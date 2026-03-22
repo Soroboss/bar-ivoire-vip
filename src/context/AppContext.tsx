@@ -54,7 +54,7 @@ export type Establishment = {
   invoiceNote: string
   status: 'Pending' | 'Active' | 'Suspended'
   trialEndsAt: string
-  plan: 'Trial' | 'Business' | 'Enterprise'
+  plan: 'Trial' | 'Business' | 'VIP' | 'Enterprise'
   createdAt: string
   userId?: string
 }
