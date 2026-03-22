@@ -34,9 +34,11 @@ export function Sidebar() {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
 
-  const handleLogout = () => {
-    toast.success('Déconnexion réussie')
-    router.push('/onboarding')
+  const { establishment, signOut } = useAppContext()
+
+  const handleLogout = async () => {
+    await signOut()
+    router.push('/login')
   }
 
   return (
@@ -57,10 +59,20 @@ export function Sidebar() {
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full h-full">
-          <div className="flex items-center justify-center h-20 border-b border-[#3A3A5A]">
+          <div className="flex flex-col items-center justify-center py-6 border-b border-[#3A3A5A] gap-2">
             <Link href="/admin/dashboard" className="transition-opacity hover:opacity-80 active:scale-95">
               <h1 className="text-xl font-bold text-[#D4AF37]">Ivoire Bar VIP</h1>
             </Link>
+            {establishment && (
+              <Badge className={cn(
+                "px-3 py-0.5 text-[10px] uppercase font-black border-none tracking-widest",
+                establishment.plan === 'VIP' ? "bg-[#D4AF37] text-[#1A1A2E]" : 
+                establishment.plan === 'Business' ? "bg-blue-500 text-white" : 
+                "bg-white/10 text-[#A0A0B8]"
+              )}>
+                {establishment.plan === 'Trial' ? 'ESSAI' : establishment.plan}
+              </Badge>
+            )}
           </div>
 
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
