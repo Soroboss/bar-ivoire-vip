@@ -18,7 +18,8 @@ export const supabaseService = {
       taxRate: est.tax_rate,
       invoiceNote: est.invoice_note,
       trialEndsAt: est.trial_ends_at,
-      createdAt: est.created_at
+      createdAt: est.created_at,
+      userId: est.user_id
     })) as Establishment[]
   },
 
@@ -33,7 +34,8 @@ export const supabaseService = {
         type: est.type,
         currency: est.currency,
         tax_rate: est.taxRate,
-        invoice_note: est.invoiceNote
+        invoice_note: est.invoiceNote,
+        user_id: est.user_id
       }])
       .select()
       .single()
@@ -43,7 +45,8 @@ export const supabaseService = {
       taxRate: data.tax_rate,
       invoiceNote: data.invoice_note,
       trialEndsAt: data.trial_ends_at,
-      createdAt: data.created_at
+      createdAt: data.created_at,
+      userId: data.user_id
     } as Establishment
   },
 

@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { supabaseService } from '@/services/supabaseService'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { User, Session } from '@supabase/supabase-js'
 
 export type Product = {
   id: string
@@ -54,6 +56,7 @@ export type Establishment = {
   trialEndsAt: string
   plan: 'Trial' | 'Business' | 'Enterprise'
   createdAt: string
+  userId?: string
 }
 
 type AppContextType = {
@@ -64,6 +67,8 @@ type AppContextType = {
   establishment: Establishment | null
   allEstablishments: Establishment[]
   loading: boolean
+  user: User | null
+  session: Session | null
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>
   updateStock: (productId: string, quantity: number) => void
   createOrder: (order: Omit<Order, 'id' | 'createdAt'>) => Promise<void>
@@ -73,11 +78,13 @@ type AppContextType = {
   registerEstablishment: (est: Omit<Establishment, 'id' | 'status' | 'trialEndsAt' | 'plan' | 'createdAt'>) => Promise<void>
   validateEstablishment: (id: string, status: Establishment['status']) => Promise<void>
   switchEstablishment: (id: string) => Promise<void>
+  signOut: () => Promise<void>
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const supabase = createClientComponentClient()
   const [products, setProducts] = useState<Product[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [clients, setClients] = useState<Client[]>([])
@@ -85,37 +92,63 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [establishment, setEstablishment] = useState<Establishment | null>(null)
   const [allEstablishments, setAllEstablishments] = useState<Establishment[]>([])
   const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
 
-  // 1. Initial Load from Supabase
+  // 1. Auth Listener & Initial Data Load
   useEffect(() => {
-    async function loadData() {
-      try {
-        const ests = await supabaseService.getEstablishments()
-        setAllEstablishments(ests)
-        
-        if (ests.length > 0) {
-          const active = ests.find(e => e.status === 'Active') || ests[0]
-          setEstablishment(active)
-          
-          const [prods, cls, stf] = await Promise.all([
-            supabaseService.getProducts(active.id),
-            supabaseService.getClients(active.id),
-            supabaseService.getStaff(active.id)
-          ])
-          
-          setProducts(prods)
-          setClients(cls)
-          setStaff(stf)
-        }
-      } catch (error) {
-        console.error('Error loading Supabase data:', error)
-        toast.error('Vérifiez la connexion à la base de données (SQL Editor)')
-      } finally {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      if (session) {
+        loadUserData(session.user.id)
+      } else {
         setLoading(false)
+        resetState()
       }
-    }
-    loadData()
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
+
+  async function loadUserData(userId: string) {
+    try {
+      setLoading(true)
+      const ests = await supabaseService.getEstablishments() // Could be filtered by user_id
+      setAllEstablishments(ests)
+      
+      const userEst = ests.find(e => e.userId === userId) || ests[0]
+      if (userEst) {
+        setEstablishment(userEst)
+        const [prods, cls, stf] = await Promise.all([
+          supabaseService.getProducts(userEst.id),
+          supabaseService.getClients(userEst.id),
+          supabaseService.getStaff(userEst.id)
+        ])
+        setProducts(prods)
+        setClients(cls)
+        setStaff(stf)
+      }
+    } catch (error) {
+      console.error('Error loading Supabase data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetState = () => {
+    setProducts([])
+    setOrders([])
+    setClients([])
+    setStaff([])
+    setEstablishment(null)
+    setAllEstablishments([])
+  }
+
+  const signOut = async () => {
+    await supabase.auth.signOut()
+    toast.success('Déconnexion réussie')
+  }
 
   const addProduct = async (p: Omit<Product, 'id'>) => {
     if (!establishment) return
@@ -179,7 +212,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const registerEstablishment = async (est: Omit<Establishment, 'id' | 'status' | 'trialEndsAt' | 'plan' | 'createdAt'>) => {
     try {
-      const newEst = await supabaseService.createEstablishment(est)
+      const newEst = await supabaseService.createEstablishment({ ...est, user_id: user?.id })
       setAllEstablishments(prev => [...prev, newEst])
       setEstablishment(newEst)
       toast.success('Établissement enregistré sur Supabase')
@@ -223,9 +256,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{ 
-      products, orders, clients, staff, establishment, allEstablishments, loading,
+      products, orders, clients, staff, establishment, allEstablishments, loading, user, session,
       addProduct, updateStock, createOrder, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
-      switchEstablishment
+      switchEstablishment, signOut
     }}>
       {children}
     </AppContext.Provider>

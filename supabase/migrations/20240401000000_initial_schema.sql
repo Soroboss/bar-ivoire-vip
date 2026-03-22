@@ -16,6 +16,7 @@ CREATE TABLE establishments (
     location TEXT,
     type establishment_type DEFAULT 'bar',
     logo_url TEXT,
+    owner_id UUID REFERENCES auth.users(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
