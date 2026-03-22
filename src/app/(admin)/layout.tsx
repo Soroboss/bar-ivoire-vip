@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { AdminSidebar } from "./components/AdminSidebar"
 
 export default function AdminLayout({
