@@ -25,10 +25,11 @@ export default function OnboardingPage() {
       <div className="w-full max-w-2xl space-y-8 relative z-10">
         <div className="text-center space-y-4">
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-[#D4AF37] to-[#A68226] text-[#1A1A2E] shadow-2xl shadow-[#D4AF37]/20 mb-2">
-            <Clock className="h-10 w-10 animate-pulse" />
+            <ShieldCheck className="h-10 w-10 animate-spin-slow" />
           </div>
-          <h1 className="text-4xl font-black tracking-tighter text-white uppercase">Inscription <span className="text-[#D4AF37]">reçue</span></h1>
-          <p className="text-[#A0A0B8] text-lg font-medium">Votre établissement "{establishment?.name || 'Bar VIP'}" est en cours de validation.</p>
+          <h1 className="text-4xl font-black tracking-tighter text-white uppercase">Accès <span className="text-[#D4AF37]">Restreint</span></h1>
+          <p className="text-[#F4E4BC] text-xl font-bold italic underline border-b-2 border-[#D4AF37] inline-block pb-1">"Vous êtes en attente de validation"</p>
+          <p className="text-[#A0A0B8] text-sm font-medium mt-4">Votre établissement "{establishment?.name || 'Vôtre Régie'}" est en cours d'examen par nos administrateurs.</p>
         </div>
 
         <Card className="bg-[#1A1A2E]/50 border-[#3A3A5A] backdrop-blur-xl shadow-2xl p-4">

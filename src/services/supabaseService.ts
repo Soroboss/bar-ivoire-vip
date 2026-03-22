@@ -32,10 +32,12 @@ export const supabaseService = {
         phone: est.phone,
         location: est.location,
         type: est.type,
-        currency: est.currency,
-        tax_rate: est.taxRate,
-        invoice_note: est.invoiceNote,
-        user_id: est.user_id
+        currency: est.currency || 'XOF',
+        tax_rate: est.taxRate || 18,
+        invoice_note: est.invoiceNote || 'Merci de votre visite !',
+        user_id: est.user_id,
+        status: 'Pending',
+        plan: 'Trial'
       }])
       .select()
       .single()
