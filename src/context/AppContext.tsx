@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { supabaseService } from '@/services/supabaseService'
@@ -72,6 +72,7 @@ type AppContextType = {
   updateEstablishment: (est: Partial<Establishment>) => void
   registerEstablishment: (est: Omit<Establishment, 'id' | 'status' | 'trialEndsAt' | 'plan' | 'createdAt'>) => Promise<void>
   validateEstablishment: (id: string, status: Establishment['status']) => Promise<void>
+  switchEstablishment: (id: string) => Promise<void>
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -196,10 +197,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const switchEstablishment = async (id: string) => {
+    const target = allEstablishments.find(e => e.id === id)
+    if (!target) return
+    
+    setLoading(true)
+    try {
+      setEstablishment(target)
+      const [prods, cls, stf] = await Promise.all([
+        supabaseService.getProducts(target.id),
+        supabaseService.getClients(target.id),
+        supabaseService.getStaff(target.id)
+      ])
+      setProducts(prods)
+      setClients(cls)
+      setStaff(stf)
+      toast.success(`Passage à l'établissement : ${target.name}`)
+    } catch (e) {
+      toast.error('Erreur lors du changement')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <AppContext.Provider value={{ 
       products, orders, clients, staff, establishment, allEstablishments, loading,
-      addProduct, updateStock, createOrder, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment
+      addProduct, updateStock, createOrder, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
+      switchEstablishment
     }}>
       {children}
     </AppContext.Provider>

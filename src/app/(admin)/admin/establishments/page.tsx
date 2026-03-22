@@ -3,14 +3,16 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Building2, Search, Filter, MoreVertical, ExternalLink, ShieldCheck, Zap, XCircle } from "lucide-react"
+import { Building2, Search, Filter, MoreVertical, ExternalLink, ShieldCheck, Zap, XCircle, LayoutDashboard } from "lucide-react"
 import { useAppContext } from "@/context/AppContext"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { differenceInDays, format } from "date-fns"
+import { useRouter } from "next/navigation"
 
 export default function EstablishmentsPage() {
-  const { allEstablishments, loading } = useAppContext()
+  const { allEstablishments, loading, switchEstablishment } = useAppContext()
+  const router = useRouter()
 
   if (loading) {
     return (
@@ -18,6 +20,11 @@ export default function EstablishmentsPage() {
         <div className="h-10 w-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     )
+  }
+
+  const handleEnterBar = async (id: string) => {
+    await switchEstablishment(id)
+    router.push('/dashboard')
   }
 
   return (
@@ -53,7 +60,7 @@ export default function EstablishmentsPage() {
                 <TableHead className="text-[#A0A0B8] font-bold py-4">Établissement</TableHead>
                 <TableHead className="text-[#A0A0B8] font-bold py-4">Abonnement</TableHead>
                 <TableHead className="text-[#A0A0B8] font-bold py-4">Statut</TableHead>
-                <TableHead className="text-right text-[#A0A0B8] font-bold py-4 pr-6">Contact Admin</TableHead>
+                <TableHead className="text-right text-[#A0A0B8] font-bold py-4 pr-6">Accès / Management</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -101,11 +108,11 @@ export default function EstablishmentsPage() {
                     </TableCell>
                     <TableCell className="text-right pr-6">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-[#A0A0B8] hover:text-[#D4AF37]">
-                          {est.owner} <ExternalLink className="h-3 w-3 ml-2" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-[#A0A0B8]">
-                          <MoreVertical className="h-4 w-4" />
+                        <Button 
+                          onClick={() => handleEnterBar(est.id)}
+                          className="bg-[#D4AF37]/10 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#1A1A2E] border border-[#D4AF37]/20 transition-all font-bold"
+                        >
+                          Gérer ce Bar <LayoutDashboard className="h-4 w-4 ml-2" />
                         </Button>
                       </div>
                     </TableCell>
