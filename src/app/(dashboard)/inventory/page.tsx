@@ -16,10 +16,8 @@ import {
 import { 
   Plus, 
   Search, 
-  Filter, 
   History,
   Wine,
-  Trash2,
   Edit2
 } from "lucide-react"
 import { useAppContext } from '@/context/AppContext'
@@ -32,7 +30,6 @@ import {
   DialogFooter
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { toast } from 'sonner'
 
 export default function InventoryPage() {
   const { products, addProduct, loading } = useAppContext()
@@ -80,11 +77,11 @@ export default function InventoryPage() {
             <History className="mr-2 h-4 w-4" /> Historique
           </Button>
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-            <DialogTrigger asChild>
+            <DialogTrigger render={
               <Button className="bg-[#D4AF37] text-[#1A1A2E] hover:bg-[#A68226]">
                 <Plus className="mr-2 h-4 w-4" /> Nouveau Produit
               </Button>
-            </DialogTrigger>
+            } />
             <DialogContent className="bg-[#252545] border-[#3A3A5A] text-[#F4E4BC]">
               <DialogHeader>
                 <DialogTitle className="text-[#D4AF37]">Ajouter un produit</DialogTitle>

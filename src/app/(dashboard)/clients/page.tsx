@@ -9,7 +9,8 @@ import {
   UserPlus, 
   Phone,
   MessageCircle,
-  Star
+  Star,
+  Search
 } from "lucide-react"
 import { useAppContext } from '@/context/AppContext'
 import { 
@@ -21,7 +22,6 @@ import {
   DialogFooter
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { toast } from 'sonner'
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default function ClientsPage() {
@@ -59,11 +59,11 @@ export default function ClientsPage() {
         </div>
         
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger asChild>
+          <DialogTrigger render={
             <Button className="bg-[#D4AF37] text-[#1A1A2E] hover:bg-[#A68226]">
               <UserPlus className="mr-2 h-4 w-4" /> Nouveau Client
             </Button>
-          </DialogTrigger>
+          } />
           <DialogContent className="bg-[#252545] border-[#3A3A5A] text-[#F4E4BC]">
             <DialogHeader>
               <DialogTitle className="text-[#D4AF37]">Enregistrer un client</DialogTitle>
@@ -71,11 +71,11 @@ export default function ClientsPage() {
             <form onSubmit={handleAdd} className="space-y-4">
               <div className="space-y-2">
                 <Label>Nom complet</Label>
-                <Input value={newClient.name} onChange={e => setNewClient({...newClient, name: e.target.value})} className="bg-[#1A1A2E] border-[#3A3A5A]" placeholder="Inza Ouattara" required />
+                <Input value={newClient.name} onChange={e => setNewClient({...newClient, name: e.target.value})} className="bg-[#1A1A2E] border-[#3A3A5A] text-white" placeholder="Inza Ouattara" required />
               </div>
               <div className="space-y-2">
                 <Label>Numéro de téléphone</Label>
-                <Input value={newClient.phone} onChange={e => setNewClient({...newClient, phone: e.target.value})} className="bg-[#1A1A2E] border-[#3A3A5A]" placeholder="0700000000" required />
+                <Input value={newClient.phone} onChange={e => setNewClient({...newClient, phone: e.target.value})} className="bg-[#1A1A2E] border-[#3A3A5A] text-white" placeholder="0700000000" required />
               </div>
               <DialogFooter className="mt-6">
                 <Button type="submit" className="bg-[#D4AF37] text-[#1A1A2E]">Enregistrer sur le Cloud</Button>
