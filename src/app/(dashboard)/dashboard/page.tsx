@@ -22,9 +22,15 @@ import { Badge } from "@/components/ui/badge"
 import { useAppContext } from "@/context/AppContext"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { useState, useEffect } from "react"
 
 export default function DashboardPage() {
   const { orders, products, clients } = useAppContext()
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const totalSales = orders.reduce((acc, o) => acc + o.total, 0)
   const recentOrders = orders.slice(0, 5)
@@ -125,8 +131,11 @@ export default function DashboardPage() {
             <CardDescription className="text-[#A0A0B8]">Ventes consolidées par heure.</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
+            {!isMounted ? (
+              <div className="w-full h-full bg-white/5 animate-pulse rounded-lg" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3}/>
@@ -139,6 +148,7 @@ export default function DashboardPage() {
                 <Area type="monotone" dataKey="total" stroke="#D4AF37" fillOpacity={1} fill="url(#colorTotal)" strokeWidth={3} />
               </AreaChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 

@@ -14,22 +14,10 @@ import {
   Activity,
   ArrowUpRight,
   ArrowDownRight,
-  Zap,
-  XCircle
-} from "lucide-react"
-import { useAppContext } from "@/context/AppContext"
-import { toast } from "sonner"
-import { differenceInDays } from "date-fns"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts'
+import { useState, useEffect } from "react"
 
 const MOCK_REVENUE_DATA = [
   { date: 'Lun', revenue: 45000 },
@@ -43,6 +31,11 @@ const MOCK_REVENUE_DATA = [
 
 export default function AdminDashboard() {
   const { allEstablishments, validateEstablishment, loading } = useAppContext()
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   if (loading) {
     return (
@@ -202,8 +195,11 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="pt-4">
             <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={MOCK_REVENUE_DATA}>
+              {!isMounted ? (
+                <div className="w-full h-full bg-white/5 animate-pulse rounded-lg" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={MOCK_REVENUE_DATA}>
                   <defs>
                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3}/>
@@ -220,6 +216,7 @@ export default function AdminDashboard() {
                   <Area type="monotone" dataKey="revenue" stroke="#D4AF37" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
                 </AreaChart>
               </ResponsiveContainer>
+              )}
             </div>
             <div className="mt-8 p-4 rounded-2xl bg-white/5 border border-white/10">
               <h4 className="text-white font-bold text-sm mb-1">Dernier Paiement reçu</h4>
