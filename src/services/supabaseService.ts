@@ -58,6 +58,14 @@ export const supabaseService = {
     if (error) throw error
   },
 
+  async updateEstablishmentPlan(id: string, plan: string) {
+    const { error } = await supabase
+      .from('establishments')
+      .update({ plan })
+      .eq('id', id)
+    if (error) throw error
+  },
+
   // Products
   async getProducts(establishmentId: string) {
     const { data, error } = await supabase

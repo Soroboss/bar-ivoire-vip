@@ -1,127 +1,176 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Building2, Search, Filter, MoreVertical, ExternalLink, ShieldCheck, Zap, XCircle, LayoutDashboard } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { 
+  Building2,
+  Filter,
+  Search,
+  CheckCircle,
+  XCircle,
+  Clock,
+  ExternalLink,
+  ShieldCheck,
+  CreditCard
+} from "lucide-react"
 import { useAppContext } from "@/context/AppContext"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
-import { differenceInDays, format } from "date-fns"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { supabaseService } from "@/services/supabaseService"
+import { toast } from "sonner"
 
-export default function EstablishmentsPage() {
-  const { allEstablishments, loading, switchEstablishment } = useAppContext()
-  const router = useRouter()
+export default function EstablishmentsAdmin() {
+  const { allEstablishments, validateEstablishment, loading } = useAppContext()
+  const [isMounted, setIsMounted] = useState(false)
+  const [filter, setFilter] = useState('All')
+  const [search, setSearch] = useState('')
 
-  if (loading) {
-    return (
-      <div className="p-6 h-screen bg-[#0F0F1A] flex items-center justify-center">
-        <div className="h-10 w-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  if (!isMounted || loading) {
+    return <div className="p-8 text-center text-[#A0A0B8]">Chargement de la base centrale...</div>
   }
 
-  const handleEnterBar = async (id: string) => {
-    await switchEstablishment(id)
-    router.push('/dashboard')
+  const filtered = allEstablishments.filter(e => {
+    const matchesFilter = filter === 'All' || e.status === filter || e.plan === filter
+    const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase()) || 
+                          e.owner.toLowerCase().includes(search.toLowerCase())
+    return matchesFilter && matchesSearch
+  })
+
+  const updatePlan = async (id: string, plan: string) => {
+    try {
+      await supabaseService.updateEstablishmentPlan(id, plan)
+      toast.success(`Forfait mis à jour : ${plan}`)
+      // Reload or update state
+      window.location.reload()
+    } catch (e) {
+      toast.error('Erreur Plan')
+    }
   }
 
   return (
     <div className="p-6 space-y-8 bg-[#0F0F1A] text-[#F4E4BC] min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white italic">
-            Annuaire <span className="text-[#D4AF37]">Établissements</span>
-          </h1>
-          <p className="text-[#A0A0B8]">Registre complet des clients SaaS Ivoire Bar VIP.</p>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-white tracking-tight">Gestion des <span className="text-[#D4AF37]">Régies</span></h1>
+          <p className="text-[#A0A0B8]">Contrôlez les accès et les abonnements des bars.</p>
         </div>
-        
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
-            <Input 
-              placeholder="Rechercher un bar..." 
-              className="pl-10 w-[300px] border-[#3A3A5A] bg-[#1A1A2E] text-white" 
-            />
-          </div>
-          <Button variant="outline" className="border-[#3A3A5A] text-[#A0A0B8]">
-            <Filter className="h-4 w-4 mr-2" /> Filtres
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="border-[#3A3A5A] text-[#A0A0B8] hover:bg-white/5">
+            <Filter className="h-4 w-4 mr-2" /> Filtrer
           </Button>
         </div>
       </div>
 
-      <Card className="bg-[#1A1A2E] border-[#3A3A5A]">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-white/5 border-b border-[#3A3A5A]">
-              <TableRow className="hover:bg-transparent border-none">
-                <TableHead className="text-[#A0A0B8] font-bold py-4">ID / Création</TableHead>
-                <TableHead className="text-[#A0A0B8] font-bold py-4">Établissement</TableHead>
-                <TableHead className="text-[#A0A0B8] font-bold py-4">Abonnement</TableHead>
-                <TableHead className="text-[#A0A0B8] font-bold py-4">Statut</TableHead>
-                <TableHead className="text-right text-[#A0A0B8] font-bold py-4 pr-6">Accès / Management</TableHead>
+      <div className="flex gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
+          <Input 
+            placeholder="Rechercher un bar ou un gérant..." 
+            className="pl-10 bg-[#1A1A2E] border-[#3A3A5A] text-white focus:border-[#D4AF37]"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex bg-[#1A1A2E] p-1 rounded-xl border border-[#3A3A5A]">
+          {['All', 'Active', 'Pending', 'Trial', 'Business', 'VIP'].map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === f ? 'bg-[#D4AF37] text-[#1A1A2E]' : 'text-[#A0A0B8] hover:text-white'}`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Card className="bg-[#1A1A2E] border-[#3A3A5A] shadow-2xl overflow-hidden">
+        <Table>
+          <TableHeader className="bg-[#0F0F1A]/50 border-b border-[#3A3A5A]">
+            <TableRow className="hover:bg-transparent border-none">
+              <TableHead className="text-[#A0A0B8] uppercase text-[10px]">Identité</TableHead>
+              <TableHead className="text-[#A0A0B8] uppercase text-[10px]">Status</TableHead>
+              <TableHead className="text-[#A0A0B8] uppercase text-[10px]">Forfait</TableHead>
+              <TableHead className="text-[#A0A0B8] uppercase text-[10px]">Contact</TableHead>
+              <TableHead className="text-right text-[#A0A0B8] uppercase text-[10px]">Actions Management</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((est) => (
+              <TableRow key={est.id} className="border-b-[#3A3A5A] hover:bg-white/5 transition-colors group">
+                <TableCell>
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-white group-hover:text-[#D4AF37] transition-colors">{est.name}</p>
+                      <p className="text-[10px] text-[#A0A0B8] uppercase">{est.type} • {est.location}</p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge className={`
+                    ${est.status === 'Active' ? 'bg-green-500/10 text-green-400' : ''}
+                    ${est.status === 'Pending' ? 'bg-orange-500/10 text-orange-400' : ''}
+                    ${est.status === 'Suspended' ? 'bg-red-500/10 text-red-400' : ''}
+                    border-none
+                  `}>
+                    {est.status === 'Active' ? 'Actif' : est.status === 'Pending' ? 'En attente' : 'Suspendu'}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <select 
+                    value={est.plan} 
+                    onChange={(e) => updatePlan(est.id, e.target.value)}
+                    className="bg-[#0F0F1A] border border-[#3A3A5A] text-xs font-bold text-[#D4AF37] rounded-lg p-1 outline-none"
+                  >
+                    <option value="Trial">ESSAI (7J)</option>
+                    <option value="Business">BUSINESS</option>
+                    <option value="VIP">PREMIUM VIP</option>
+                    <option value="Enterprise">ENTERPRISE</option>
+                  </select>
+                </TableCell>
+                <TableCell>
+                  <p className="text-sm text-white">{est.owner}</p>
+                  <p className="text-[10px] text-[#A0A0B8]">{est.phone}</p>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    {est.status !== 'Active' && (
+                      <Button 
+                        size="sm" 
+                        onClick={() => validateEstablishment(est.id, 'Active')}
+                        className="bg-green-600 hover:bg-green-700 h-8 px-4"
+                      >
+                        Valider
+                      </Button>
+                    )}
+                    {est.status === 'Active' && (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => validateEstablishment(est.id, 'Suspended')}
+                        className="border-red-500/20 text-red-400 hover:bg-red-500/10 h-8"
+                      >
+                        Suspendre
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="text-[#A0A0B8] hover:text-[#D4AF37]">
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {allEstablishments.length === 0 ? (
-                 <TableRow><TableCell colSpan={5} className="text-center py-20 text-[#A0A0B8]">Aucun établissement synchronisé.</TableCell></TableRow>
-              ) : (
-                allEstablishments.map((est) => (
-                  <TableRow key={est.id} className="border-b-[#3A3A5A] hover:bg-white/5 transition-colors">
-                    <TableCell className="text-xs font-mono text-[#A0A0B8]">
-                      {est.id.substring(0, 8)}...<br/>
-                      {est.createdAt ? format(new Date(est.createdAt), 'dd MMM yyyy') : 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
-                          <Building2 className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-white">{est.name}</p>
-                          <p className="text-xs text-[#A0A0B8]">{est.location}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Badge className={est.plan === 'Trial' ? 'bg-blue-500/10 text-blue-400' : 'bg-[#D4AF37]/10 text-[#D4AF37]'}>
-                            {est.plan}
-                          </Badge>
-                          {est.plan === 'Trial' && <Zap className="h-3 w-3 text-blue-400" />}
-                        </div>
-                        <p className="text-[10px] text-[#A0A0B8]">
-                          {est.trialEndsAt ? `Fin : ${format(new Date(est.trialEndsAt), 'dd/MM/yy')}` : ''}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={
-                        est.status === 'Active' ? 'bg-green-500/10 text-green-500' :
-                        est.status === 'Pending' ? 'bg-orange-500/10 text-orange-500' :
-                        'bg-red-500/10 text-red-400'
-                      }>
-                        {est.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right pr-6">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          onClick={() => handleEnterBar(est.id)}
-                          className="bg-[#D4AF37]/10 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#1A1A2E] border border-[#D4AF37]/20 transition-all font-bold"
-                        >
-                          Gérer ce Bar <LayoutDashboard className="h-4 w-4 ml-2" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
     </div>
   )
