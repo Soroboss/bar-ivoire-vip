@@ -109,6 +109,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error('Error loading Supabase data:', error)
+        toast.error('Vérifiez la connexion à la base de données (SQL Editor)')
       } finally {
         setLoading(false)
       }

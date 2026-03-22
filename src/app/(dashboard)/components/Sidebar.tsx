@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { 
   LayoutDashboard, 
   ShoppingCart, 
@@ -17,6 +17,7 @@ import {
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 const navigation = [
   { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
@@ -30,7 +31,13 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
+
+  const handleLogout = () => {
+    toast.success('Déconnexion réussie')
+    router.push('/onboarding')
+  }
 
   return (
     <>
@@ -50,6 +57,11 @@ export function Sidebar() {
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full h-full">
+          <div className="flex items-center justify-center h-20 border-b border-[#3A3A5A]">
+            <Link href="/admin/dashboard" className="transition-opacity hover:opacity-80 active:scale-95">
+              <h1 className="text-xl font-bold text-[#D4AF37]">Ivoire Bar VIP</h1>
+            </Link>
+          </div>
 
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             {navigation.map((item) => {
@@ -80,6 +92,7 @@ export function Sidebar() {
             <Button 
               variant="ghost" 
               className="w-full justify-start gap-3 text-[#A0A0B8] hover:text-red-400 hover:bg-red-950/20"
+              onClick={handleLogout}
             >
               <LogOut className="h-5 w-5" />
               <span>Déconnexion</span>
