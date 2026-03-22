@@ -1,0 +1,103 @@
+'use client'
+
+import React from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { 
+  BarChart3, 
+  Settings,
+  LogOut,
+  X,
+  Menu,
+  ShieldCheck,
+  Building2,
+  Users
+} from 'lucide-react'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+const adminNavigation = [
+  { name: 'Dashboard Admin', href: '/admin/dashboard', icon: ShieldCheck },
+  { name: 'Tous les Bars', href: '/admin/establishments', icon: Building2 },
+  { name: 'Utilisateurs SaaS', href: '/admin/users', icon: Users },
+  { name: 'Revenus SaaS', href: '/admin/revenue', icon: BarChart3 },
+  { name: 'Config SaaS', href: '/admin/settings', icon: Settings },
+]
+
+export function AdminSidebar() {
+  const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="bg-[#1A1A2E] border-[#3A3A5A] text-[#D4AF37]"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+      </div>
+
+      <div className={cn(
+        "fixed inset-y-0 left-0 z-40 w-64 bg-[#0A0A15] border-r border-[#3A3A5A] transition-transform duration-300 lg:translate-x-0",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-center h-20 border-b border-[#3A3A5A] bg-[#D4AF37]/5">
+            <h1 className="text-xl font-bold text-[#D4AF37] flex items-center gap-2">
+              <ShieldCheck className="h-6 w-6" /> IVOIRE ADMIN
+            </h1>
+          </div>
+
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            {adminNavigation.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group",
+                    isActive 
+                      ? "bg-[#D4AF37] text-[#1A1A2E] shadow-[0_0_20px_rgba(212,175,55,0.2)]" 
+                      : "text-[#A0A0B8] hover:text-[#D4AF37] hover:bg-white/5"
+                  )}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <item.icon className={cn(
+                    "h-5 w-5",
+                    isActive ? "text-[#1A1A2E]" : "text-[#D4AF37] group-hover:scale-110 transition-transform"
+                  )} />
+                  <span className="font-medium">{item.name}</span>
+                </Link>
+              )
+            })}
+          </nav>
+
+          <div className="p-4 border-t border-[#3A3A5A]">
+            <Link href="/dashboard">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start gap-3 text-[#A0A0B8] hover:text-[#D4AF37]"
+              >
+                <Building2 className="h-5 w-5" />
+                <span>Régie Bar</span>
+              </Button>
+            </Link>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-3 text-[#A0A0B8] hover:text-red-400 mt-2"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Déconnexion</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
