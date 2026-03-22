@@ -1,8 +1,8 @@
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 
 export const dynamic = 'force-dynamic'
 
-const AdminDashboardContent = dynamic(
+const AdminDashboardContent = nextDynamic(
   () => import('./AdminDashboardContent'),
   { 
     ssr: false,
