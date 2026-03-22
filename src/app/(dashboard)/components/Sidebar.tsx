@@ -50,9 +50,6 @@ export function Sidebar() {
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full h-full">
-          <div className="flex items-center justify-center h-20 border-b border-[#3A3A5A]">
-            <h1 className="text-xl font-bold text-[#D4AF37]">Ivoire Bar VIP</h1>
-          </div>
 
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             {navigation.map((item) => {
