@@ -46,10 +46,12 @@ export default function EstablishmentsAdmin() {
     )
   }
 
-  const filtered = allEstablishments.filter(e => {
+  const filtered = (allEstablishments || []).filter(e => {
     const matchesFilter = filter === 'All' || e.status === filter || e.plan === filter
-    const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase()) || 
-                          e.owner.toLowerCase().includes(search.toLowerCase())
+    const name = e.name || ''
+    const owner = e.owner || ''
+    const matchesSearch = name.toLowerCase().includes(search.toLowerCase()) || 
+                          owner.toLowerCase().includes(search.toLowerCase())
     return matchesFilter && matchesSearch
   })
 

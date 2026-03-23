@@ -65,11 +65,13 @@ export default function AdminDashboardContent() {
   // Real MRR calculation (Sum of last 30 days)
   const mrr = saasTransactions.reduce((acc: number, t: any) => acc + (Number(t.amount) || 0), 0)
   
-  const revenueChartData = saasTransactions.length > 0 
-    ? saasTransactions.map((t: any) => ({
-        date: format(new Date(t.created_at), 'dd/MM', { locale: fr }),
-        revenue: t.amount
-      })).reverse()
+  const revenueChartData = (saasTransactions || []).length > 0 
+    ? saasTransactions
+        .filter((t: any) => t.created_at) // Ensure date exists
+        .map((t: any) => ({
+          date: format(new Date(t.created_at), 'dd/MM', { locale: fr }),
+          revenue: Number(t.amount) || 0
+        })).reverse()
     : []
 
   const handleAction = async (id: string, name: string, status: 'Active' | 'Suspended' | 'Pending') => {

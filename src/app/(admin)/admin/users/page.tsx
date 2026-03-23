@@ -156,7 +156,9 @@ export default function SaaSUsersPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-xs text-[#A0A0B8] font-mono">
-                    {format(new Date(admin.created_at), 'dd MMM yyyy', { locale: fr })}
+                    {admin.created_at 
+                      ? format(new Date(admin.created_at), 'dd MMM yyyy', { locale: fr })
+                      : 'Date inconnue'}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" className="text-[#3A3A5A] hover:text-red-400"><MoreVertical className="h-4 w-4" /></Button>
