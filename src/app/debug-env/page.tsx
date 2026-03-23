@@ -1,77 +1,45 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
-export default function DebugEnvPage() {
-  const [envStatus, setEnvStatus] = useState({
-    url: 'Checking...',
-    key: 'Checking...',
-    supabaseInit: 'Checking...'
-  })
+export default function DebugPage() {
+    const [status, setStatus] = useState<any>({ loading: true })
 
-  useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    
-    setEnvStatus({
-      url: url ? '✅ Configuré' : '❌ Manquant',
-      key: key ? '✅ Configuré' : '❌ Manquant',
-      supabaseInit: (url && key) ? '✅ Prêt' : '⚠ Incomplet'
-    })
-  }, [])
+    useEffect(() => {
+        const check = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            const { data: profile } = session ? await supabase.from('profiles').select('*').eq('id', session.user.id).single() : { data: null }
+            const { data: establishments } = await supabase.from('establishments').select('*').limit(5)
 
-  return (
-    <div className="min-h-screen bg-[#0F0F1A] text-white p-8 flex items-center justify-center">
-      <Card className="w-full max-w-md bg-[#1A1A2E] border-[#3A3A5A]">
-        <CardHeader>
-          <CardTitle className="text-[#D4AF37] flex items-center gap-2">
-            Diagnostic Environnement VIP 🧪
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex justify-between items-center p-4 bg-[#0F0F1A] rounded-lg border border-[#3A3A5A]">
-            <span className="text-[#A0A0B8]">SUPABASE_URL</span>
-            <Badge variant={envStatus.url.includes('✅') ? 'outline' : 'destructive'} 
-                   className={envStatus.url.includes('✅') ? 'border-green-500 text-green-500' : ''}>
-              {envStatus.url}
-            </Badge>
-          </div>
+            setStatus({
+                loading: false,
+                hasSession: !!session,
+                user: session?.user,
+                profile,
+                establishmentsCount: establishments?.length || 0,
+                establishmentsSample: establishments,
+                origin: window.location.origin
+            })
+        }
+        check()
+    }, [])
 
-          <div className="flex justify-between items-center p-4 bg-[#0F0F1A] rounded-lg border border-[#3A3A5A]">
-            <span className="text-[#A0A0B8]">SUPABASE_ANON_KEY</span>
-            <Badge variant={envStatus.key.includes('✅') ? 'outline' : 'destructive'}
-                   className={envStatus.key.includes('✅') ? 'border-green-500 text-green-500' : ''}>
-              {envStatus.key}
-            </Badge>
-          </div>
+    if (status.loading) return <div className="p-10 text-white">Loading Debug Info...</div>
 
-          <div className={`p-4 rounded-lg flex items-center gap-3 ${
-            envStatus.supabaseInit.includes('✅') ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
-          }`}>
-            {envStatus.supabaseInit.includes('✅') ? <CheckCircle2 /> : <AlertTriangle />}
-            <span className="font-medium text-sm">
-              {envStatus.supabaseInit.includes('✅') 
-                ? "Le système peut communiquer avec Supabase." 
-                : "Erreur : Les variables d'environnement ne sont pas détectées sur Vercel."}
-            </span>
-          </div>
-
-          <div className="text-xs text-[#A0A0B8] border-t border-[#3A3A5A] pt-4 mt-4">
-            <p className="font-bold mb-2 text-[#D4AF37]">Instructions :</p>
-            <ol className="list-decimal list-inside space-y-1">
-              <li>Allez sur votre tableau de bord **Vercel**.</li>
-              <li>Settings → Environment Variables.</li>
-              <li>Ajoutez les deux clés ci-dessus.</li>
-              <li>**Redéployez** votre application pour appliquer les changements.</li>
-            </ol>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
+    return (
+        <div className="p-10 bg-black min-h-screen text-green-500 font-mono text-xs overflow-auto">
+            <h1 className="text-2xl font-bold mb-4">DEBUG ENVIRONMENT</h1>
+            <pre>{JSON.stringify(status, null, 2)}</pre>
+            
+            <div className="mt-10 p-4 border border-green-500">
+                <h2 className="text-lg font-bold">RECOMMANDATIONS</h2>
+                <ul className="list-disc ml-5 mt-2">
+                    {!status.hasSession && <li>❌ AUCUNE SESSION - Connectez-vous d'abord.</li>}
+                    {status.hasSession && !status.profile && <li>❌ PROFIL MANQUANT - Exécutez le script SQL Section 6.</li>}
+                    {status.profile && status.profile.role !== 'SUPER_ADMIN' && <li>⚠️ ROLE INCORRECT - Actuellement: {status.profile.role}. Attendu: SUPER_ADMIN.</li>}
+                </ul>
+            </div>
+        </div>
+    )
 }
