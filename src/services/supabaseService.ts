@@ -36,6 +36,7 @@ export const supabaseService = {
         tax_rate: est.taxRate || 18,
         invoice_note: est.invoiceNote || 'Merci de votre visite !',
         user_id: est.user_id,
+        whatsapp: est.whatsapp || est.phone,
         status: 'Pending',
         plan: 'Trial'
       }])

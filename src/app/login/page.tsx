@@ -53,6 +53,7 @@ export default function LoginPage() {
             name: barName,
             owner: fullName,
             phone: phone || 'Non précisé',
+            whatsapp: phone,
             location: 'À préciser',
             type: 'Bar VIP',
             user_id: data.user.id
@@ -146,10 +147,11 @@ export default function LoginPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="regPhone" className="text-[#A0A0B8]">Numéro de Téléphone</Label>
+                        <Label htmlFor="whatsapp" className="text-[#A0A0B8]">Numéro WhatsApp (pour les alertes)</Label>
                         <Input 
-                          id="regPhone" 
+                          id="whatsapp" 
                           placeholder="07 01 02 03 04" 
+                          required
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           className="bg-[#0F0F1A] border-[#3A3A5A] text-white focus:border-[#D4AF37] transition-all"
