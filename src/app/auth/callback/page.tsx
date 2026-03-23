@@ -13,14 +13,34 @@ export default function AuthCallbackPage() {
     // Listen for auth state changes (covers implicit & PKCE flows)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          setStatus('Connecté ! Redirection...')
-          // Small delay to ensure cookies are set
-          setTimeout(() => router.push('/onboarding'), 500)
-        }
-        if (event === 'TOKEN_REFRESHED' && session) {
-          setStatus('Connecté ! Redirection...')
-          setTimeout(() => router.push('/onboarding'), 500)
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+          setStatus('Vérification du profil...')
+          
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single()
+
+          if (profile?.role === 'SUPER_ADMIN') {
+            setStatus('Accés Administrateur détecté. Redirection...')
+            setTimeout(() => router.push('/admin/dashboard'), 500)
+          } else {
+            // Check if user has an establishment
+            const { data: est } = await supabase
+              .from('establishments')
+              .select('id')
+              .eq('user_id', session.user.id)
+              .single()
+            
+            if (est) {
+              setStatus('Accés Partenaire. Redirection...')
+              setTimeout(() => router.push('/dashboard'), 500)
+            } else {
+              setStatus('Premier accès. Initialisation...')
+              setTimeout(() => router.push('/onboarding'), 500)
+            }
+          }
         }
       }
     )
@@ -29,8 +49,8 @@ export default function AuthCallbackPage() {
     const fallbackTimer = setTimeout(async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        setStatus('Connecté ! Redirection...')
-        router.push('/dashboard')
+        setStatus('Vérification finale...')
+        window.location.reload() // Force a re-run of the event listener which has the logic
       } else {
         setStatus('Session non trouvée. Retour à la connexion...')
         setTimeout(() => router.push('/login'), 1500)

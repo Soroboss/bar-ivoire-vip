@@ -75,7 +75,7 @@ export const supabaseService = {
       .select('*')
       .eq('establishment_id', establishmentId)
     if (error) throw error
-    return data as Product[]
+    return data || []
   },
 
   async addProduct(product: any) {
@@ -147,7 +147,7 @@ export const supabaseService = {
     
     if (error) throw error
     
-    return data.map((o: any) => ({
+    return (data || []).map((o: any) => ({
       id: o.id,
       tableId: o.table_id,
       total: Number(o.total_amount),
@@ -171,7 +171,7 @@ export const supabaseService = {
       .order('name', { ascending: true })
     
     if (error) throw error
-    return data.map((t: any) => ({
+    return (data || []).map((t: any) => ({
       id: t.id,
       name: t.name,
       status: t.status === 'libre' ? 'Libre' : 'Occupée',
@@ -201,7 +201,7 @@ export const supabaseService = {
       .select('*')
       .eq('establishment_id', establishmentId)
     if (error) throw error
-    return data as Client[]
+    return (data || []) as Client[]
   },
 
   async addClient(client: any) {
@@ -221,7 +221,7 @@ export const supabaseService = {
       .select('*')
       .eq('establishment_id', establishmentId)
     if (error) throw error
-    return data as Staff[]
+    return (data || []) as Staff[]
   },
 
   async updateStaffStatus(id: string, status: string) {

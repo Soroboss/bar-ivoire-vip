@@ -144,22 +144,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             console.log('[AppContext] Selected establishment:', userEst.name)
             setEstablishment(userEst)
             
-            console.log('[AppContext] Fetching detailed data (products, clients, staff, expenses, orders, tables)...')
-            const [prods, cls, stf, exps, ords, tbls] = await Promise.all([
-              supabaseService.getProducts(userEst.id),
-              supabaseService.getClients(userEst.id),
-              supabaseService.getStaff(userEst.id),
-              supabaseService.getExpenses(userEst.id),
-              supabaseService.getOrders(userEst.id),
-              supabaseService.getTables(userEst.id)
-            ])
-            console.log('[AppContext] Detailed data loaded')
+            console.log('[AppContext] Fetching detailed data...')
+            
+            console.log('[AppContext] -> Products...')
+            const prods = await supabaseService.getProducts(userEst.id)
             setProducts(prods)
+            
+            console.log('[AppContext] -> Clients...')
+            const cls = await supabaseService.getClients(userEst.id)
             setClients(cls)
+            
+            console.log('[AppContext] -> Staff...')
+            const stf = await supabaseService.getStaff(userEst.id)
             setStaff(stf)
+            
+            console.log('[AppContext] -> Expenses...')
+            const exps = await supabaseService.getExpenses(userEst.id)
             setExpenses(exps)
+            
+            console.log('[AppContext] -> Orders...')
+            const ords = await supabaseService.getOrders(userEst.id)
             setOrders(ords)
+            
+            console.log('[AppContext] -> Tables...')
+            const tbls = await supabaseService.getTables(userEst.id)
             setTables(tbls)
+            
+            console.log('[AppContext] Detailed data loaded successfully')
           } else {
             console.warn('[AppContext] No establishment found for user')
           }
