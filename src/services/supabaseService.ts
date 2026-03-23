@@ -239,7 +239,7 @@ export const supabaseService = {
       .select('*, establishments(name)')
       .order('created_at', { ascending: false })
     if (error) throw error
-    return data
+    return data || []
   },
 
   // Expenses (Establishment Level)

@@ -139,7 +139,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setAllEstablishments(ests)
           
           const userEst = ests.find(e => e.userId === userId) || ests[0]
-          if (userEst) {
+          
+          if (userEst && userEst.id) {
             console.log('[AppContext] Selected establishment:', userEst.name)
             setEstablishment(userEst)
             
