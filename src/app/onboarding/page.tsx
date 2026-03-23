@@ -188,20 +188,16 @@ export default function OnboardingPage() {
             </div>
 
             <div className="pt-4 space-y-3">
-              <Button 
-                render={
-                  <Link href="https://wa.me/2250102030405" target="_blank" className="w-full bg-[#D4AF37] text-[#1A1A2E] font-black h-12 rounded-xl group overflow-hidden relative flex items-center justify-center">
-                    <span className="relative z-10 flex items-center gap-2">
-                      CONTACTER SUPPORT PRIORITAIRE <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                  </Link>
-                }
-              />
-              <Button onClick={signOut} variant="ghost" className="w-full text-[#A0A0B8] hover:text-white flex items-center justify-center gap-2">
-                <LogOut className="h-4 w-4" /> Se déconnecter
-              </Button>
-            </div>
+                <Link href="https://wa.me/2250102030405" target="_blank" className="w-full bg-[#D4AF37] text-[#1A1A2E] font-black h-12 rounded-xl group overflow-hidden relative flex items-center justify-center">
+                  <span className="relative z-10 flex items-center gap-2">
+                    CONTACTER SUPPORT PRIORITAIRE <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                </Link>
+                <Button onClick={signOut} variant="ghost" className="w-full text-[#A0A0B8] hover:text-white flex items-center justify-center gap-2">
+                  <LogOut className="h-4 w-4" /> Se déconnecter
+                </Button>
+              </div>
           </CardContent>
         </Card>
 

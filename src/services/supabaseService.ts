@@ -1,29 +1,113 @@
 import { supabase } from '@/lib/supabase'
-import { Establishment, Product, Order, Client, Staff } from '@/context/AppContext'
+import { 
+  Establishment, Product, Order, Client, Staff, 
+  Expense, SaasTransaction, Table, Profile 
+} from '@/types'
 
-// Modèles de données pour Supabase (Snake Case)
+// Database row types (Snake Case)
+interface EstablishmentRow {
+  id: string
+  name: string
+  owner: string
+  phone: string
+  location: string
+  type: string
+  logo_url?: string
+  currency: string
+  tax_rate: number
+  invoice_note: string
+  status: 'Pending' | 'Active' | 'Suspended'
+  trial_ends_at: string
+  plan: 'Trial' | 'Business' | 'VIP' | 'Enterprise'
+  created_at: string
+  user_id: string
+}
+
+interface ProductRow {
+  id: string
+  establishment_id: string
+  name: string
+  category: string
+  price: number
+  stock: number
+  unit: string
+  image_url?: string
+}
+
+interface OrderRow {
+  id: string
+  establishment_id: string
+  table_id: string
+  total_amount: number
+  status: string
+  created_at: string
+}
+
+interface OrderItemRow {
+  id: string
+  order_id: string
+  product_id: string
+  name: string
+  quantity: number
+  unit_price: number
+}
+
+interface TableRow {
+  id: string
+  establishment_id: string
+  name: string
+  status: 'libre' | 'occupée'
+  capacity: number
+}
+
+interface ExpenseRow {
+  id: string
+  establishment_id: string
+  description: string
+  amount: number
+  category: string
+  date: string
+}
+
+interface OrderInput {
+  establishment_id: string
+  tableId: string
+  total: number
+  status: string
+  items: { productId: string; name: string; quantity: number; price: number }[]
+}
+
+const mapEstablishment = (est: EstablishmentRow): Establishment => ({
+  id: est.id,
+  name: est.name,
+  owner: est.owner,
+  phone: est.phone,
+  location: est.location,
+  type: est.type,
+  logo: est.logo_url,
+  currency: est.currency,
+  taxRate: est.tax_rate,
+  invoiceNote: est.invoice_note,
+  status: est.status,
+  trialEndsAt: est.trial_ends_at,
+  plan: est.plan,
+  createdAt: est.created_at,
+  userId: est.user_id
+})
+
 export const supabaseService = {
   // Establishments
-  async getEstablishments() {
+  async getEstablishments(): Promise<Establishment[]> {
     const { data, error } = await supabase
       .from('establishments')
       .select('*')
       .order('created_at', { ascending: false })
     if (error) throw error
     
-    // Mapping Snake to Camel
-    return data.map((est: any) => ({
-      ...est,
-      logo: est.logo_url,
-      taxRate: est.tax_rate,
-      invoiceNote: est.invoice_note,
-      trialEndsAt: est.trial_ends_at,
-      createdAt: est.created_at,
-      userId: est.user_id
-    })) as Establishment[]
+    return (data as EstablishmentRow[] || []).map(mapEstablishment)
   },
 
-  async createEstablishment(est: any) {
+  async createEstablishment(est: Partial<Establishment> & { user_id: string }): Promise<Establishment> {
     const { data, error } = await supabase
       .from('establishments')
       .insert([{
@@ -33,8 +117,8 @@ export const supabaseService = {
         location: est.location,
         type: est.type,
         currency: est.currency || 'XOF',
-        tax_rate: est.taxRate || est.tax_rate || 18,
-        invoice_note: est.invoiceNote || est.invoice_note || 'Merci de votre visite !',
+        tax_rate: est.taxRate || 18,
+        invoice_note: est.invoiceNote || 'Merci de votre visite !',
         user_id: est.user_id,
         status: 'Pending',
         plan: est.plan || 'Trial'
@@ -42,14 +126,7 @@ export const supabaseService = {
       .select()
       .single()
     if (error) throw error
-    return {
-      ...data,
-      taxRate: data.tax_rate,
-      invoiceNote: data.invoice_note,
-      trialEndsAt: data.trial_ends_at,
-      createdAt: data.created_at,
-      userId: data.user_id
-    } as Establishment
+    return mapEstablishment(data as EstablishmentRow)
   },
 
   async updateEstablishmentStatus(id: string, status: string) {
@@ -69,34 +146,78 @@ export const supabaseService = {
   },
 
   // Products
-  async getProducts(establishmentId: string) {
+  async getProducts(establishmentId: string): Promise<Product[]> {
     const { data, error } = await supabase
       .from('products')
       .select('*')
       .eq('establishment_id', establishmentId)
     if (error) throw error
-    return data || []
+    
+    return (data as ProductRow[] || []).map(p => ({
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      price: p.price,
+      stock: p.stock,
+      unit: p.unit,
+      image: p.image_url
+    }))
   },
 
-  async addProduct(product: any) {
+  async addProduct(product: Omit<Product, 'id'> & { establishment_id: string }): Promise<Product> {
     const { data, error } = await supabase
       .from('products')
-      .insert([product])
+      .insert([{
+        establishment_id: product.establishment_id,
+        name: product.name,
+        category: product.category,
+        price: product.price,
+        stock: product.stock,
+        unit: product.unit,
+        image_url: product.image
+      }])
       .select()
       .single()
     if (error) throw error
-    return data as Product
+    
+    const p = data as ProductRow
+    return {
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      price: p.price,
+      stock: p.stock,
+      unit: p.unit,
+      image: p.image_url
+    }
   },
 
-  async updateProduct(id: string, updates: Partial<Product>) {
+  async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
     const { data, error } = await supabase
       .from('products')
-      .update(updates)
+      .update({
+        name: updates.name,
+        category: updates.category,
+        price: updates.price,
+        stock: updates.stock,
+        unit: updates.unit,
+        image_url: updates.image
+      })
       .eq('id', id)
       .select()
       .single()
     if (error) throw error
-    return data as Product
+    
+    const p = data as ProductRow
+    return {
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      price: p.price,
+      stock: p.stock,
+      unit: p.unit,
+      image: p.image_url
+    }
   },
 
   async deleteProduct(id: string) {
@@ -108,7 +229,7 @@ export const supabaseService = {
   },
 
   // Orders
-  async createOrder(order: any) {
+  async createOrder(order: OrderInput) {
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert([{
@@ -122,8 +243,8 @@ export const supabaseService = {
 
     if (orderError) throw orderError
 
-    const items = order.items.map((item: any) => ({
-      order_id: orderData.id,
+    const items = order.items.map((item) => ({
+      order_id: (orderData as OrderRow).id,
       product_id: item.productId,
       name: item.name,
       quantity: item.quantity,
@@ -135,10 +256,10 @@ export const supabaseService = {
       .insert(items)
 
     if (itemsError) throw itemsError
-    return orderData
+    return orderData as OrderRow
   },
 
-  async getOrders(establishmentId: string) {
+  async getOrders(establishmentId: string): Promise<Order[]> {
     const { data, error } = await supabase
       .from('orders')
       .select('*, order_items(*)')
@@ -147,19 +268,19 @@ export const supabaseService = {
     
     if (error) throw error
     
-    return (data || []).map((o: any) => ({
+    return ((data as (OrderRow & { order_items: OrderItemRow[] })[]) || []).map((o) => ({
       id: o.id,
       tableId: o.table_id,
       total: Number(o.total_amount),
-      status: o.status === 'en cours' ? 'pending' : o.status === 'payée' ? 'completed' : 'cancelled',
+      status: (o.status === 'en cours' ? 'pending' : o.status === 'payée' ? 'completed' : 'cancelled') as Order['status'],
       createdAt: o.created_at,
-      items: (o.order_items || []).map((i: any) => ({
+      items: (o.order_items || []).map((i) => ({
         productId: i.product_id,
         name: i.name || 'Produit',
         quantity: i.quantity,
         price: Number(i.unit_price)
       }))
-    })) as Order[]
+    }))
   },
 
   // Tables
@@ -171,31 +292,32 @@ export const supabaseService = {
       .order('name', { ascending: true })
     
     if (error) throw error
-    return (data || []).map((t: any) => ({
+    return ((data as TableRow[]) || []).map((t) => ({
       id: t.id,
       name: t.name,
-      status: t.status === 'libre' ? 'Libre' : 'Occupée',
+      status: (t.status === 'libre' ? 'Libre' : 'Occupée') as 'Libre' | 'Occupée',
       capacity: t.capacity
     }))
   },
 
-  async addTable(table: any) {
+  async addTable(table: Omit<TableRow, 'id'>) {
     const { data, error } = await supabase
       .from('tables')
       .insert([table])
       .select()
       .single()
     if (error) throw error
+    const t = data as TableRow
     return {
-      id: data.id,
-      name: data.name,
-      status: data.status === 'libre' ? 'Libre' : 'Occupée',
-      capacity: data.capacity
+      id: t.id,
+      name: t.name,
+      status: (t.status === 'libre' ? 'Libre' : 'Occupée') as 'Libre' | 'Occupée',
+      capacity: t.capacity
     }
   },
 
   // Clients
-  async getClients(establishmentId: string) {
+  async getClients(establishmentId: string): Promise<Client[]> {
     const { data, error } = await supabase
       .from('clients')
       .select('*')
@@ -204,7 +326,7 @@ export const supabaseService = {
     return (data || []) as Client[]
   },
 
-  async addClient(client: any) {
+  async addClient(client: Omit<Client, 'id' | 'points' | 'tier'> & { establishment_id: string }): Promise<Client> {
     const { data, error } = await supabase
       .from('clients')
       .insert([client])
@@ -215,7 +337,7 @@ export const supabaseService = {
   },
 
   // Staff
-  async getStaff(establishmentId: string) {
+  async getStaff(establishmentId: string): Promise<Staff[]> {
     const { data, error } = await supabase
       .from('staff')
       .select('*')
@@ -233,38 +355,58 @@ export const supabaseService = {
   },
 
   // SaaS Transactions (Global)
-  async getSaaSTransactions() {
+  async getSaaSTransactions(): Promise<SaasTransaction[]> {
     const { data, error } = await supabase
       .from('saas_transactions')
       .select('*, establishments(name)')
       .order('created_at', { ascending: false })
     if (error) throw error
-    return data || []
+    return (data as SaasTransaction[]) || []
   },
 
   // Expenses (Establishment Level)
-  async getExpenses(establishmentId: string) {
+  async getExpenses(establishmentId: string): Promise<Expense[]> {
     const { data, error } = await supabase
       .from('expenses')
       .select('*')
       .eq('establishment_id', establishmentId)
       .order('date', { ascending: false })
     if (error) throw error
-    return data
+    return (data as ExpenseRow[] || []).map(e => ({
+      id: e.id,
+      establishment_id: e.establishment_id,
+      description: e.description,
+      amount: e.amount,
+      category: e.category,
+      date: e.date
+    }))
   },
 
-  async addExpense(expense: any) {
+  async addExpense(expense: Omit<Expense, 'id'>): Promise<Expense> {
     const { data, error } = await supabase
       .from('expenses')
-      .insert([expense])
+      .insert([{
+        establishment_id: expense.establishment_id,
+        description: expense.description,
+        amount: expense.amount,
+        category: expense.category,
+        date: expense.date
+      }])
       .select()
       .single()
     if (error) throw error
-    return data
+    const e = data as ExpenseRow
+    return {
+      id: e.id,
+      establishment_id: e.establishment_id,
+      description: e.description,
+      amount: e.amount,
+      category: e.category,
+      date: e.date
+    }
   },
 
   async renewEstablishment(id: string, months: number, plan: string, amount: number) {
-    // Calculates the new expiry date based on the current one or NOW
     const { data: est, error: getError } = await supabase
       .from('establishments')
       .select('trial_ends_at')
@@ -273,11 +415,10 @@ export const supabaseService = {
     
     if (getError) throw getError
 
-    const currentExpiry = est.trial_ends_at ? new Date(est.trial_ends_at) : new Date()
+    const currentExpiry = (est as EstablishmentRow).trial_ends_at ? new Date((est as EstablishmentRow).trial_ends_at) : new Date()
     const baseDate = currentExpiry > new Date() ? currentExpiry : new Date()
     const newExpiry = new Date(baseDate.setMonth(baseDate.getMonth() + months))
 
-    // 1. Update establishment
     const { error: updateError } = await supabase
       .from('establishments')
       .update({ 
@@ -289,7 +430,6 @@ export const supabaseService = {
     
     if (updateError) throw updateError
 
-    // 2. Record transaction
     const { error: txError } = await supabase
       .from('saas_transactions')
       .insert([{
@@ -306,29 +446,24 @@ export const supabaseService = {
   },
 
   // Admin Management
-  async getAdminUsers() {
+  async getAdminUsers(): Promise<Profile[]> {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .in('role', ['SUPER_ADMIN', 'ADMIN'])
       .order('created_at', { ascending: false })
     if (error) throw error
-    return data
+    return (data as Profile[]) || []
   },
 
-  async promoteUserToAdmin(email: string) {
-    // 1. Find user by email in auth.users (can only follow profiles if they exist)
-    // Actually, we can just upsert into profiles if we have the ID.
-    // But we need the ID from the email.
-    
-    // We'll use a RPC or a specific query if the user has already a profile.
+  async promoteUserToAdmin(email: string): Promise<boolean> {
     const { data: profile, error: findError } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .single()
     
-    if (findError) throw new Error("Utilisateur non trouvé dans les profils. Il doit d'abord se connecter une fois.")
+    if (findError) throw new Error("Utilisateur non trouvé dans les profils.")
 
     const { error: updateError } = await supabase
       .from('profiles')

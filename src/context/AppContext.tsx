@@ -6,69 +6,21 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { User, Session } from '@supabase/supabase-js'
 
-export type Product = {
-  id: string
-  name: string
-  category: string
-  price: number
-  stock: number
-  unit: string
-  image?: string
-}
+import { 
+  Product, Order, Client, Staff, Establishment, Expense, SaasTransaction, Table 
+} from '@/types'
 
-export type Order = {
-  id: string
-  tableId: string
-  items: { productId: string; name: string; quantity: number; price: number }[]
-  total: number
-  status: 'pending' | 'completed' | 'cancelled'
-  createdAt: string
-}
-
-export type Client = {
-  id: string
-  name: string
-  phone: string
-  points: number
-  tier: 'Regular' | 'Silver' | 'Gold' | 'VIP'
-}
-
-export type Staff = {
-  id: string
-  name: string
-  role: string
-  status: 'Present' | 'Absent'
-  checkIn?: string
-}
-
-export type Establishment = {
-  id: string
-  name: string
-  owner: string
-  phone: string
-  location: string
-  type: string
-  logo?: string
-  currency: string
-  taxRate: number
-  invoiceNote: string
-  status: 'Pending' | 'Active' | 'Suspended'
-  trialEndsAt: string
-  plan: 'Trial' | 'Business' | 'VIP' | 'Enterprise'
-  createdAt: string
-  userId?: string
-}
 
 type AppContextType = {
   products: Product[]
   orders: Order[]
   clients: Client[]
   staff: Staff[]
-  expenses: any[]
-  saasTransactions: any[]
+  expenses: Expense[]
+  saasTransactions: SaasTransaction[]
   establishment: Establishment | null
   allEstablishments: Establishment[]
-  tables: any[]
+  tables: Table[]
   loading: boolean
   user: User | null
   session: Session | null
@@ -78,7 +30,7 @@ type AppContextType = {
   deleteProduct: (id: string) => Promise<void>
   updateStock: (productId: string, quantity: number) => void
   createOrder: (order: Omit<Order, 'id' | 'createdAt'>) => Promise<void>
-  addExpense: (expense: any) => Promise<void>
+  addExpense: (expense: Omit<Expense, 'id' | 'establishment_id'>) => Promise<void>
   addClient: (client: Omit<Client, 'id' | 'points' | 'tier'>) => Promise<void>
   toggleStaffStatus: (staffId: string) => Promise<void>
   updateEstablishment: (est: Partial<Establishment>) => void
@@ -96,11 +48,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [staff, setStaff] = useState<Staff[]>([])
-  const [expenses, setExpenses] = useState<any[]>([])
-  const [saasTransactions, setSaaSTransactions] = useState<any[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [saasTransactions, setSaaSTransactions] = useState<SaasTransaction[]>([])
   const [establishment, setEstablishment] = useState<Establishment | null>(null)
   const [allEstablishments, setAllEstablishments] = useState<Establishment[]>([])
-  const [tables, setTables] = useState<any[]>([])
+  const [tables, setTables] = useState<Table[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -134,10 +86,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (profile) {
           currentRole = profile.role
           setUserRole(currentRole)
-          console.log('[AppContext] Role:', currentRole)
+          console.log('[AppContext] Role detected:', currentRole)
         }
-      } catch (e) {
-        console.error('[AppContext] Profile fetch error:', e)
+      } catch (warn) {
+        console.warn('[AppContext] Profile fetch error (non-fatal):', warn)
       }
 
       // 2. Load Establishments
@@ -145,15 +97,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         ests = await supabaseService.getEstablishments()
         setAllEstablishments(ests || [])
-      } catch (e) {
-        console.error('[AppContext] Establishments fetch error:', e)
+        console.log('[AppContext] Establishments loaded:', ests.length)
+      } catch (err) {
+        console.error('[AppContext] Establishments fetch error:', err)
       }
 
       // 3. Identify and Load User Establishment Data
-      const userEst = ests.find(e => e.userId === userId) || ests[0]
+      // Prefer establishment owned by user, else first one if Super Admin
+      const userEst = ests.find(e => e.userId === userId) || (currentRole === 'SUPER_ADMIN' ? ests[0] : null)
+      
       if (userEst) {
         setEstablishment(userEst)
-        console.log('[AppContext] Target Establishment:', userEst.name)
+        console.log('[AppContext] Target Establishment active:', userEst.name)
         
         try {
           const [prods, stff, clnts, ords, tbls, exps] = await Promise.all([
@@ -169,11 +124,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setStaff(stff)
           setClients(clnts)
           setOrders(ords)
-          setTables(tbls)
-          setExpenses(exps)
-        } catch (e) {
-          console.error('[AppContext] Dependent data fetch error:', e)
+          setTables(tbls as Table[])
+          setExpenses(exps as Expense[])
+        } catch (err) {
+          console.error('[AppContext] Dependent data fetch error:', err)
         }
+      } else {
+        console.log('[AppContext] No establishment found for user.')
       }
 
       // 4. Load SaaS Transactions if Admin
@@ -181,8 +138,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         try {
           const saasData = await supabaseService.getSaaSTransactions()
           setSaaSTransactions(saasData || [])
-        } catch (e) {
-          console.error('[AppContext] SaaS Transactions error:', e)
+        } catch (err) {
+          console.error('[AppContext] SaaS Transactions error:', err)
         }
       }
 
@@ -191,7 +148,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toast.error('Erreur lors de la synchronisation des données.')
     } finally {
       setLoading(false)
-      console.log('[AppContext] Loading finished')
+      console.log('[AppContext] Loading sequence completed')
     }
   }
 
@@ -219,7 +176,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newProd = await supabaseService.addProduct({ ...p, establishment_id: establishment.id })
       setProducts([...products, newProd])
       toast.success('Produit ajouté au catalogue Cloud')
-    } catch (e) {
+    } catch (err) {
       toast.error('Erreur lors de l\'ajout')
     }
   }
@@ -229,7 +186,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const updated = await supabaseService.updateProduct(id, updates)
       setProducts(products.map(p => p.id === id ? updated : p))
       toast.success('Produit mis à jour')
-    } catch (e) {
+    } catch (err) {
       toast.error('Erreur lors de la modification')
     }
   }
@@ -239,7 +196,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await supabaseService.deleteProduct(id)
       setProducts(products.filter(p => p.id !== id))
       toast.success('Produit supprimé')
-    } catch (e) {
+    } catch (err) {
       toast.error('Erreur lors de la suppression')
     }
   }
@@ -260,19 +217,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setOrders([newOrder, ...orders])
       o.items.forEach(item => updateStock(item.productId, -item.quantity))
       toast.success('Commande enregistrée en ligne')
-    } catch (e) {
+    } catch (err) {
       toast.error('Erreur de synchronisation Cloud')
     }
   }
 
-  const addExpense = async (exp: any) => {
+  const addExpense = async (exp: Omit<Expense, 'id' | 'establishment_id'>) => {
     if (!establishment) return
     try {
       const newExp = await supabaseService.addExpense({ ...exp, establishment_id: establishment.id })
       setExpenses([newExp, ...expenses])
       toast.success('Dépense enregistrée Cloud')
-    } catch (e) {
-      toast.error('Erreur dépenses')
+    } catch (err) {
+      toast.error('Erreur lors de l\'enregistrement de la dépense')
     }
   }
 
@@ -282,7 +239,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newClient = await supabaseService.addClient({ ...c, establishment_id: establishment.id })
       setClients([...clients, newClient])
       toast.success('Nouveau client enregistré')
-    } catch (e) {
+    } catch (err) {
       toast.error('Erreur client')
     }
   }
@@ -295,7 +252,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await supabaseService.updateStaffStatus(id, newStatus)
       setStaff(staff.map(s => s.id === id ? { ...s, status: newStatus as any } : s))
       toast.info(`Statut mis à jour pour ${member.name}`)
-    } catch (e) {
+    } catch (err) {
       toast.error('Erreur staff')
     }
   }
@@ -305,13 +262,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   const registerEstablishment = async (est: Omit<Establishment, 'id' | 'status' | 'trialEndsAt' | 'plan' | 'createdAt'>) => {
+    if (!user) {
+      toast.error('Vous devez être connecté')
+      return
+    }
     try {
-      const newEst = await supabaseService.createEstablishment({ ...est, user_id: user?.id })
+      const newEst = await supabaseService.createEstablishment({ ...est, user_id: user.id })
       setAllEstablishments(prev => [...prev, newEst])
       setEstablishment(newEst)
-      toast.success('Établissement enregistré sur Supabase')
-    } catch (e) {
-      toast.error('Erreur d\'inscription cloud')
+      toast.success('Établissement enregistré avec succès')
+      // Reset dependent data as it's a new establishment
+      setProducts([])
+      setStaff([])
+      setClients([])
+      setOrders([])
+      setTables([])
+      setExpenses([])
+    } catch (err) {
+      toast.error('Erreur lors de l\'enregistrement de l\'établissement')
     }
   }
 
@@ -319,8 +287,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       await supabaseService.updateEstablishmentStatus(id, status)
       setAllEstablishments(prev => prev.map(e => e.id === id ? { ...e, status } : e))
-      toast.success('Statut mis à jour sur le serveur')
-    } catch (e) {
+      if (establishment?.id === id) {
+        setEstablishment({ ...establishment, status })
+      }
+      toast.success('Statut de l\'établissement mis à jour')
+    } catch (err) {
       toast.error('Erreur de validation')
     }
   }
@@ -343,12 +314,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setProducts(prods)
       setClients(cls)
       setStaff(stf)
-      setExpenses(exps)
+      setExpenses(exps as Expense[])
       setOrders(ords)
-      setTables(tbls)
+      setTables(tbls as Table[])
       toast.success(`Passage à l'établissement : ${target.name}`)
-    } catch (e) {
-      toast.error('Erreur lors du changement')
+    } catch (err) {
+      toast.error('Erreur lors du changement d\'établissement')
     } finally {
       setLoading(false)
     }
@@ -363,10 +334,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         capacity,
         status: 'libre'
       })
-      setTables([...tables, newTable])
+      setTables([...tables, newTable as Table])
       toast.success('Table ajoutée')
-    } catch (e) {
-      toast.error('Erreur table')
+    } catch (err) {
+      toast.error('Erreur lors de l\'ajout de la table')
     }
   }
 
