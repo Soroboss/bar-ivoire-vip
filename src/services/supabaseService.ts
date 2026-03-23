@@ -78,22 +78,22 @@ interface OrderInput {
   items: { productId: string; name: string; quantity: number; price: number }[]
 }
 
-const mapEstablishment = (est: EstablishmentRow): Establishment => ({
+const mapEstablishment = (est: any): Establishment => ({
   id: est.id,
-  name: est.name,
-  owner: est.owner,
-  phone: est.phone,
-  location: est.location,
-  type: est.type,
-  logo: est.logo_url,
-  currency: est.currency,
-  taxRate: est.tax_rate,
-  invoiceNote: est.invoice_note,
-  status: est.status,
-  trialEndsAt: est.trial_ends_at,
-  plan: est.plan,
-  createdAt: est.created_at,
-  userId: est.user_id
+  name: est.name || 'Sans nom',
+  owner: est.owner || 'N/A',
+  phone: est.phone || 'N/A',
+  location: est.location || 'N/A',
+  type: est.type || 'bar',
+  logo: est.logo_url || '',
+  currency: est.currency || 'XOF',
+  taxRate: Number(est.tax_rate) || 0,
+  invoiceNote: est.invoice_note || '',
+  status: (est.status || 'Pending') as Establishment['status'],
+  trialEndsAt: est.trial_ends_at || new Date().toISOString(),
+  plan: (est.plan || 'Trial') as Establishment['plan'],
+  createdAt: est.created_at || new Date().toISOString(),
+  userId: est.user_id || ''
 })
 
 export const supabaseService = {
