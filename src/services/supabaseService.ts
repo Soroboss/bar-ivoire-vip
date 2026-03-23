@@ -186,5 +186,81 @@ export const supabaseService = {
       .single()
     if (error) throw error
     return data
+  },
+
+  async renewEstablishment(id: string, months: number, plan: string, amount: number) {
+    // Calculates the new expiry date based on the current one or NOW
+    const { data: est, error: getError } = await supabase
+      .from('establishments')
+      .select('trial_ends_at')
+      .eq('id', id)
+      .single()
+    
+    if (getError) throw getError
+
+    const currentExpiry = est.trial_ends_at ? new Date(est.trial_ends_at) : new Date()
+    const baseDate = currentExpiry > new Date() ? currentExpiry : new Date()
+    const newExpiry = new Date(baseDate.setMonth(baseDate.getMonth() + months))
+
+    // 1. Update establishment
+    const { error: updateError } = await supabase
+      .from('establishments')
+      .update({ 
+        trial_ends_at: newExpiry.toISOString(),
+        plan: plan,
+        status: 'Active'
+      })
+      .eq('id', id)
+    
+    if (updateError) throw updateError
+
+    // 2. Record transaction
+    const { error: txError } = await supabase
+      .from('saas_transactions')
+      .insert([{
+        establishment_id: id,
+        amount: amount,
+        plan: plan,
+        status: 'success',
+        payment_method: 'admin_manual'
+      }])
+    
+    if (txError) throw txError
+
+    return newExpiry
+  },
+
+  // Admin Management
+  async getAdminUsers() {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .in('role', ['SUPER_ADMIN', 'ADMIN'])
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data
+  },
+
+  async promoteUserToAdmin(email: string) {
+    // 1. Find user by email in auth.users (can only follow profiles if they exist)
+    // Actually, we can just upsert into profiles if we have the ID.
+    // But we need the ID from the email.
+    
+    // We'll use a RPC or a specific query if the user has already a profile.
+    const { data: profile, error: findError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .single()
+    
+    if (findError) throw new Error("Utilisateur non trouvé dans les profils. Il doit d'abord se connecter une fois.")
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ role: 'SUPER_ADMIN' })
+      .eq('id', profile.id)
+    
+    if (updateError) throw updateError
+    return true
   }
 }

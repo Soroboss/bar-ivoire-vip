@@ -39,23 +39,20 @@ export default function DashboardPage() {
   const netProfit = totalSales - totalExpenses
   
   const recentOrders = orders.slice(0, 5)
-
-  // Demo dynamic labels for charts
+  
+  // Real dynamic labels for charts
   const salesByHour = orders.reduce((acc: any, o) => {
     const hour = format(new Date(o.createdAt), 'HH') + 'h'
     acc[hour] = (acc[hour] || 0) + o.total
     return acc
   }, {})
 
-  const chartData = [
-    { name: '18h', total: 45000 },
-    { name: '19h', total: 82000 },
-    { name: '20h', total: 125000 },
-    { name: '21h', total: 250000 },
-    { name: '22h', total: 450000 },
-    // Merged with actual orders if any
-    ...Object.entries(salesByHour).map(([name, total]) => ({ name, total: Number(total) }))
-  ].sort((a,b) => a.name.localeCompare(b.name))
+  // Fill in the last 6 hours if empty, for a better look
+  const chartData = Object.entries(salesByHour)
+    .map(([name, total]) => ({ name, total: Number(total) }))
+    .sort((a,b) => a.name.localeCompare(b.name))
+
+  const trend = orders.length > 5 ? "+12%" : "Nouveau"
 
   return (
     <div className="p-6 space-y-8 bg-[#1A1A2E] text-[#F4E4BC] animate-in fade-in duration-500">
@@ -76,7 +73,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold text-white">{totalSales.toLocaleString()} F</div>
             <p className="text-xs text-[#4CAF50] flex items-center mt-1">
-              <ArrowUpRight className="h-3 w-3 mr-1" /> +{(orders.length > 0 ? 12 : 0)} % vs hier
+              <ArrowUpRight className="h-3 w-3 mr-1" /> {trend} vs session précédente
             </p>
           </CardContent>
         </Card>

@@ -71,6 +71,7 @@ type AppContextType = {
   loading: boolean
   user: User | null
   session: Session | null
+  userRole: string | null
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>
   updateStock: (productId: string, quantity: number) => void
   createOrder: (order: Omit<Order, 'id' | 'createdAt'>) => Promise<void>
@@ -98,6 +99,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -137,9 +139,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       // If Super Admin, load global stats
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
-      if (profile?.role === 'SUPER_ADMIN') {
-        const adminData = await supabaseService.getSaaSTransactions()
-        setSaaSTransactions(adminData)
+      if (profile) {
+        setUserRole(profile.role)
+        if (profile.role === 'SUPER_ADMIN') {
+          const adminData = await supabaseService.getSaaSTransactions()
+          setSaaSTransactions(adminData)
+        }
       }
 
     } catch (error) {
@@ -158,6 +163,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSaaSTransactions([])
     setEstablishment(null)
     setAllEstablishments([])
+    setUserRole(null)
   }
 
   const signOut = async () => {
@@ -284,7 +290,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{ 
-      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, loading, user, session,
+      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, loading, user, session, userRole,
       addProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
       switchEstablishment, signOut
     }}>

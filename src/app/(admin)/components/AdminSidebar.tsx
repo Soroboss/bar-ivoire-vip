@@ -13,9 +13,11 @@ import {
   Building2,
   Users
 } from 'lucide-react'
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
+import { useState } from 'react'
 
 const adminNavigation = [
   { name: 'Dashboard Admin', href: '/admin/dashboard', icon: ShieldCheck },
@@ -78,21 +80,26 @@ export function AdminSidebar() {
             })}
           </nav>
 
-          <div className="p-4 border-t border-[#3A3A5A]">
-            <Link href="/dashboard">
+          <div className="p-4 border-t border-[#3A3A5A] space-y-2">
+            <Link href="/dashboard" className="block">
               <Button 
                 variant="ghost" 
-                className="w-full justify-start gap-3 text-[#A0A0B8] hover:text-[#D4AF37]"
+                className="w-full justify-start gap-3 text-[#A0A0B8] hover:text-[#D4AF37] hover:bg-white/5"
               >
-                <Building2 className="h-5 w-5" />
+                <Building2 className="h-5 w-5 text-[#D4AF37]" />
                 <span>Régie Bar</span>
               </Button>
             </Link>
             <Button 
               variant="ghost" 
-              className="w-full justify-start gap-3 text-[#A0A0B8] hover:text-red-400 mt-2"
+              onClick={async () => {
+                await supabase.auth.signOut()
+                toast.success('Déconnexion Administrateur réussie')
+                window.location.href = '/admin/login'
+              }}
+              className="w-full justify-start gap-3 text-red-400/60 hover:text-red-400 hover:bg-red-400/5 group"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-5 w-5 group-hover:rotate-12 transition-transform" />
               <span>Déconnexion</span>
             </Button>
           </div>

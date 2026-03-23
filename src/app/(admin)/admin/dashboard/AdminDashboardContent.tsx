@@ -66,11 +66,11 @@ export default function AdminDashboardContent() {
   const mrr = saasTransactions.reduce((acc: number, t: any) => acc + (Number(t.amount) || 0), 0)
   
   const revenueChartData = saasTransactions.length > 0 
-    ? saasTransactions.slice(-7).map((t: any) => ({
+    ? saasTransactions.map((t: any) => ({
         date: format(new Date(t.created_at), 'dd/MM', { locale: fr }),
         revenue: t.amount
-      }))
-    : MOCK_REVENUE_DATA
+      })).reverse()
+    : []
 
   const handleAction = async (id: string, name: string, status: 'Active' | 'Suspended' | 'Pending') => {
     try {
@@ -87,12 +87,12 @@ export default function AdminDashboardContent() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-1">
             <Badge className="bg-[#D4AF37] text-[#1A1A2E] font-bold">SUPER RÉGIE</Badge>
-            <span className="text-[#A0A0B8] text-sm">• v1.0.4 Premium</span>
+            <span className="text-[#A0A0B8] text-sm">• v1.0.5 Live</span>
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tighter text-white">
-            Vue d'ensemble <span className="text-[#D4AF37]">SaaS</span>
+          <h1 className="text-4xl font-extrabold tracking-tighter text-white uppercase italic">
+            Dashboard <span className="text-[#D4AF37]">Stratégique</span>
           </h1>
-          <p className="text-[#A0A0B8] border-l-2 border-[#D4AF37] pl-3">Tableau de bord de gestion stratégique Ivoire Bar VIP.</p>
+          <p className="text-[#A0A0B8] border-l-2 border-[#D4AF37] pl-3">Contrôle en temps réel de l'écosystème Ivoire Bar VIP.</p>
         </div>
         
         <div className="flex items-center gap-4 bg-[#1A1A2E] p-2 rounded-2xl border border-[#3A3A5A]">
@@ -100,8 +100,8 @@ export default function AdminDashboardContent() {
             <Activity className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] text-[#A0A0B8] uppercase">Santé Système</p>
-            <p className="text-sm font-bold text-white">100% Opérationnel</p>
+            <p className="text-[10px] text-[#A0A0B8] uppercase">Système</p>
+            <p className="text-sm font-bold text-white">Live Data</p>
           </div>
         </div>
       </div>
@@ -109,10 +109,10 @@ export default function AdminDashboardContent() {
       {/* KPI Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { title: "Établissements", value: allEstablishments.length, icon: Building2, trend: `+${allEstablishments.length}`, color: "#D4AF37" },
-          { title: "Revenu Mensuel (MRR)", value: `${mrr.toLocaleString()} F`, icon: TrendingUp, trend: "+100%", color: "#4CAF50" },
-          { title: "En Trial", value: trial.length, icon: Zap, trend: trial.length.toString(), color: "#3B82F6" },
-          { title: "Validations", value: pending.length, icon: Clock, trend: pending.length > 0 ? "URGENT" : "À jour", color: "#F97316" },
+          { title: "Régies Totales", value: allEstablishments.length, icon: Building2, trend: `${allEstablishments.length} inscrites`, color: "#D4AF37" },
+          { title: "Chiffre d'Affaire (MRR)", value: `${mrr.toLocaleString()} F`, icon: TrendingUp, trend: saasTransactions.length > 0 ? "Réel" : "En attente", color: "#4CAF50" },
+          { title: "Périodes d'Essai", value: trial.length, icon: Zap, trend: `${trial.length} en cours`, color: "#3B82F6" },
+          { title: "En attente Validation", value: pending.length, icon: Clock, trend: pending.length > 0 ? "Action requise" : "À jour", color: "#F97316" },
         ].map((kpi, i) => (
           <Card key={i} className="bg-[#1A1A2E] border-[#3A3A5A] relative overflow-hidden group hover:border-[#D4AF37]/50 transition-all">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -124,8 +124,7 @@ export default function AdminDashboardContent() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2 text-xs">
-                <span className={kpi.trend.includes('+') ? 'text-green-500' : 'text-orange-400'}>{kpi.trend}</span>
-                <span className="text-[#A0A0B8]">depuis 30 jours</span>
+                <span className="text-[#D4AF37] font-bold">{kpi.trend}</span>
               </div>
             </CardContent>
           </Card>
@@ -239,10 +238,12 @@ export default function AdminDashboardContent() {
               {saasTransactions.length > 0 ? (
                 <div className="flex justify-between items-end">
                   <div>
-                    <p className="text-[10px] text-[#A0A0B8]">{saasTransactions[saasTransactions.length - 1].bar_name || 'Établissement'}</p>
-                    <p className="text-lg font-bold text-[#4CAF50]">{saasTransactions[saasTransactions.length - 1].amount.toLocaleString()} F</p>
+                    <p className="text-[10px] text-[#A0A0B8] uppercase tracking-tighter">
+                      {(saasTransactions[0] as any).establishments?.name || 'Établissement'}
+                    </p>
+                    <p className="text-lg font-bold text-[#4CAF50]">{(saasTransactions[0] as any).amount.toLocaleString()} F</p>
                   </div>
-                  <Badge className="bg-[#4CAF50]/20 text-[#4CAF50] border-none uppercase text-[8px]">VALIDÉ</Badge>
+                  <Badge className="bg-[#4CAF50]/20 text-[#4CAF50] border-none uppercase text-[8px] font-black">VALIDÉ</Badge>
                 </div>
               ) : (
                 <p className="text-xs text-[#A0A0B8]">Aucune transaction récente.</p>

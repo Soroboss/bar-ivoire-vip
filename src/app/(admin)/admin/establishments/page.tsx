@@ -24,18 +24,26 @@ import { supabaseService } from "@/services/supabaseService"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 
+import { AdminRenewalModal } from "../../components/AdminRenewalModal"
+
 export default function EstablishmentsAdmin() {
   const { allEstablishments, validateEstablishment, loading } = useAppContext()
   const [isMounted, setIsMounted] = useState(false)
   const [filter, setFilter] = useState('All')
   const [search, setSearch] = useState('')
+  const [selectedEst, setSelectedEst] = useState<any>(null)
+  const [isRenewalOpen, setIsRenewalOpen] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
   if (!isMounted || loading) {
-    return <div className="p-8 text-center text-[#A0A0B8]">Chargement de la base centrale...</div>
+    return (
+      <div className="min-h-screen bg-[#0F0F1A] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#D4AF37]" />
+      </div>
+    )
   }
 
   const filtered = allEstablishments.filter(e => {
@@ -45,11 +53,11 @@ export default function EstablishmentsAdmin() {
     return matchesFilter && matchesSearch
   })
 
+  // ... (keep updatePlan if needed, though renewEstablishment is better)
   const updatePlan = async (id: string, plan: string) => {
     try {
-      await supabaseService.updateEstablishmentPlan(id, plan)
+      await supabaseService.renewEstablishment(id, 0, plan, 0)
       toast.success(`Forfait mis à jour : ${plan}`)
-      // Reload or update state
       window.location.reload()
     } catch (e) {
       toast.error('Erreur Plan')
@@ -61,10 +69,8 @@ export default function EstablishmentsAdmin() {
   const handleValidateAndNotify = async (est: any) => {
     setValidatingId(est.id)
     try {
-      // 1. Activer l'établissement
       await validateEstablishment(est.id, 'Active')
       
-      // 2. Récupérer l'email de l'utilisateur
       const { data: profile } = await supabase
         .from('establishments')
         .select('user_id')
@@ -72,7 +78,6 @@ export default function EstablishmentsAdmin() {
         .single()
       
       if (profile?.user_id) {
-        // Chercher l'email dans auth via les profils ou le user_id
         const { data: userProfile } = await supabase
           .from('profiles')
           .select('email')
@@ -81,13 +86,12 @@ export default function EstablishmentsAdmin() {
         
         const email = userProfile?.email
         if (email) {
-          // 3. Envoyer l'email de création de mot de passe
           await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: 'https://ivoire-bar-vip.vercel.app/auth/update-password',
           })
           toast.success(`✅ Validé ! Email d'activation envoyé à ${email}`)
         } else {
-          toast.success('✅ Établissement validé (email non trouvé, notification manuelle requise)')
+          toast.success('✅ Établissement validé (email non trouvé)')
         }
       }
     } catch (e) {
@@ -97,36 +101,42 @@ export default function EstablishmentsAdmin() {
     }
   }
 
+  const getDaysRemaining = (expiry: string) => {
+    if (!expiry) return 0
+    const diff = new Date(expiry).getTime() - new Date().getTime()
+    return Math.ceil(diff / (1000 * 3600 * 24))
+  }
+
   return (
     <div className="p-6 space-y-8 bg-[#0F0F1A] text-[#F4E4BC] min-h-screen">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-white tracking-tight">Gestion des <span className="text-[#D4AF37]">Régies</span></h1>
-          <p className="text-[#A0A0B8]">Contrôlez les accès et les abonnements des bars.</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight italic uppercase">Gestion <span className="text-[#D4AF37]">Régies Globale</span></h1>
+          <p className="text-[#A0A0B8] text-sm">Contrôlez les accès, les abonnements et les réactivations.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="border-[#3A3A5A] text-[#A0A0B8] hover:bg-white/5">
-            <Filter className="h-4 w-4 mr-2" /> Filtrer
-          </Button>
+          <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border-none px-4 py-2">
+            {allEstablishments.length} Établissements Total
+          </Badge>
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#3A3A5A]" />
           <Input 
-            placeholder="Rechercher un bar ou un gérant..." 
-            className="pl-10 bg-[#1A1A2E] border-[#3A3A5A] text-white focus:border-[#D4AF37]"
+            placeholder="Rechercher un bar, un gérant ou une ville..." 
+            className="pl-10 bg-[#1A1A2E] border-[#3A3A5A] text-white focus:border-[#D4AF37] h-12"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex bg-[#1A1A2E] p-1 rounded-xl border border-[#3A3A5A]">
+        <div className="flex bg-[#1A1A2E] p-1 rounded-xl border border-[#3A3A5A] overflow-x-auto">
           {['All', 'Active', 'Pending', 'Trial', 'Business', 'VIP'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === f ? 'bg-[#D4AF37] text-[#1A1A2E]' : 'text-[#A0A0B8] hover:text-white'}`}
+              className={`px-4 py-2 rounded-lg text-[10px] uppercase font-black transition-all whitespace-nowrap ${filter === f ? 'bg-[#D4AF37] text-black shadow-lg' : 'text-[#A0A0B8] hover:text-[#D4AF37]'}`}
             >
               {f}
             </button>
@@ -134,93 +144,133 @@ export default function EstablishmentsAdmin() {
         </div>
       </div>
 
-      <Card className="bg-[#1A1A2E] border-[#3A3A5A] shadow-2xl overflow-hidden">
+      <Card className="bg-[#1A1A2E]/50 border-[#3A3A5A] shadow-2xl overflow-hidden backdrop-blur-xl">
         <Table>
-          <TableHeader className="bg-[#0F0F1A]/50 border-b border-[#3A3A5A]">
+          <TableHeader className="bg-black/30 border-b border-[#3A3A5A]">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="text-[#A0A0B8] uppercase text-[10px]">Identité</TableHead>
-              <TableHead className="text-[#A0A0B8] uppercase text-[10px]">Status</TableHead>
-              <TableHead className="text-[#A0A0B8] uppercase text-[10px]">Forfait</TableHead>
-              <TableHead className="text-[#A0A0B8] uppercase text-[10px]">Contact</TableHead>
-              <TableHead className="text-right text-[#A0A0B8] uppercase text-[10px]">Actions Management</TableHead>
+              <TableHead className="text-[#D4AF37] uppercase text-[10px] font-black tracking-widest py-5">Établissement</TableHead>
+              <TableHead className="text-[#D4AF37] uppercase text-[10px] font-black tracking-widest py-5">Status</TableHead>
+              <TableHead className="text-[#D4AF37] uppercase text-[10px] font-black tracking-widest py-5">Forfait / Échéance</TableHead>
+              <TableHead className="text-[#D4AF37] uppercase text-[10px] font-black tracking-widest py-5">Contact Gérant</TableHead>
+              <TableHead className="text-right text-[#D4AF37] uppercase text-[10px] font-black tracking-widest py-5">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((est) => (
-              <TableRow key={est.id} className="border-b-[#3A3A5A] hover:bg-white/5 transition-colors group">
-                <TableCell>
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
-                      <Building2 className="h-5 w-5" />
+            {filtered.map((est) => {
+              const daysLeft = getDaysRemaining(est.trialEndsAt)
+              const isExpired = daysLeft <= 0
+
+              return (
+                <TableRow key={est.id} className="border-b-[#3A3A5A] hover:bg-white/5 transition-colors group">
+                  <TableCell>
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-black border border-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37]">
+                        <Building2 className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-white group-hover:text-[#D4AF37] transition-colors">{est.name}</p>
+                        <p className="text-[10px] text-[#A0A0B8] uppercase">{est.type} • {est.location}</p>
+                      </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={`
+                      ${est.status === 'Active' && !isExpired ? 'border-green-500/50 text-green-400 bg-green-500/5' : ''}
+                      ${est.status === 'Active' && isExpired ? 'border-red-500/50 text-red-500 bg-red-500/10' : ''}
+                      ${est.status === 'Pending' ? 'border-orange-500/50 text-orange-400 bg-orange-500/5' : ''}
+                      ${est.status === 'Suspended' ? 'border-red-500/50 text-red-400 bg-red-500/5' : ''}
+                      text-[10px] px-3 font-bold uppercase
+                    `}>
+                      {est.status === 'Active' && isExpired ? 'EXPIRÉ' : est.status === 'Active' ? 'Actif' : est.status === 'Pending' ? 'En attente' : 'Suspendu'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     <div>
-                      <p className="font-bold text-white group-hover:text-[#D4AF37] transition-colors">{est.name}</p>
-                      <p className="text-[10px] text-[#A0A0B8] uppercase">{est.type} • {est.location}</p>
+                      <select 
+                        value={est.plan} 
+                        onChange={(e) => updatePlan(est.id, e.target.value)}
+                        className="bg-black/40 border border-[#3A3A5A] text-[10px] font-black text-[#D4AF37] rounded-lg p-1.5 outline-none mb-1 cursor-pointer"
+                      >
+                        <option value="Trial">ESSAI</option>
+                        <option value="Business">BUSINESS</option>
+                        <option value="VIP">PREMIUM VIP</option>
+                      </select>
+                      <div className="flex items-center gap-1.5 text-[10px]">
+                        <Clock className={`h-3 w-3 ${isExpired ? 'text-red-500' : 'text-[#A0A0B8]'}`} />
+                        <span className={isExpired ? 'text-red-500 font-bold' : 'text-[#A0A0B8]'}>
+                          {isExpired ? 'Expiré' : `${daysLeft} jours restants`}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge className={`
-                    ${est.status === 'Active' ? 'bg-green-500/10 text-green-400' : ''}
-                    ${est.status === 'Pending' ? 'bg-orange-500/10 text-orange-400' : ''}
-                    ${est.status === 'Suspended' ? 'bg-red-500/10 text-red-400' : ''}
-                    border-none
-                  `}>
-                    {est.status === 'Active' ? 'Actif' : est.status === 'Pending' ? 'En attente' : 'Suspendu'}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <select 
-                    value={est.plan} 
-                    onChange={(e) => updatePlan(est.id, e.target.value)}
-                    className="bg-[#0F0F1A] border border-[#3A3A5A] text-xs font-bold text-[#D4AF37] rounded-lg p-1 outline-none"
-                  >
-                    <option value="Trial">ESSAI (7J)</option>
-                    <option value="Business">BUSINESS</option>
-                    <option value="VIP">PREMIUM VIP</option>
-                    <option value="Enterprise">ENTERPRISE</option>
-                  </select>
-                </TableCell>
-                <TableCell>
-                  <p className="text-sm text-white">{est.owner}</p>
-                  <p className="text-[10px] text-[#A0A0B8]">{est.phone}</p>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    {est.status !== 'Active' && (
+                  </TableCell>
+                  <TableCell>
+                    <p className="text-sm text-white font-medium">{est.owner}</p>
+                    <p className="text-[10px] text-[#A0A0B8] flex items-center gap-1">
+                      <Mail className="h-3 w-3" /> {est.phone}
+                    </p>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      {est.status === 'Pending' && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleValidateAndNotify(est)}
+                          disabled={validatingId === est.id}
+                          className="bg-green-600 hover:bg-green-700 h-9 font-bold px-4 text-xs"
+                        >
+                          {validatingId === est.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            'Valider & Notifier'
+                          )}
+                        </Button>
+                      )}
+                      
                       <Button 
-                        size="sm" 
-                        onClick={() => handleValidateAndNotify(est)}
-                        disabled={validatingId === est.id}
-                        className="bg-green-600 hover:bg-green-700 h-8 px-4"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedEst(est)
+                          setIsRenewalOpen(true)
+                        }}
+                        className="bg-[#D4AF37] hover:bg-[#B6962E] text-black h-9 font-bold px-4 text-xs"
                       >
-                        {validatingId === est.id ? (
-                          <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Envoi...</>
-                        ) : (
-                          <><Mail className="h-3 w-3 mr-1" /> Valider & Notifier</>
-                        )}
+                        <CreditCard className="h-3.5 w-3.5 mr-1" /> Renouveler
                       </Button>
-                    )}
-                    {est.status === 'Active' && (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => validateEstablishment(est.id, 'Suspended')}
-                        className="border-red-500/20 text-red-400 hover:bg-red-500/10 h-8"
-                      >
-                        Suspendre
-                      </Button>
-                    )}
-                    <Button variant="ghost" size="icon" className="text-[#A0A0B8] hover:text-[#D4AF37]">
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+
+                      {est.status === 'Active' && !isExpired && (
+                        <Button 
+                          size="icon" 
+                          variant="outline"
+                          onClick={() => validateEstablishment(est.id, 'Suspended')}
+                          className="border-[#3A3A5A] text-red-400 hover:bg-red-500/10 h-9 w-9"
+                          title="Suspendre"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </Card>
+
+      {selectedEst && (
+        <AdminRenewalModal 
+          establishment={selectedEst}
+          isOpen={isRenewalOpen}
+          onClose={() => {
+            setIsRenewalOpen(false)
+            setSelectedEst(null)
+          }}
+          onSuccess={() => {
+            // Recharger ou mettre à jour l'état local
+            window.location.reload()
+          }}
+        />
+      )}
     </div>
   )
 }
