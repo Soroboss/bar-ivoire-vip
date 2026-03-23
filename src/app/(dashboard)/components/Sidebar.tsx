@@ -10,10 +10,18 @@ import {
   Users, 
   UserCircle, 
   BarChart3, 
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Package,
+  Users,
+  BarChart3,
   Settings,
   LogOut,
   X,
-  Menu
+  Menu,
+  Wallet,
+  Search // Added Search as it was in the provided snippet, though not used in MENU_ITEMS
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -21,14 +29,15 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
-const navigation = [
-  { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Caisse (POS)', href: '/pos', icon: ShoppingCart },
-  { name: 'Inventaire', href: '/inventory', icon: Package },
-  { name: 'Personnel', href: '/staff', icon: Users },
-  { name: 'Clients VIP', href: '/clients', icon: UserCircle },
-  { name: 'Rapports', href: '/reports', icon: BarChart3 },
-  { name: 'Paramètres', href: '/settings', icon: Settings },
+const MENU_ITEMS = [
+  { icon: LayoutDashboard, label: 'Tableau de bord', href: '/dashboard' },
+  { icon: ShoppingCart, label: 'Ventes (POS)', href: '/pos' },
+  { icon: Package, label: 'Inventaire', href: '/inventory' },
+  { icon: Wallet, label: 'Dépenses', href: '/expenses' },
+  { icon: Users, label: 'Clients VIP', href: '/clients' },
+  { icon: BarChart3, label: 'Rapports', href: '/reports' },
+  { icon: Users, label: 'Personnel', href: '/staff' },
+  { icon: Settings, label: 'Paramètres', href: '/settings' },
 ]
 
 export function Sidebar() {
