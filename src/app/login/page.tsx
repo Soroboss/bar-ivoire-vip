@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [barName, setBarName] = useState('')
+  const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false)
@@ -31,15 +32,18 @@ export default function LoginPage() {
     setLoading(true)
     try {
       if (isSignUp) {
-        if (!barName) {
-          toast.error('Veuillez entrer le nom de votre établissement')
+        if (!barName || !fullName) {
+          toast.error('Veuillez remplir tous les champs obligatoires')
           setLoading(false)
           return
         }
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+          options: { 
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: { full_name: fullName }
+          }
         })
         if (error) throw error
         
@@ -47,16 +51,16 @@ export default function LoginPage() {
         if (data.user) {
           await supabaseService.createEstablishment({
             name: barName,
-            owner: email.split('@')[0],
-            phone: 'A compléter',
-            location: 'A préciser',
+            owner: fullName,
+            phone: phone || 'Non précisé',
+            location: 'À préciser',
             type: 'Bar VIP',
             user_id: data.user.id
           })
         }
         
         toast.success('Inscription réussie ! Vous êtes en attente de validation.')
-        setIsSignUp(false) // Send them to login
+        router.push('/onboarding') // Direct to pending screen
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
@@ -115,23 +119,46 @@ export default function LoginPage() {
               <TabsContent value="email">
                 <form onSubmit={handleEmailAuth} className="space-y-4">
                   {isSignUp && (
-                    <div className="space-y-2">
-                      <Label htmlFor="barName" className="text-[#A0A0B8]">Nom de l'établissement</Label>
-                      <div className="relative">
-                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="barName" className="text-[#A0A0B8]">Nom de l'établissement</Label>
+                        <div className="relative">
+                          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
+                          <Input 
+                            id="barName" 
+                            placeholder="Ex: Le Maquis des VIP" 
+                            required 
+                            value={barName}
+                            onChange={(e) => setBarName(e.target.value)}
+                            className="bg-[#0F0F1A] border-[#3A3A5A] pl-10 text-white focus:border-[#D4AF37] transition-all"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="fullName" className="text-[#A0A0B8]">Nom Complet du Gérant</Label>
                         <Input 
-                          id="barName" 
-                          placeholder="Ex: Le Maquis des VIP" 
+                          id="fullName" 
+                          placeholder="Jean Kouadio" 
                           required 
-                          value={barName}
-                          onChange={(e) => setBarName(e.target.value)}
-                          className="bg-[#0F0F1A] border-[#3A3A5A] pl-10 text-white focus:border-[#D4AF37] transition-all"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="bg-[#0F0F1A] border-[#3A3A5A] text-white focus:border-[#D4AF37] transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="regPhone" className="text-[#A0A0B8]">Numéro de Téléphone</Label>
+                        <Input 
+                          id="regPhone" 
+                          placeholder="07 01 02 03 04" 
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="bg-[#0F0F1A] border-[#3A3A5A] text-white focus:border-[#D4AF37] transition-all"
                         />
                       </div>
                     </div>
                   )}
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-[#A0A0B8]">Adresse Email</Label>
+                    <Label htmlFor="email" className="text-[#A0A0B8]">Adresse Email de Connexion</Label>
                     <Input 
                       id="email" 
                       type="email" 
