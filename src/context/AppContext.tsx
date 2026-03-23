@@ -60,6 +60,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('[AppContext] Auth state changed:', _event)
       setSession(session)
       setUser(session?.user ?? null)
       if (session) {
@@ -73,74 +74,73 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Safety timer to prevent stuck loading screen
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        console.warn('[AppContext] Loading safety timeout reached (10s). Forcing loading off.')
+        setLoading(false)
+      }, 10000)
+      return () => clearTimeout(timer)
+    }
+  }, [loading])
+
   async function loadUserData(userId: string) {
     console.log('[AppContext] Starting data load for user:', userId)
     
     try {
       setLoading(true)
       
-      // 1. Load Profile & Role
-      let currentRole = null
-      try {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
-        if (profile) {
-          currentRole = profile.role
-          setUserRole(currentRole)
-          console.log('[AppContext] Role detected:', currentRole)
-        }
-      } catch (warn) {
-        console.warn('[AppContext] Profile fetch error (non-fatal):', warn)
-      }
+      // 1. Parallelize initial profile and establishments fetch
+      const [profileRes, estsRes] = await Promise.all([
+        supabase.from('profiles').select('role').eq('id', userId).single(),
+        supabaseService.getEstablishments().catch(err => {
+          console.error('[AppContext] Establishments fetch error:', err)
+          return [] as Establishment[]
+        })
+      ])
 
-      // 2. Load Establishments
-      let ests: Establishment[] = []
-      try {
-        ests = await supabaseService.getEstablishments()
-        setAllEstablishments(ests || [])
-        console.log('[AppContext] Establishments loaded:', ests.length)
-      } catch (err) {
-        console.error('[AppContext] Establishments fetch error:', err)
-      }
+      const currentRole = profileRes.data?.role || null
+      setUserRole(currentRole)
+      console.log('[AppContext] Role detected:', currentRole)
+      
+      const ests = Array.isArray(estsRes) ? estsRes : []
+      setAllEstablishments(ests)
+      console.log('[AppContext] Establishments loaded:', ests.length)
 
-      // 3. Identify and Load User Establishment Data
-      // Prefer establishment owned by user, else first one if Super Admin
+      // 2. Identify and Load User Establishment Data
       const userEst = ests.find(e => e.userId === userId) || (currentRole === 'SUPER_ADMIN' ? ests[0] : null)
       
       if (userEst) {
         setEstablishment(userEst)
         console.log('[AppContext] Target Establishment active:', userEst.name)
         
-        try {
-          const [prods, stff, clnts, ords, tbls, exps] = await Promise.all([
-            supabaseService.getProducts(userEst.id).catch(() => []),
-            supabaseService.getStaff(userEst.id).catch(() => []),
-            supabaseService.getClients(userEst.id).catch(() => []),
-            supabaseService.getOrders(userEst.id).catch(() => []),
-            supabaseService.getTables(userEst.id).catch(() => []),
-            supabaseService.getExpenses(userEst.id).catch(() => [])
-          ])
-          
-          setProducts(prods)
-          setStaff(stff)
-          setClients(clnts)
-          setOrders(ords)
-          setTables(tbls as Table[])
-          setExpenses(exps as Expense[])
-        } catch (err) {
-          console.error('[AppContext] Dependent data fetch error:', err)
-        }
+        const [prods, stff, clnts, ords, tbls, exps] = await Promise.all([
+          supabaseService.getProducts(userEst.id).catch(() => []),
+          supabaseService.getStaff(userEst.id).catch(() => []),
+          supabaseService.getClients(userEst.id).catch(() => []),
+          supabaseService.getOrders(userEst.id).catch(() => []),
+          supabaseService.getTables(userEst.id).catch(() => []),
+          supabaseService.getExpenses(userEst.id).catch(() => [])
+        ])
+        
+        setProducts(prods)
+        setStaff(stff)
+        setClients(clnts)
+        setOrders(ords)
+        setTables(tbls as Table[])
+        setExpenses(exps as Expense[])
       } else {
         console.log('[AppContext] No establishment found for user.')
       }
 
-      // 4. Load SaaS Transactions if Admin
+      // 3. Load SaaS Transactions if Admin
       if (currentRole === 'SUPER_ADMIN') {
-        try {
-          const saasData = await supabaseService.getSaaSTransactions()
-          setSaaSTransactions(saasData || [])
-        } catch (err) {
+        const saasData = await supabaseService.getSaaSTransactions().catch(err => {
           console.error('[AppContext] SaaS Transactions error:', err)
-        }
+          return []
+        })
+        setSaaSTransactions(saasData)
       }
 
     } catch (error: any) {
@@ -148,7 +148,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toast.error('Erreur lors de la synchronisation des données.')
     } finally {
       setLoading(false)
-      console.log('[AppContext] Loading sequence completed')
+      console.log('[AppContext] Data load finished.')
     }
   }
 
