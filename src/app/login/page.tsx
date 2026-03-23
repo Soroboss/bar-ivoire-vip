@@ -215,7 +215,25 @@ export default function LoginPage() {
               </TabsContent>
             </Tabs>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <button 
+                onClick={async () => {
+                  if (!email) {
+                    toast.error('Veuillez saisir votre email pour réinitialiser le mot de passe')
+                    return
+                  }
+                  setLoading(true)
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/auth/update-password`,
+                  })
+                  setLoading(false)
+                  if (error) toast.error(error.message)
+                  else toast.success('Lien de réinitialisation envoyé par email !')
+                }}
+                className="text-xs text-[#D4AF37] hover:underline transition-all"
+              >
+                Mot de passe oublié ?
+              </button>
               <button 
                 onClick={() => setIsSignUp(!isSignUp)}
                 className="text-xs text-[#A0A0B8] hover:text-[#D4AF37] transition-colors"
