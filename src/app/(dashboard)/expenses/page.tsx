@@ -118,7 +118,7 @@ export default function ExpensesPage() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Catégorie</Label>
-                <Select value={category} onValueChange={setCategory}>
+                <Select value={category} onValueChange={(val) => setCategory(val)}>
                   <SelectTrigger className="bg-[#0F0F1A] border-[#3A3A5A]">
                     <SelectValue placeholder="Choisir une catégorie" />
                   </SelectTrigger>
