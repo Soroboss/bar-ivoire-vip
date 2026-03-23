@@ -10,12 +10,15 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { establishment, loading } = useAppContext()
+  const { establishment, loading, userRole } = useAppContext()
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
     if (!loading) {
+      // Les SUPER_ADMIN peuvent tout voir sans établissement rattaché
+      if (userRole === 'SUPER_ADMIN') return
+
       if (!establishment) {
         // Aucun établissement : rediriger vers l'inscription
         router.push('/onboarding')
@@ -24,7 +27,7 @@ export default function DashboardLayout({
         router.push('/onboarding')
       }
     }
-  }, [loading, establishment, pathname, router])
+  }, [loading, establishment, pathname, router, userRole])
 
   if (loading) {
     return (

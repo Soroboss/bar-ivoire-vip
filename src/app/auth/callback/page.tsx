@@ -24,13 +24,22 @@ export default function AuthCallbackPage() {
               .eq('id', session.user.id)
               .single()
 
-            if (profileError && profileError.code === 'PGRST116') {
-               // Log for debugging
-               console.log("No profile found for user, might need sync")
-            }
+            const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip']
+            const isKnownAdmin = adminEmails.includes(session.user.email || '')
 
-            if (profile?.role === 'SUPER_ADMIN') {
-              setStatus('Accés Administrateur détecté. Redirection...')
+            if (profile?.role === 'SUPER_ADMIN' || isKnownAdmin) {
+              // If it's a known admin but profile is missing or role is not set, fix it
+              if (!profile || profile.role !== 'SUPER_ADMIN') {
+                setStatus('Configuration de votre accès administrateur...')
+                await supabase.from('profiles').upsert({
+                  id: session.user.id,
+                  email: session.user.email,
+                  role: 'SUPER_ADMIN',
+                  full_name: session.user.user_metadata?.full_name || 'Admin',
+                  updated_at: new Date().toISOString()
+                })
+              }
+              setStatus('Accès Administrateur détecté. Redirection...')
               setTimeout(() => router.push('/admin/dashboard'), 500)
             } else {
               // Check if user has an establishment
@@ -41,7 +50,7 @@ export default function AuthCallbackPage() {
                 .single()
               
               if (est) {
-                setStatus('Accés Partenaire. Redirection...')
+                setStatus('Accès Partenaire. Redirection...')
                 setTimeout(() => router.push('/dashboard'), 500)
               } else {
                 setStatus('Premier accès. Initialisation...')
