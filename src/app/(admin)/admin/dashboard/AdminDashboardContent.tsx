@@ -25,6 +25,8 @@ import {
   ResponsiveContainer 
 } from 'recharts'
 import { useState, useEffect } from "react"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 
 const MOCK_REVENUE_DATA = [
   { date: 'Lun', revenue: 45000 },
@@ -56,9 +58,19 @@ export default function AdminDashboardContent() {
     )
   }
 
-  const { allEstablishments = [], validateEstablishment } = context
+  const { allEstablishments = [], saasTransactions = [], validateEstablishment } = context
   const pending = allEstablishments.filter(e => e.status === 'Pending')
   const trial = allEstablishments.filter(e => e.plan === 'Trial')
+  
+  // Real MRR calculation (Sum of last 30 days)
+  const mrr = saasTransactions.reduce((acc: number, t: any) => acc + (Number(t.amount) || 0), 0)
+  
+  const revenueChartData = saasTransactions.length > 0 
+    ? saasTransactions.slice(-7).map((t: any) => ({
+        date: format(new Date(t.created_at), 'dd/MM', { locale: fr }),
+        revenue: t.amount
+      }))
+    : MOCK_REVENUE_DATA
 
   const handleAction = async (id: string, name: string, status: 'Active' | 'Suspended' | 'Pending') => {
     try {
@@ -97,10 +109,10 @@ export default function AdminDashboardContent() {
       {/* KPI Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { title: "Établissements", value: allEstablishments.length, icon: Building2, trend: "+12%", color: "#D4AF37" },
-          { title: "Revenu Mensuel", value: "485.000 F", icon: TrendingUp, trend: "+8.5%", color: "#4CAF50" },
-          { title: "En Trial", value: trial.length, icon: Zap, trend: "-2", color: "#3B82F6" },
-          { title: "Validations", value: pending.length, icon: Clock, trend: "Urgent", color: "#F97316" },
+          { title: "Établissements", value: allEstablishments.length, icon: Building2, trend: `+${allEstablishments.length}`, color: "#D4AF37" },
+          { title: "Revenu Mensuel (MRR)", value: `${mrr.toLocaleString()} F`, icon: TrendingUp, trend: "+100%", color: "#4CAF50" },
+          { title: "En Trial", value: trial.length, icon: Zap, trend: trial.length.toString(), color: "#3B82F6" },
+          { title: "Validations", value: pending.length, icon: Clock, trend: pending.length > 0 ? "URGENT" : "À jour", color: "#F97316" },
         ].map((kpi, i) => (
           <Card key={i} className="bg-[#1A1A2E] border-[#3A3A5A] relative overflow-hidden group hover:border-[#D4AF37]/50 transition-all">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -204,7 +216,7 @@ export default function AdminDashboardContent() {
           <CardContent className="pt-4">
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={MOCK_REVENUE_DATA}>
+                <AreaChart data={revenueChartData}>
                   <defs>
                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3}/>
@@ -224,13 +236,17 @@ export default function AdminDashboardContent() {
             </div>
             <div className="mt-8 p-4 rounded-2xl bg-white/5 border border-white/10">
               <h4 className="text-white font-bold text-sm mb-1">Dernier Paiement reçu</h4>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-[10px] text-[#A0A0B8]">Le Caveau des Elites</p>
-                  <p className="text-lg font-bold text-[#4CAF50]">15.000 F</p>
+              {saasTransactions.length > 0 ? (
+                <div className="flex justify-between items-end">
+                  <div>
+                    <p className="text-[10px] text-[#A0A0B8]">{saasTransactions[saasTransactions.length - 1].bar_name || 'Établissement'}</p>
+                    <p className="text-lg font-bold text-[#4CAF50]">{saasTransactions[saasTransactions.length - 1].amount.toLocaleString()} F</p>
+                  </div>
+                  <Badge className="bg-[#4CAF50]/20 text-[#4CAF50] border-none uppercase text-[8px]">VALIDÉ</Badge>
                 </div>
-                <Badge className="bg-[#4CAF50]/20 text-[#4CAF50] border-none">COMPLET</Badge>
-              </div>
+              ) : (
+                <p className="text-xs text-[#A0A0B8]">Aucune transaction récente.</p>
+              )}
             </div>
           </CardContent>
         </Card>
