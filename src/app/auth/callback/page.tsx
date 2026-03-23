@@ -7,45 +7,40 @@ import { Loader2, Wine } from 'lucide-react'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
-  const [status, setStatus] = useState('Connexion en cours...')
+  const [status, setStatus] = useState('Authentification en cours...')
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        // Check for code in URL query params (PKCE flow)
-        const params = new URLSearchParams(window.location.search)
-        const code = params.get('code')
-        
-        if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code)
-          if (error) throw error
-        }
-
-        // Check if we have a session (covers both flows)
-        const { data: { session } } = await supabase.auth.getSession()
-        
-        if (session) {
+    // Listen for auth state changes (covers implicit & PKCE flows)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
           setStatus('Connecté ! Redirection...')
-          router.push('/dashboard')
-        } else {
-          // Wait a moment for the session to be established
-          setTimeout(async () => {
-            const { data: { session: retrySession } } = await supabase.auth.getSession()
-            if (retrySession) {
-              router.push('/dashboard')
-            } else {
-              setStatus('Erreur de session')
-              router.push('/login?error=no-session')
-            }
-          }, 2000)
+          // Small delay to ensure cookies are set
+          setTimeout(() => router.push('/dashboard'), 500)
         }
-      } catch (error) {
-        console.error('Auth callback error:', error)
-        router.push('/login?error=callback-failed')
+        if (event === 'TOKEN_REFRESHED' && session) {
+          setStatus('Connecté ! Redirection...')
+          setTimeout(() => router.push('/dashboard'), 500)
+        }
       }
-    }
+    )
 
-    handleCallback()
+    // Fallback: if no auth event fires within 5 seconds, check manually
+    const fallbackTimer = setTimeout(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setStatus('Connecté ! Redirection...')
+        router.push('/dashboard')
+      } else {
+        setStatus('Session non trouvée. Retour à la connexion...')
+        setTimeout(() => router.push('/login'), 1500)
+      }
+    }, 5000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(fallbackTimer)
+    }
   }, [router])
 
   return (
