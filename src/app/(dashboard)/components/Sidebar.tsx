@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation'
 
 const MENU_ITEMS = [
   { icon: LayoutDashboard, label: 'Tableau de bord', href: '/dashboard', permission: 'dashboard' },
-  { icon: ShoppingCart, label: 'Ventes (POS)', href: '/pos', permission: 'dashboard' }, // default to dashboard
+  { icon: ShoppingCart, label: 'Ventes (POS)', href: '/pos', permission: 'dashboard' },
   { icon: Package, label: 'Inventaire', href: '/inventory', permission: 'inventory' },
   { icon: Wallet, label: 'Dépenses', href: '/expenses', permission: 'inventory' },
   { icon: Users, label: 'Personnel', href: '/staff', permission: 'staff' },
@@ -56,34 +56,35 @@ export function Sidebar() {
     <>
       <Button
         variant="ghost"
-        className="lg:hidden fixed top-4 left-4 z-50 text-primary"
+        className="lg:hidden fixed top-4 left-4 z-50 text-primary hover:bg-primary/10 rounded-xl"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </Button>
 
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col",
+        "fixed inset-y-0 left-0 z-40 w-64 bg-background border-r border-border transform transition-transform duration-500 ease-in-out lg:translate-x-0 flex flex-col shadow-[10px_0_30px_rgba(0,0,0,0.02)]",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6">
-          <h1 className="text-xl font-black tracking-tighter text-foreground italic uppercase">
-            IVOIRE BAR <span className="text-primary">VIP</span>
+        <div className="p-8">
+          <h1 className="text-xl font-black tracking-tighter text-foreground italic uppercase leading-none">
+            IVOIRE BAR <span className="gold-gradient-text">VIP</span>
           </h1>
           {establishment && (
-            <div className="mt-2 flex items-center gap-2">
-              <Badge className="bg-primary/10 text-primary border-none text-[10px] uppercase font-black px-2 py-0">
+            <div className="mt-3 flex items-center gap-2">
+              <Badge className="bg-primary/10 text-primary border-none text-[8px] uppercase font-black px-2 py-0.5 tracking-widest">
                 {establishment.plan}
               </Badge>
-              <span className="text-[10px] text-muted-foreground truncate max-w-[100px] font-medium">{establishment.name}</span>
+              <span className="text-[9px] text-muted-foreground truncate max-w-[100px] font-bold uppercase italic tracking-tight">{establishment.name}</span>
             </div>
           )}
         </div>
 
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto scrollbar-hide py-4">
+          <p className="px-4 text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-4 italic">Navigation Orbitale</p>
           {MENU_ITEMS.filter(item => {
             if (userRole === 'SUPER_ADMIN') return true
-            if (!userPermissions) return true // Default to showing all if not loaded or not set
+            if (!userPermissions) return true 
             return userPermissions[item.permission] !== false
           }).map((item) => {
             const Icon = item.icon
@@ -93,41 +94,46 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative",
+                  "flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative",
                   isActive 
-                    ? "bg-primary text-primary-foreground font-bold shadow-sm" 
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    ? "bg-primary text-white font-black italic shadow-lg shadow-primary/20 scale-[1.02]" 
+                    : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
                 )}
                 onClick={() => setIsOpen(false)}
               >
                 <Icon className={cn(
-                  "h-5 w-5",
-                  isActive ? "text-primary-foreground" : "text-slate-400 group-hover:text-primary"
+                  "h-5 w-5 transition-transform group-hover:scale-110 duration-300",
+                  isActive ? "text-white" : "text-primary/40 group-hover:text-primary"
                 )} />
-                <span className="text-sm font-medium">{item.label}</span>
+                <span className={cn(
+                  "text-[11px] uppercase tracking-wider font-black",
+                  isActive ? "italic" : "opacity-70 group-hover:opacity-100"
+                )}>{item.label}</span>
                 {isActive && (
-                  <div className="absolute left-0 w-1 h-6 bg-white rounded-full opacity-40" />
+                  <div className="absolute left-1 w-1 h-5 bg-white/40 rounded-full" />
                 )}
               </Link>
             )
           })}
         </nav>
 
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="p-6 border-t border-border bg-muted/10">
           <Button
             variant="ghost"
-            className="w-full justify-start text-muted-foreground hover:text-red-500 hover:bg-red-50 gap-3 rounded-xl"
+            className="w-full justify-start text-muted-foreground hover:text-red-500 hover:bg-red-50 gap-4 rounded-2xl h-14 group transition-all"
             onClick={handleLogout}
           >
-            <LogOut className="h-5 w-5" />
-            <span className="text-sm font-medium">Déconnexion</span>
+            <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-muted group-hover:bg-red-100 transition-colors">
+              <LogOut className="h-5 w-5" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest italic">Déconnexion</span>
           </Button>
         </div>
       </aside>
 
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-slate-900/10 backdrop-blur-sm z-30 lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}

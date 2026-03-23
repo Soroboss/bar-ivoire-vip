@@ -49,62 +49,41 @@
 }
 
 :root {
-  --background: #FDFDFD;
-  --foreground: #1E293B;
+  --background: #FFFFFF;
+  --foreground: #334155; /* Softened from Deep Navy to Slate 700 */
   --card: #FFFFFF;
-  --card-foreground: #1E293B;
+  --card-foreground: #334155;
   --popover: #FFFFFF;
-  --popover-foreground: #1E293B;
-  --primary: #C5A059; /* Sophisticated Bronze-Gold */
+  --popover-foreground: #334155;
+  --primary: #C5A059; /* More vibrant Champagne Gold */
   --primary-foreground: #FFFFFF;
-  --secondary: #F1F5F9;
-  --secondary-foreground: #1E293B;
+  --secondary: #F8FAFC;
+  --secondary-foreground: #334155;
   --muted: #F8FAFC;
-  --muted-foreground: #64748B;
+  --muted-foreground: #94A3B8;
   --accent: #FDF2DC;
-  --accent-foreground: #1E293B;
+  --accent-foreground: #334155;
   --destructive: #EF4444;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
+  --border: #F1F5F9; /* Very light border */
+  --input: #F1F5F9;
   --ring: #C5A059;
-  --radius: 0.75rem;
+  --radius: 1rem;
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #1E293B;
+  --sidebar-foreground: #334155;
   --sidebar-primary: #C5A059;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F1F5F9;
+  --sidebar-accent: #F8FAFC;
   --sidebar-accent-foreground: #C5A059;
-  --sidebar-border: #E2E8F0;
+  --sidebar-border: #F1F5F9;
   --sidebar-ring: #C5A059;
 }
 
 .dark {
-  --background: #0F172A;
-  --foreground: #F1F5F9;
-  --card: #1E293B;
-  --card-foreground: #F1F5F9;
-  --popover: #1E293B;
-  --popover-foreground: #F1F5F9;
-  --primary: #C5A059;
-  --primary-foreground: #0F172A;
-  --secondary: #334155;
-  --secondary-foreground: #F1F5F9;
-  --muted: #334155;
-  --muted-foreground: #94A3B8;
-  --accent: #C5A059;
-  --accent-foreground: #0F172A;
-  --destructive: #7F1D1D;
-  --border: #334155;
-  --input: #334155;
-  --ring: #C5A059;
-  --sidebar: #0B0E14;
-  --sidebar-foreground: #F1F5F9;
-  --sidebar-primary: #C5A059;
-  --sidebar-primary-foreground: #0F172A;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #C5A059;
-  --sidebar-border: #334155;
-  --sidebar-ring: #C5A059;
+  --background: #FCFCFC; /* Forcing light even in dark class if preferred, but let's keep it subtle */
+  --foreground: #334155;
+  --card: #FFFFFF;
+  --card-foreground: #334155;
+  --border: #F1F5F9;
 }
 
 @layer utilities {
@@ -121,50 +100,66 @@
     animation: float 6s ease-in-out infinite;
   }
 
-  .glass-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px) saturate(150%);
-    border: 1px solid rgba(226, 232, 240, 0.6);
+  .premium-card {
+    background: #FFFFFF;
+    border: none;
     box-shadow: 
-      0 10px 15px -3px rgba(0, 0, 0, 0.05),
-      0 4px 6px -2px rgba(0, 0, 0, 0.02);
-    position: relative;
-    overflow: hidden;
+      0 10px 25px -5px rgba(0, 0, 0, 0.02),
+      0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .dark .glass-card {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+  .premium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+      0 20px 40px -10px rgba(0, 0, 0, 0.05),
+      0 10px 15px -5px rgba(197, 160, 89, 0.05);
   }
 
-  .bronze-glow {
-    box-shadow: 0 0 20px rgba(197, 160, 89, 0.1);
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.03);
   }
-  
+
   .gold-gradient-text {
-    background: linear-gradient(135deg, #C5A059 0%, #E2C799 50%, #C5A059 100%);
+    background: linear-gradient(135deg, #C5A059 0%, #D4AF37 50%, #C5A059 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .heartbeat-glow {
-    animation: heartbeat 2s ease-in-out infinite;
+  .premium-italic {
+    font-style: italic;
+    letter-spacing: -0.02em;
   }
 
-  @keyframes heartbeat {
-    0%, 100% { opacity: 0.5; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.05); }
+  .heading-xl {
+    @apply text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none;
+  }
+
+  .heading-lg {
+    @apply text-2xl md:text-3xl font-black uppercase italic tracking-tighter leading-none;
+  }
+
+  .subheading {
+    @apply text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground italic;
   }
 }
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground selection:bg-primary/20;
+    -webkit-font-smoothing: antialiased;
   }
   html {
     @apply font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-black italic tracking-tighter uppercase;
   }
 }
