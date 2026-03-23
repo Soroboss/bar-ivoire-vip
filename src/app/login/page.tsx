@@ -11,6 +11,7 @@ import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { supabaseService } from '@/services/supabaseService'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
