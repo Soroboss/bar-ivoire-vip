@@ -24,8 +24,9 @@ export default function AuthCallbackPage() {
               .eq('id', session.user.id)
               .single()
 
-            const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip']
-            const isKnownAdmin = adminEmails.includes(session.user.email || '')
+            const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip', 'soro.nagony.adama@gmail.com']
+            const userEmail = session.user.email?.toLowerCase() || ''
+            const isKnownAdmin = adminEmails.some(email => email.toLowerCase() === userEmail)
 
             if (profile?.role === 'SUPER_ADMIN' || isKnownAdmin) {
               // If it's a known admin but profile is missing or role is not set, fix it

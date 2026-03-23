@@ -92,8 +92,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true)
       
-      const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip']
-      const isKnownAdmin = adminEmails.includes(user.email || '')
+      const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip', 'soro.nagony.adama@gmail.com']
+      const userEmail = user.email?.toLowerCase() || ''
+      const isKnownAdmin = adminEmails.some(email => email.toLowerCase() === userEmail)
       
       // 1. Parallelize initial profile and establishments fetch
       const [profileRes, estsRes] = await Promise.all([

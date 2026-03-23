@@ -13,13 +13,23 @@ import { useRouter } from "next/navigation"
 import { toast } from 'sonner'
 
 export default function OnboardingPage() {
-  const { establishment, user, signOut, loading, registerEstablishment } = useAppContext()
+  const { establishment, user, userRole, signOut, loading, registerEstablishment } = useAppContext()
   const router = useRouter()
   
   const [barName, setBarName] = useState('')
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '')
   const [phone, setPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // Sécurité supplémentaire : si c'est un admin connu ou rôle SUPER_ADMIN, redirect vers admin
+  const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip', 'soro.nagony.adama@gmail.com']
+  const userEmail = user?.email?.toLowerCase() || ''
+  const isKnownAdmin = adminEmails.some(email => email.toLowerCase() === userEmail)
+
+  if (!loading && (userRole === 'SUPER_ADMIN' || isKnownAdmin)) {
+    router.push('/admin/dashboard')
+    return null
+  }
 
   // Si l'établissement est actif → rediriger vers le dashboard
   if (!loading && establishment?.status === 'Active') {
