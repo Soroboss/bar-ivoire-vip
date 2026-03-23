@@ -200,6 +200,16 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
+        <div className="mt-4 text-center pb-8">
+          <Link 
+            href="/admin/login" 
+            className="text-[10px] text-[#3A3A5A] hover:text-[#D4AF37] uppercase tracking-[0.3em] font-black transition-colors flex items-center justify-center gap-2"
+          >
+            <ShieldCheck className="h-3 w-3" />
+            Accès Administrateur SaaS
+          </Link>
+        </div>
+
         <p className="text-center text-[10px] text-[#3A3A5A] font-medium uppercase tracking-widest">
           Sécurisé par IVOIRE TECH • © 2026 IVOIRE BAR VIP
         </p>
