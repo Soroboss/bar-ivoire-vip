@@ -96,11 +96,13 @@ export default function ExpensesPage() {
         </div>
 
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger asChild>
-            <Button className="bg-[#D4AF37] text-[#1A1A2E] font-bold hover:bg-[#B8962E] transition-all">
-              <Plus className="h-4 w-4 mr-2" /> Nouvelle Dépense
-            </Button>
-          </DialogTrigger>
+          <DialogTrigger 
+            render={
+              <Button className="bg-[#D4AF37] text-[#1A1A2E] font-bold hover:bg-[#B8962E] transition-all">
+                <Plus className="h-4 w-4 mr-2" /> Nouvelle Dépense
+              </Button>
+            }
+          />
           <DialogContent className="bg-[#1A1A2E] border-[#3A3A5A] text-white">
             <DialogHeader>
               <DialogTitle className="text-[#D4AF37]">Enregistrer une dépense</DialogTitle>
@@ -108,7 +110,7 @@ export default function ExpensesPage() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Catégorie</Label>
-                <Select value={category} onValueChange={(val: string) => setCategory(val)}>
+                <Select value={category} onValueChange={(val: string | null) => setCategory(val || '')}>
                   <SelectTrigger className="bg-[#0F0F1A] border-[#3A3A5A]">
                     <SelectValue placeholder="Choisir une catégorie" />
                   </SelectTrigger>

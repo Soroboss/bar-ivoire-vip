@@ -4,9 +4,9 @@ import { ArrowRight, Star, Shield, Smartphone } from 'lucide-react'
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#1A1A2E] text-[#F4E4BC]" suppressHydrationWarning>
+    <div className="min-h-screen bg-[#1A1A2E] text-[#F4E4BC]">
       {/* Header */}
-      <header className="border-b border-[#3A3A5A] px-6 py-4 flex justify-between items-center" suppressHydrationWarning>
+      <header className="border-b border-[#3A3A5A] px-6 py-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-[#D4AF37]">Ivoire Bar VIP</h1>
         <div className="space-x-4">
           <Link href="/login">
