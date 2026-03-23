@@ -16,6 +16,7 @@ export default function AuthCallbackPage() {
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
           setStatus('Vérification du profil...')
           
+          try {
             // First ensure we have a profile. If not, create a basic one from session
             const { data: profile, error: profileError } = await supabase
               .from('profiles')
