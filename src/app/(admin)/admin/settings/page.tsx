@@ -27,13 +27,36 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence, Variants } from "framer-motion"
+import { supabase } from "@/lib/supabase"
+import { toast } from "sonner"
 
 export default function SaaSConfigPage() {
   const [isMounted, setIsMounted] = useState(false)
+  const [newPassword, setNewPassword] = useState("")
+  const [updatingPassword, setUpdatingPassword] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      toast.error("Le mot de passe doit faire au moins 6 caractères")
+      return
+    }
+
+    setUpdatingPassword(true)
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword })
+      if (error) throw error
+      toast.success("Mot de passe mis à jour ! Vous pouvez maintenant vous connecter manuellement.")
+      setNewPassword("")
+    } catch (error: any) {
+      toast.error(error.message || "Erreur lors de la mise à jour")
+    } finally {
+      setUpdatingPassword(false)
+    }
+  }
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -270,6 +293,34 @@ export default function SaaSConfigPage() {
                      </div>
                    </div>
                    
+                   <div className="flex flex-col md:flex-row md:items-center justify-between p-10 rounded-[2.5rem] bg-white/[0.02] border border-white/5 group hover:border-[#D4AF37]/30 transition-all gap-8 mb-8">
+                     <div className="flex items-center gap-6">
+                        <div className="h-16 w-16 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] border border-[#D4AF37]/20 group-hover:rotate-12 transition-transform shadow-xl shadow-[#D4AF37]/5">
+                           <Lock className="h-8 w-8" />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-xl font-black text-white italic uppercase tracking-tighter">Accès Manuel (Mode Expert)</p>
+                          <p className="text-[11px] text-[#A0A0B8] font-medium leading-relaxed max-w-md">Définissez un mot de passe pour vous connecter directement via Email/Password sans passer par Google Auth.</p>
+                        </div>
+                     </div>
+                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                        <Input 
+                          type="password" 
+                          placeholder="Nouveau mot de passe" 
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:border-[#D4AF37] w-full md:w-48"
+                        />
+                        <Button 
+                          onClick={handleUpdatePassword}
+                          disabled={updatingPassword}
+                          className="bg-[#D4AF37] text-black h-12 px-6 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-[#B6962E] transition-all whitespace-nowrap min-w-[150px]"
+                        >
+                           {updatingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : 'DÉFINIR MOT DE PASSE'}
+                        </Button>
+                     </div>
+                   </div>
+
                    <div className="flex flex-col md:flex-row md:items-center justify-between p-10 rounded-[2.5rem] bg-white/[0.02] border border-white/5 group hover:border-[#D4AF37]/30 transition-all gap-8">
                      <div className="flex items-center gap-6">
                         <div className="h-16 w-16 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] border border-[#D4AF37]/20 group-hover:rotate-12 transition-transform shadow-xl shadow-[#D4AF37]/5">
