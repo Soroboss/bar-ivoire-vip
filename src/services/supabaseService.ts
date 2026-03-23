@@ -155,5 +155,36 @@ export const supabaseService = {
       .update({ status })
       .eq('id', id)
     if (error) throw error
+  },
+
+  // SaaS Transactions (Global)
+  async getSaaSTransactions() {
+    const { data, error } = await supabase
+      .from('saas_transactions')
+      .select('*, establishments(name)')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data
+  },
+
+  // Expenses (Establishment Level)
+  async getExpenses(establishmentId: string) {
+    const { data, error } = await supabase
+      .from('expenses')
+      .select('*')
+      .eq('establishment_id', establishmentId)
+      .order('date', { ascending: false })
+    if (error) throw error
+    return data
+  },
+
+  async addExpense(expense: any) {
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert([expense])
+      .select()
+      .single()
+    if (error) throw error
+    return data
   }
 }
