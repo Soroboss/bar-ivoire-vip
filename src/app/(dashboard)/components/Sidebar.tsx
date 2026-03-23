@@ -41,10 +41,6 @@ export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const { establishment } = useAppContext()
   const router = useRouter()
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
 
   const handleLogout = async () => {
     try {
