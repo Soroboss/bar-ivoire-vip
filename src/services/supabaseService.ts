@@ -33,12 +33,11 @@ export const supabaseService = {
         location: est.location,
         type: est.type,
         currency: est.currency || 'XOF',
-        tax_rate: est.taxRate || 18,
-        invoice_note: est.invoiceNote || 'Merci de votre visite !',
+        tax_rate: est.taxRate || est.tax_rate || 18,
+        invoice_note: est.invoiceNote || est.invoice_note || 'Merci de votre visite !',
         user_id: est.user_id,
-        whatsapp: est.whatsapp || est.phone,
         status: 'Pending',
-        plan: 'Trial'
+        plan: est.plan || 'Trial'
       }])
       .select()
       .single()
