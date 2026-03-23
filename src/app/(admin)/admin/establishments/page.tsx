@@ -12,13 +12,16 @@ import {
   Clock,
   ExternalLink,
   ShieldCheck,
-  CreditCard
+  CreditCard,
+  Loader2,
+  Mail
 } from "lucide-react"
 import { useAppContext } from "@/context/AppContext"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
 import { supabaseService } from "@/services/supabaseService"
+import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 
 export default function EstablishmentsAdmin() {
@@ -50,6 +53,47 @@ export default function EstablishmentsAdmin() {
       window.location.reload()
     } catch (e) {
       toast.error('Erreur Plan')
+    }
+  }
+
+  const [validatingId, setValidatingId] = useState<string | null>(null)
+
+  const handleValidateAndNotify = async (est: any) => {
+    setValidatingId(est.id)
+    try {
+      // 1. Activer l'établissement
+      await validateEstablishment(est.id, 'Active')
+      
+      // 2. Récupérer l'email de l'utilisateur
+      const { data: profile } = await supabase
+        .from('establishments')
+        .select('user_id')
+        .eq('id', est.id)
+        .single()
+      
+      if (profile?.user_id) {
+        // Chercher l'email dans auth via les profils ou le user_id
+        const { data: userProfile } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', profile.user_id)
+          .single()
+        
+        const email = userProfile?.email
+        if (email) {
+          // 3. Envoyer l'email de création de mot de passe
+          await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: 'https://ivoire-bar-vip.vercel.app/auth/update-password',
+          })
+          toast.success(`✅ Validé ! Email d'activation envoyé à ${email}`)
+        } else {
+          toast.success('✅ Établissement validé (email non trouvé, notification manuelle requise)')
+        }
+      }
+    } catch (e) {
+      toast.error('Erreur lors de la validation')
+    } finally {
+      setValidatingId(null)
     }
   }
 
@@ -146,10 +190,15 @@ export default function EstablishmentsAdmin() {
                     {est.status !== 'Active' && (
                       <Button 
                         size="sm" 
-                        onClick={() => validateEstablishment(est.id, 'Active')}
+                        onClick={() => handleValidateAndNotify(est)}
+                        disabled={validatingId === est.id}
                         className="bg-green-600 hover:bg-green-700 h-8 px-4"
                       >
-                        Valider
+                        {validatingId === est.id ? (
+                          <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Envoi...</>
+                        ) : (
+                          <><Mail className="h-3 w-3 mr-1" /> Valider & Notifier</>
+                        )}
                       </Button>
                     )}
                     {est.status === 'Active' && (
