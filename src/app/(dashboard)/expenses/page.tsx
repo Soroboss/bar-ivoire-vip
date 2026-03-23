@@ -16,20 +16,25 @@ import {
   AlertCircle,
   CheckCircle2,
   Trash2,
-  ArrowRight
+  ArrowRight,
+  Loader2,
+  TrendingUp,
+  Receipt
 } from "lucide-react"
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger 
+  DialogTrigger,
+  DialogFooter
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAppContext } from "@/context/AppContext"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { toast } from "sonner"
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function ExpensesPage() {
   const { establishment, loading: contextLoading, expenses, addExpense } = useAppContext()
@@ -74,47 +79,76 @@ export default function ExpensesPage() {
   const balance = budget - totalSpent
 
   if (contextLoading) {
-    return <div className="p-6 text-[#A0A0B8]">Chargement de la trésorerie...</div>
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center text-foreground font-montserrat">
+        <div className="space-y-6 animate-pulse">
+          <div className="relative">
+             <div className="h-16 w-16 rounded-3xl bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
+               <Wallet className="h-8 w-8 text-primary" />
+             </div>
+             <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-2">
+               <Loader2 className="h-20 w-20 animate-spin text-primary opacity-20" />
+             </div>
+          </div>
+          <p className="text-primary text-xs font-black uppercase tracking-[0.3em] italic">Analyse de la Trésorerie...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!establishment) {
     return (
-      <div className="p-6 text-center">
-        <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white">Établissement non trouvé</h2>
-        <p className="text-[#A0A0B8]">Veuillez vous connecter avec un compte établissement valide.</p>
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center text-foreground font-montserrat">
+        <div className="max-w-md space-y-4">
+          <AlertCircle className="h-12 w-12 text-orange-500 mx-auto opacity-40" />
+          <h2 className="text-xl font-bold uppercase italic tracking-tighter">Établissement non trouvé</h2>
+          <p className="text-sm text-muted-foreground font-semibold italic">Veuillez vous connecter avec un compte établissement valide pour accéder au flux de trésorerie.</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 space-y-8 bg-[#1A1A2E] text-[#F4E4BC] min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#D4AF37]">Gestion des Dépenses</h1>
-          <p className="text-[#A0A0B8]">Suivi en temps réel des charges de {establishment.name}.</p>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="p-6 md:p-10 space-y-10 bg-background text-foreground min-h-screen font-montserrat"
+    >
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+               <Wallet className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest italic">Gestion des Flux</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter italic uppercase leading-none">
+            Trésorerie <span className="gold-gradient-text">& Dépenses</span>
+          </h1>
+          <p className="text-muted-foreground text-base border-l-2 border-primary pl-4 max-w-xl font-medium">
+            Suivi des sorties de caisse et rationalisation des charges. Journalisation des flux financiers synchronisée avec <span className="text-foreground italic">Supabase Cloud Vault</span>.
+          </p>
         </div>
 
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger 
-          render={
-            <Button className="bg-[#D4AF37] text-[#1A1A2E] font-bold hover:bg-[#B8962E] transition-all">
-              <Plus className="h-4 w-4 mr-2" /> Nouvelle Dépense
+          <DialogTrigger asChild>
+            <Button className="bg-primary text-white font-black uppercase italic text-[10px] h-12 px-6 hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-xl flex items-center gap-2 transition-all hover:scale-105">
+              <Plus className="h-4 w-4" /> Nouvelle Dépense
             </Button>
-          }
-        />
-          <DialogContent className="bg-[#1A1A2E] border-[#3A3A5A] text-white">
+          </DialogTrigger>
+          <DialogContent className="bg-card border-border rounded-3xl p-8 max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-[#D4AF37]">Enregistrer une dépense</DialogTitle>
+              <DialogTitle className="text-2xl font-black uppercase italic gold-gradient-text">Enregistrement <span className="text-foreground">Flux</span></DialogTitle>
+              <CardDescription className="font-semibold italic">Journaliser une nouvelle sortie de caisse dans le Cloud.</CardDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-6 mt-4">
               <div className="space-y-2">
-                <Label>Catégorie</Label>
-                <Select value={category} onValueChange={(val: string | null) => setCategory(val || '')}>
-                  <SelectTrigger className="bg-[#0F0F1A] border-[#3A3A5A]">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Catégorie</Label>
+                <Select value={category} onValueChange={(val) => setCategory(val)}>
+                  <SelectTrigger className="bg-muted border-border text-foreground h-12 rounded-xl">
                     <SelectValue placeholder="Choisir une catégorie" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1A1A2E] border-[#3A3A5A] text-white">
+                  <SelectContent className="bg-card border-border text-foreground">
                     <SelectItem value="Loyer">Loyer & Charges</SelectItem>
                     <SelectItem value="Electricité">Électricité / Eau</SelectItem>
                     <SelectItem value="Stock">Achat de Stock</SelectItem>
@@ -125,134 +159,131 @@ export default function ExpensesPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Description</Label>
                 <Input 
                   placeholder="Ex: Facture CIE Mars 2024" 
-                  className="bg-[#0F0F1A] border-[#3A3A5A]"
+                  className="bg-muted border-border text-foreground h-12 rounded-xl"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Montant (F CFA)</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Montant (F CFA)</Label>
                   <Input 
                     type="number" 
                     placeholder="25000" 
-                    className="bg-[#0F0F1A] border-[#3A3A5A]"
+                    className="bg-muted border-border text-foreground h-12 rounded-xl"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Date</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Date</Label>
                   <Input 
                     type="date" 
-                    className="bg-[#0F0F1A] border-[#3A3A5A]"
+                    className="bg-muted border-border text-foreground h-12 rounded-xl"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                   />
                 </div>
               </div>
-              <Button 
-                className="w-full bg-[#D4AF37] text-[#1A1A2E] font-bold mt-4"
-                disabled={isSubmitting}
-                onClick={handleAddExpense}
-              >
-                {isSubmitting ? "Enregistrement..." : "Confirmer la transaction"}
-              </Button>
+              <DialogFooter className="pt-4">
+                <Button 
+                  className="w-full bg-primary text-white font-black uppercase italic h-14 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
+                  disabled={isSubmitting}
+                  onClick={handleAddExpense}
+                >
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Confirmer la Transaction"}
+                </Button>
+              </DialogFooter>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="bg-[#252545] border-[#3A3A5A] shadow-xl relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <TrendingDown className="h-24 w-24" />
-          </div>
-          <CardHeader>
-            <CardDescription className="text-[#A0A0B8] uppercase text-[10px] tracking-widest">Total Dépensé</CardDescription>
-            <CardTitle className="text-3xl font-bold text-white">{totalSpent.toLocaleString()} F</CardTitle>
-          </CardHeader>
-        </Card>
-
-        <Card className="bg-[#252545] border-[#3A3A5A] shadow-xl relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Wallet className="h-24 w-24" />
-          </div>
-          <CardHeader>
-            <CardDescription className="text-[#A0A0B8] uppercase text-[10px] tracking-widest">Budget Restant</CardDescription>
-            <CardTitle className={cn("text-3xl font-bold font-bold", balance < 50000 ? "text-red-400" : "text-[#4CAF50]")}>
-              {balance.toLocaleString()} F
-            </CardTitle>
-          </CardHeader>
-        </Card>
-
-        <Card className="bg-[#252545] border-[#3A3A5A] shadow-xl relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Calendar className="h-24 w-24" />
-          </div>
-          <CardHeader>
-            <CardDescription className="text-[#A0A0B8] uppercase text-[10px] tracking-widest">Dernière Dépense</CardDescription>
-            <CardTitle className="text-xl font-bold text-white">
-              {expenses && expenses.length > 0 ? expenses[0].category : "Aucune"}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        {[
+          { label: 'Total Dépensé (Période)', value: `${totalRevenue.toLocaleString()} F`, icon: TrendingDown, color: "text-red-500", bg: "bg-red-500/10" },
+          { label: 'Budget de Sécurité', value: `${balance.toLocaleString()} F`, icon: Wallet, color: balance < 50000 ? "text-orange-500" : "text-emerald-500", bg: balance < 50000 ? "bg-orange-500/10" : "bg-emerald-500/10" },
+          { label: 'Dernière Sortie Cloud', value: expenses?.[0]?.category || "Aucune", icon: History, color: "text-blue-500", bg: "bg-blue-500/10" },
+        ].map((stat, i) => (
+          <Card key={i} className="bg-card border-border rounded-[2rem] overflow-hidden shadow-sm hover:border-primary/40 transition-all duration-500 group">
+            <CardContent className="p-8">
+              <div className="flex items-center gap-6">
+                <div className={`h-14 w-14 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center border border-current/10 group-hover:scale-110 transition-transform`}>
+                  <stat.icon className="h-7 w-7" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">{stat.label}</p>
+                  <p className="text-3xl font-black text-foreground tracking-tighter">{stat.value}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      <Card className="bg-[#252545] border-[#3A3A5A] overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-white">Historique des Transactions</CardTitle>
-            <CardDescription className="text-[#A0A0B8]">Journal détaillé des sorties de caisse.</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="text-[#A0A0B8] hover:text-white"><Filter className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon" className="text-[#A0A0B8] hover:text-white"><Search className="h-4 w-4" /></Button>
+      <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-sm">
+        <CardHeader className="p-8 border-b border-border bg-muted/20">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl font-black uppercase italic gold-gradient-text leading-none">Journal <span className="text-foreground">Transactionnel</span></CardTitle>
+              <CardDescription className="text-sm font-semibold italic mt-1">Audit complet des sorties de caisse et charges opérationnelles.</CardDescription>
+            </div>
+            <div className="flex gap-2">
+               <div className="h-10 w-10 bg-primary/5 rounded-xl border border-primary/20 flex items-center justify-center">
+                  <Filter className="h-4 w-4 text-primary" />
+               </div>
+               <div className="h-10 w-10 bg-primary/5 rounded-xl border border-primary/20 flex items-center justify-center">
+                  <Search className="h-4 w-4 text-primary" />
+               </div>
+            </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-8">
           <div className="space-y-4">
             {!expenses || expenses.length === 0 ? (
-              <div className="py-20 text-center space-y-4">
-                <div className="h-16 w-16 bg-[#1A1A2E] rounded-full flex items-center justify-center mx-auto border border-[#3A3A5A]">
-                  <ArrowRight className="h-8 w-8 text-[#3A3A5A] -rotate-45" />
-                </div>
-                <p className="text-[#A0A0B8]">Commencez à suivre vos dépenses pour voir l'historique ici.</p>
+              <div className="py-20 text-center space-y-4 bg-muted/20 border-2 border-dashed border-border rounded-[2rem]">
+                 <Receipt className="h-12 w-12 text-muted-foreground opacity-20 mx-auto" />
+                 <p className="text-sm font-black uppercase text-muted-foreground tracking-widest italic">Aucun flux détecté dans le journal</p>
               </div>
             ) : (
-              expenses.map((exp: any) => (
-                <div 
-                  key={exp.id} 
-                  className="flex items-center justify-between p-4 rounded-2xl bg-[#1A1A2E]/50 border border-[#3A3A5A]/30 hover:bg-[#1A1A2E] hover:border-[#D4AF37]/30 transition-all group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
-                      <CheckCircle2 className="h-5 w-5" />
+              <AnimatePresence>
+                {expenses.map((exp: any, idx: number) => (
+                  <motion.div 
+                    key={exp.id} 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="flex items-center justify-between p-6 rounded-3xl bg-card border border-border hover:bg-muted/30 hover:border-primary/20 transition-all group"
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="h-14 w-14 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <CheckCircle2 className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-black text-foreground uppercase italic tracking-tighter group-hover:text-primary transition-colors leading-none mb-1">{exp.category}</p>
+                        <p className="text-[10px] text-muted-foreground font-semibold italic">{exp.description || 'Protocole Standard'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-white group-hover:text-[#D4AF37] transition-colors">{exp.category}</p>
-                      <p className="text-xs text-[#A0A0B8]">{exp.description || 'Pas de description'}</p>
+                    <div className="text-right flex items-center gap-8">
+                      <div>
+                        <p className="text-xl font-black text-red-500 italic tracking-tight">-{Number(exp.amount).toLocaleString()} F</p>
+                        <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest">{format(new Date(exp.date), 'dd MMM yyyy', { locale: fr })}</p>
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-11 w-11 text-muted-foreground/30 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-200 opacity-0 group-hover:opacity-100">
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
                     </div>
-                  </div>
-                  <div className="text-right flex items-center gap-6">
-                    <div>
-                      <p className="font-bold text-red-400">-{Number(exp.amount).toLocaleString()} F</p>
-                      <p className="text-[10px] text-[#A0A0B8] uppercase">{format(new Date(exp.date), 'dd MMM yyyy', { locale: fr })}</p>
-                    </div>
-                    <Button variant="ghost" size="icon" className="text-[#3A3A5A] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             )}
           </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   )
 }
 

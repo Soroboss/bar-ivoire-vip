@@ -25,6 +25,7 @@ type AppContextType = {
   user: User | null
   session: Session | null
   userRole: string | null
+  userPermissions: any | null
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>
   deleteProduct: (id: string) => Promise<void>
@@ -57,6 +58,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [userPermissions, setUserPermissions] = useState<any | null>(null)
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -107,6 +109,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       const currentRole = isKnownAdmin ? 'SUPER_ADMIN' : (profileRes.data?.role || null)
       setUserRole(currentRole)
+      
+      // Fetch permissions
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('permissions')
+        .eq('id', userId)
+        .single()
+      
+      setUserPermissions(profileData?.permissions || null)
+      
       console.log('[AppContext] Role detected:', currentRole, isKnownAdmin ? '(Forced Admin)' : '')
       
       const ests = Array.isArray(estsRes) ? estsRes : []
@@ -168,6 +180,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAllEstablishments([])
     setTables([])
     setUserRole(null)
+    setUserPermissions(null)
   }
 
   const signOut = async () => {
@@ -348,7 +361,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{ 
-      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, tables, loading, user, session, userRole,
+      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, tables, loading, user, session, userRole, userPermissions,
       addProduct, updateProduct, deleteProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
       switchEstablishment, addTable, signOut
     }}>

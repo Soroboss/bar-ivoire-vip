@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-montserrat);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -49,72 +49,62 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: #1A1A2E;
-  --card: oklch(1 0 0);
-  --card-foreground: #1A1A2E;
-  --popover: oklch(1 0 0);
-  --popover-foreground: #1A1A2E;
-  --primary: #D4AF37;
-  --primary-foreground: #1A1A2E;
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: #1A1A2E;
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: #F4E4BC;
-  --accent-foreground: #1A1A2E;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: #D4AF37;
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: #1A1A2E;
-  --sidebar-primary: #D4AF37;
-  --sidebar-primary-foreground: #1A1A2E;
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: #1A1A2E;
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: #D4AF37;
+  --background: #FDFDFD;
+  --foreground: #1E293B;
+  --card: #FFFFFF;
+  --card-foreground: #1E293B;
+  --popover: #FFFFFF;
+  --popover-foreground: #1E293B;
+  --primary: #C5A059; /* Sophisticated Bronze-Gold */
+  --primary-foreground: #FFFFFF;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #1E293B;
+  --muted: #F8FAFC;
+  --muted-foreground: #64748B;
+  --accent: #FDF2DC;
+  --accent-foreground: #1E293B;
+  --destructive: #EF4444;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #C5A059;
+  --radius: 0.75rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1E293B;
+  --sidebar-primary: #C5A059;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F1F5F9;
+  --sidebar-accent-foreground: #C5A059;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #C5A059;
 }
 
 .dark {
-  --background: #1A1A2E;
-  --foreground: #F4E4BC;
-  --card: #252545;
-  --card-foreground: #F4E4BC;
-  --popover: #252545;
-  --popover-foreground: #F4E4BC;
-  --primary: #D4AF37;
-  --primary-foreground: #1A1A2E;
-  --secondary: #2A2A4A;
-  --secondary-foreground: #F4E4BC;
-  --muted: #2A2A4A;
-  --muted-foreground: #A0A0B8;
-  --accent: #D4AF37;
-  --accent-foreground: #1A1A2E;
-  --destructive: oklch(0.396 0.141 25.723);
-  --border: #3A3A5A;
-  --input: #3A3A5A;
-  --ring: #D4AF37;
-  --chart-1: #D4AF37;
-  --chart-2: #A68226;
-  --chart-3: #84651E;
-  --chart-4: #644B17;
-  --chart-5: #453310;
-  --sidebar: #151525;
-  --sidebar-foreground: #F4E4BC;
-  --sidebar-primary: #D4AF37;
-  --sidebar-primary-foreground: #1A1A2E;
-  --sidebar-accent: #252545;
-  --sidebar-accent-foreground: #D4AF37;
-  --sidebar-border: #3A3A5A;
-  --sidebar-ring: #D4AF37;
+  --background: #0F172A;
+  --foreground: #F1F5F9;
+  --card: #1E293B;
+  --card-foreground: #F1F5F9;
+  --popover: #1E293B;
+  --popover-foreground: #F1F5F9;
+  --primary: #C5A059;
+  --primary-foreground: #0F172A;
+  --secondary: #334155;
+  --secondary-foreground: #F1F5F9;
+  --muted: #334155;
+  --muted-foreground: #94A3B8;
+  --accent: #C5A059;
+  --accent-foreground: #0F172A;
+  --destructive: #7F1D1D;
+  --border: #334155;
+  --input: #334155;
+  --ring: #C5A059;
+  --sidebar: #0B0E14;
+  --sidebar-foreground: #F1F5F9;
+  --sidebar-primary: #C5A059;
+  --sidebar-primary-foreground: #0F172A;
+  --sidebar-accent: #1E293B;
+  --sidebar-accent-foreground: #C5A059;
+  --sidebar-border: #334155;
+  --sidebar-ring: #C5A059;
 }
 
 @layer utilities {
@@ -124,7 +114,7 @@
   
   @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-8px); }
   }
   
   .animate-float {
@@ -132,47 +122,30 @@
   }
 
   .glass-card {
-    background: rgba(10, 10, 20, 0.4);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(226, 232, 240, 0.6);
     box-shadow: 
-      0 4px 24px -1px rgba(0, 0, 0, 0.2),
-      inset 0 0 20px rgba(255, 255, 255, 0.02);
+      0 10px 15px -3px rgba(0, 0, 0, 0.05),
+      0 4px 6px -2px rgba(0, 0, 0, 0.02);
     position: relative;
     overflow: hidden;
   }
 
-  .glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 200%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(212, 175, 55, 0.03),
-      transparent
-    );
-    transition: 0.5s;
-    pointer-events: none;
+  .dark .glass-card {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .glass-card:hover::before {
-    left: 100%;
-    transition: 0.8s;
-  }
-
-  .gold-glow {
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+  .bronze-glow {
+    box-shadow: 0 0 20px rgba(197, 160, 89, 0.1);
   }
   
   .gold-gradient-text {
-    background: linear-gradient(135deg, #D4AF37 0%, #F4E4BC 50%, #D4AF37 100%);
+    background: linear-gradient(135deg, #C5A059 0%, #E2C799 50%, #C5A059 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+    background-clip: text;
   }
 
   .heartbeat-glow {
@@ -180,28 +153,8 @@
   }
 
   @keyframes heartbeat {
-    0%, 100% { opacity: 0.4; transform: scale(1); filter: blur(4px); }
-    50% { opacity: 1; transform: scale(1.1); filter: blur(0px); }
-  }
-
-  .scanline {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .scanline::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      transparent 50%,
-      rgba(212, 175, 55, 0.02) 50%
-    );
-    background-size: 100% 4px;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.3;
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
   }
 }
 @layer base {

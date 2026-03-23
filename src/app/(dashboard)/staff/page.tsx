@@ -8,19 +8,34 @@ import {
   Clock, 
   Shield, 
   XCircle,
-  LogIn
+  LogIn,
+  Loader2,
+  Mail,
+  Phone,
+  MoreVertical,
+  UserPlus
 } from "lucide-react"
 import { useAppContext } from '@/context/AppContext'
-import { toast } from 'sonner'
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function StaffPage() {
   const { staff, toggleStaffStatus, loading } = useAppContext()
 
   if (loading) {
     return (
-      <div className="p-6 h-screen bg-[#1A1A2E] flex items-center justify-center">
-        <div className="h-10 w-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center text-foreground font-montserrat">
+        <div className="space-y-6 animate-pulse">
+          <div className="relative">
+             <div className="h-16 w-16 rounded-3xl bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
+               <Users className="h-8 w-8 text-primary" />
+             </div>
+             <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-2">
+               <Loader2 className="h-20 w-20 animate-spin text-primary opacity-20" />
+             </div>
+          </div>
+          <p className="text-primary text-xs font-black uppercase tracking-[0.3em] italic">Mobilisation de l'Équipe...</p>
+        </div>
       </div>
     )
   }
@@ -30,82 +45,132 @@ export default function StaffPage() {
   }
 
   return (
-    <div className="p-6 space-y-8 bg-[#1A1A2E] text-[#F4E4BC] min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#D4AF37]">Équipe & <span className="text-white">Personnel Cloud</span></h1>
-          <p className="text-[#A0A0B8]">Suivi des présences via Supabase Realtime.</p>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="p-6 md:p-10 space-y-10 bg-background text-foreground min-h-screen font-montserrat"
+    >
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+               <Users className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest italic">Cohorte Opérationnelle</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter italic uppercase leading-none">
+            Équipe <span className="gold-gradient-text">& Staff</span>
+          </h1>
+          <p className="text-muted-foreground text-base border-l-2 border-primary pl-4 max-w-xl font-medium">
+            Supervision des effectifs tactiques. Suivi des présences et déploiement des rôles synchronisé via <span className="text-foreground italic">Supabase Realtime</span>.
+          </p>
         </div>
         
-        <div className="flex gap-3">
-          <Button variant="outline" className="border-[#3A3A5A] text-[#A0A0B8]">
+        <div className="flex gap-4">
+          <Button variant="outline" className="h-12 border-border text-foreground hover:bg-muted font-bold px-6 rounded-xl transition-all">
             <Clock className="mr-2 h-4 w-4" /> Planning Cloud
           </Button>
-          <Button className="bg-[#D4AF37] text-[#1A1A2E] hover:bg-[#A68226]">
-            Ajouter Personnel
+          <Button className="bg-primary text-white font-black uppercase italic text-[10px] h-12 px-6 hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-xl flex items-center gap-2 transition-all hover:scale-105">
+            <UserPlus className="h-4 w-4" /> Nouveau Membre
           </Button>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {staff.length === 0 ? (
-           <div className="col-span-full text-center py-20 text-[#A0A0B8]">Aucun membre du personnel enregistré.</div>
+           <div className="col-span-full h-80 flex flex-col items-center justify-center gap-4 bg-muted/20 border-2 border-dashed border-border rounded-[2.5rem]">
+              <Users className="h-12 w-12 text-muted-foreground opacity-20" />
+              <p className="text-sm font-black uppercase text-muted-foreground tracking-widest italic">Aucun membre détecté sous ce protocole</p>
+           </div>
         ) : (
-          staff.map(member => (
-            <Card key={member.id} className="bg-[#252545] border-[#3A3A5A] hover:border-[#D4AF37] transition-all overflow-hidden">
-              <CardHeader className="p-6 pb-0">
-                <div className="flex items-center justify-between">
-                  <Avatar className="h-14 w-14 border-2 border-[#D4AF37]/20">
-                    <AvatarFallback className="bg-[#1A1A2E] text-[#D4AF37]">{member.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="text-right">
-                    <Badge variant={member.status === 'Present' ? 'default' : 'secondary'} 
-                      className={member.status === 'Present' ? "bg-green-500 text-white" : "bg-red-500/20 text-red-400"}
-                    >
-                      {member.status === 'Present' ? 'En service' : 'Absent'}
-                    </Badge>
+          staff.map((member, idx) => (
+            <motion.div
+              key={member.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <Card className="bg-card border-border hover:border-primary/40 transition-all duration-500 rounded-[2.5rem] overflow-hidden shadow-sm group">
+                <CardHeader className="p-8 pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="relative">
+                      <Avatar className="h-20 w-20 rounded-2xl border-4 border-background shadow-xl group-hover:scale-110 transition-transform duration-500">
+                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-black text-2xl uppercase">
+                          {member.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className={`absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-4 border-background shadow-sm ${
+                        member.status === 'Present' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'
+                      }`} />
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-11 w-11 text-muted-foreground/30 hover:text-primary hover:bg-primary/5 rounded-xl border border-transparent hover:border-primary/20 transition-all">
+                       <MoreVertical className="h-5 w-5" />
+                    </Button>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <CardTitle className="text-xl text-white">{member.name}</CardTitle>
-                  <CardDescription className="text-[#D4AF37] flex items-center gap-1">
-                    <Shield className="h-3 w-3" /> {member.role}
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[#A0A0B8]">Dernier Pointage</span>
-                    <span className="text-white font-mono">{member.checkIn || '--:--'}</span>
+                  <div className="mt-6 space-y-1">
+                    <CardTitle className="text-2xl font-black text-foreground italic uppercase tracking-tighter leading-none group-hover:text-primary transition-colors">{member.name}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-primary/10 text-primary border-primary/20 text-[8px] px-3 py-1 font-black uppercase tracking-widest rounded-full">
+                        {member.role}
+                      </Badge>
+                      <span className="text-[10px] text-muted-foreground font-semibold italic">Identifiant Opérationnel</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[#A0A0B8]">Statut Cloud</span>
-                    <span className="text-[#4CAF50] font-bold">Synchronisé</span>
+                </CardHeader>
+                <CardContent className="p-8 pt-0 space-y-8">
+                  <div className="space-y-3 bg-muted/30 p-4 rounded-2xl border border-border">
+                    <div className="flex justify-between items-center text-xs">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span className="font-bold uppercase tracking-tighter">Dernière Liaison</span>
+                      </div>
+                      <span className="text-foreground font-black italic">{member.checkIn || '--:--'}</span>
+                    </div>
+                    <div className="h-px bg-border/50" />
+                    <div className="flex justify-between items-center text-xs">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Shield className="h-3.5 w-3.5" />
+                        <span className="font-bold uppercase tracking-tighter">État du Signal</span>
+                      </div>
+                      <span className="text-emerald-500 font-black italic uppercase tracking-widest">Actif</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="pt-2">
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      className="flex-1 h-12 bg-card border-border text-foreground hover:bg-muted font-bold rounded-xl transition-all"
+                    >
+                      <Mail className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="flex-1 h-12 bg-card border-border text-foreground hover:bg-muted font-bold rounded-xl transition-all"
+                    >
+                      <Phone className="h-4 w-4" />
+                    </Button>
+                  </div>
+
                   <Button 
                     onClick={() => handleStatusChange(member.id, member.name)}
-                    className={`w-full font-bold h-12 ${
+                    className={`w-full font-black uppercase italic text-[10px] h-14 rounded-2xl transition-all shadow-lg ${
                       member.status === 'Present' 
-                        ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20' 
-                        : 'bg-green-500/10 text-green-500 hover:bg-green-500/20 border border-green-500/20'
+                        ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 border border-red-200' 
+                        : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-200'
                     }`}
                   >
                     {member.status === 'Present' ? (
-                      <><XCircle className="mr-2 h-4 w-4" /> Marquer Absent</>
+                      <><XCircle className="mr-2 h-4 w-4" /> SUSPENDRE LA RÉCEPTION</>
                     ) : (
-                      <><LogIn className="mr-2 h-4 w-4" /> Marquer Présent</>
+                      <><LogIn className="mr-2 h-4 w-4" /> ACTIVER LA LIAISON</>
                     )}
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }
