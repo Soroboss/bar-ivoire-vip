@@ -64,6 +64,8 @@ type AppContextType = {
   orders: Order[]
   clients: Client[]
   staff: Staff[]
+  expenses: any[]
+  saasTransactions: any[]
   establishment: Establishment | null
   allEstablishments: Establishment[]
   loading: boolean
@@ -72,6 +74,7 @@ type AppContextType = {
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>
   updateStock: (productId: string, quantity: number) => void
   createOrder: (order: Omit<Order, 'id' | 'createdAt'>) => Promise<void>
+  addExpense: (expense: any) => Promise<void>
   addClient: (client: Omit<Client, 'id' | 'points' | 'tier'>) => Promise<void>
   toggleStaffStatus: (staffId: string) => Promise<void>
   updateEstablishment: (est: Partial<Establishment>) => void
@@ -88,13 +91,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [staff, setStaff] = useState<Staff[]>([])
+  const [expenses, setExpenses] = useState<any[]>([])
+  const [saasTransactions, setSaaSTransactions] = useState<any[]>([])
   const [establishment, setEstablishment] = useState<Establishment | null>(null)
   const [allEstablishments, setAllEstablishments] = useState<Establishment[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
 
-  // 1. Auth Listener & Initial Data Load
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
@@ -113,21 +117,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   async function loadUserData(userId: string) {
     try {
       setLoading(true)
-      const ests = await supabaseService.getEstablishments() // Could be filtered by user_id
+      const ests = await supabaseService.getEstablishments()
       setAllEstablishments(ests)
       
       const userEst = ests.find(e => e.userId === userId) || ests[0]
       if (userEst) {
         setEstablishment(userEst)
-        const [prods, cls, stf] = await Promise.all([
+        const [prods, cls, stf, exps] = await Promise.all([
           supabaseService.getProducts(userEst.id),
           supabaseService.getClients(userEst.id),
-          supabaseService.getStaff(userEst.id)
+          supabaseService.getStaff(userEst.id),
+          supabaseService.getExpenses(userEst.id)
         ])
         setProducts(prods)
         setClients(cls)
         setStaff(stf)
+        setExpenses(exps)
       }
+
+      // If Super Admin, load global stats
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
+      if (profile?.role === 'SUPER_ADMIN') {
+        const adminData = await supabaseService.getSaaSTransactions()
+        setSaaSTransactions(adminData)
+      }
+
     } catch (error) {
       console.error('Error loading Supabase data:', error)
     } finally {
@@ -140,6 +154,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setOrders([])
     setClients([])
     setStaff([])
+    setExpenses([])
+    setSaaSTransactions([])
     setEstablishment(null)
     setAllEstablishments([])
   }
@@ -178,6 +194,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toast.success('Commande enregistrée en ligne')
     } catch (e) {
       toast.error('Erreur de synchronisation Cloud')
+    }
+  }
+
+  const addExpense = async (exp: any) => {
+    if (!establishment) return
+    try {
+      const newExp = await supabaseService.addExpense({ ...exp, establishment_id: establishment.id })
+      setExpenses([newExp, ...expenses])
+      toast.success('Dépense enregistrée Cloud')
+    } catch (e) {
+      toast.error('Erreur dépenses')
     }
   }
 
@@ -237,14 +264,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     try {
       setEstablishment(target)
-      const [prods, cls, stf] = await Promise.all([
+      const [prods, cls, stf, exps] = await Promise.all([
         supabaseService.getProducts(target.id),
         supabaseService.getClients(target.id),
-        supabaseService.getStaff(target.id)
+        supabaseService.getStaff(target.id),
+        supabaseService.getExpenses(target.id)
       ])
       setProducts(prods)
       setClients(cls)
       setStaff(stf)
+      setExpenses(exps)
       toast.success(`Passage à l'établissement : ${target.name}`)
     } catch (e) {
       toast.error('Erreur lors du changement')
@@ -255,8 +284,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{ 
-      products, orders, clients, staff, establishment, allEstablishments, loading, user, session,
-      addProduct, updateStock, createOrder, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
+      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, loading, user, session,
+      addProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
       switchEstablishment, signOut
     }}>
       {children}

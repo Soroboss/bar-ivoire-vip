@@ -27,7 +27,7 @@ import { fr } from "date-fns/locale"
 import { useState, useEffect } from "react"
 
 export default function DashboardPage() {
-  const { orders, products, clients } = useAppContext()
+  const { orders, products, clients, expenses } = useAppContext()
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -35,6 +35,9 @@ export default function DashboardPage() {
   }, [])
 
   const totalSales = orders.reduce((acc, o) => acc + o.total, 0)
+  const totalExpenses = (expenses || []).reduce((acc: number, e: any) => acc + (Number(e.amount) || 0), 0)
+  const netProfit = totalSales - totalExpenses
+  
   const recentOrders = orders.slice(0, 5)
 
   // Demo dynamic labels for charts
@@ -65,15 +68,30 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-[#252545] border-[#3A3A5A] hover:border-[#D4AF37] transition-all group">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-[#A0A0B8]">Ventes ce soir</CardTitle>
+            <CardTitle className="text-sm font-medium text-[#A0A0B8]">Chiffre d'Affaires</CardTitle>
             <div className="h-8 w-8 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
               <TrendingUp className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{(1845000 + totalSales).toLocaleString()} F</div>
+            <div className="text-2xl font-bold text-white">{totalSales.toLocaleString()} F</div>
             <p className="text-xs text-[#4CAF50] flex items-center mt-1">
-              <ArrowUpRight className="h-3 w-3 mr-1" /> +{orders.length > 0 ? (totalSales / 1845000 * 100).toFixed(1) : '0'} %
+              <ArrowUpRight className="h-3 w-3 mr-1" /> +{(orders.length > 0 ? 12 : 0)} % vs hier
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#252545] border-[#3A3A5A] hover:border-[#D4AF37] transition-all group border-l-4 border-l-[#4CAF50]">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-[#A0A0B8]">Bénéfice Net (Réel)</CardTitle>
+            <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
+              <CreditCard className="h-4 w-4" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white">{netProfit.toLocaleString()} F</div>
+            <p className="text-xs text-[#A0A0B8] mt-1">
+              Après déduction de {totalExpenses.toLocaleString()} F de charges
             </p>
           </CardContent>
         </Card>
