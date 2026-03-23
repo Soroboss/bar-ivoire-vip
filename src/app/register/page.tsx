@@ -11,6 +11,7 @@ import { useState, Suspense } from 'react'
 import { Loader2, Wine, Building2, User, Phone, Mail, MapPin, ArrowLeft, Check } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { supabaseService } from '@/services/supabaseService'
+import { Establishment } from '@/types'
 import { toast } from 'sonner'
 
 const planLabels: Record<string, { name: string; color: string }> = {
@@ -74,7 +75,7 @@ function RegisterForm() {
           location: formData.location || 'À préciser',
           type: 'Bar VIP',
           user_id: data.user.id,
-          plan: planToDb[selectedPlan] || 'Trial',
+          plan: (planToDb[selectedPlan] || 'Trial') as Establishment['plan'],
         })
       }
 

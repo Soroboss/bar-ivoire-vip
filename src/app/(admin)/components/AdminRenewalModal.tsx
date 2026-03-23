@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Calendar, CreditCard, CheckCircle2, Loader2 } from 'lucide-react'
-import { Establishment } from '@/context/AppContext'
+import { Establishment } from '@/types'
 import { supabaseService } from '@/services/supabaseService'
 import { toast } from 'sonner'
 

@@ -44,6 +44,7 @@ export type Establishment = {
   currency: string
   taxRate: number
   invoiceNote: string
+  whatsapp?: string
   status: 'Pending' | 'Active' | 'Suspended'
   trialEndsAt: string
   plan: 'Trial' | 'Business' | 'VIP' | 'Enterprise'
@@ -58,6 +59,7 @@ export type Expense = {
   amount: number
   category: string
   date: string
+  status?: string
 }
 
 export type SaasTransaction = {

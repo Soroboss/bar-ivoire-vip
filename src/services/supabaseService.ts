@@ -67,6 +67,7 @@ interface ExpenseRow {
   amount: number
   category: string
   date: string
+  status?: string
 }
 
 interface OrderInput {
@@ -378,7 +379,8 @@ export const supabaseService = {
       description: e.description,
       amount: e.amount,
       category: e.category,
-      date: e.date
+      date: e.date,
+      status: e.status
     }))
   },
 
@@ -390,7 +392,8 @@ export const supabaseService = {
         description: expense.description,
         amount: expense.amount,
         category: expense.category,
-        date: expense.date
+        date: expense.date,
+        status: expense.status
       }])
       .select()
       .single()
@@ -402,7 +405,8 @@ export const supabaseService = {
       description: e.description,
       amount: e.amount,
       category: e.category,
-      date: e.date
+      date: e.date,
+      status: e.status
     }
   },
 

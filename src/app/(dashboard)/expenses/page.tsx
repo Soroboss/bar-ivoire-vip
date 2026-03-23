@@ -97,12 +97,12 @@ export default function ExpensesPage() {
 
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger 
-            render={
-              <Button className="bg-[#D4AF37] text-[#1A1A2E] font-bold hover:bg-[#B8962E] transition-all">
-                <Plus className="h-4 w-4 mr-2" /> Nouvelle Dépense
-              </Button>
-            }
-          />
+          render={
+            <Button className="bg-[#D4AF37] text-[#1A1A2E] font-bold hover:bg-[#B8962E] transition-all">
+              <Plus className="h-4 w-4 mr-2" /> Nouvelle Dépense
+            </Button>
+          }
+        />
           <DialogContent className="bg-[#1A1A2E] border-[#3A3A5A] text-white">
             <DialogHeader>
               <DialogTitle className="text-[#D4AF37]">Enregistrer une dépense</DialogTitle>
