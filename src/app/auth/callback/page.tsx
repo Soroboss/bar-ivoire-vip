@@ -16,30 +16,44 @@ export default function AuthCallbackPage() {
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
           setStatus('Vérification du profil...')
           
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single()
-
-          if (profile?.role === 'SUPER_ADMIN') {
-            setStatus('Accés Administrateur détecté. Redirection...')
-            setTimeout(() => router.push('/admin/dashboard'), 500)
-          } else {
-            // Check if user has an establishment
-            const { data: est } = await supabase
-              .from('establishments')
-              .select('id')
-              .eq('user_id', session.user.id)
+          try {
+            // Promise with timeout
+            const profilePromise = supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', session.user.id)
               .single()
-            
-            if (est) {
-              setStatus('Accés Partenaire. Redirection...')
-              setTimeout(() => router.push('/dashboard'), 500)
+
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('TIMEOUT')), 3000)
+            )
+
+            const { data: profile } = await Promise.race([profilePromise, timeoutPromise]) as any
+
+            if (profile?.role === 'SUPER_ADMIN') {
+              setStatus('Accés Administrateur détecté. Redirection...')
+              setTimeout(() => router.push('/admin/dashboard'), 500)
             } else {
-              setStatus('Premier accès. Initialisation...')
-              setTimeout(() => router.push('/onboarding'), 500)
+              // Check if user has an establishment
+              const { data: est } = await supabase
+                .from('establishments')
+                .select('id')
+                .eq('user_id', session.user.id)
+                .single()
+              
+              if (est) {
+                setStatus('Accés Partenaire. Redirection...')
+                setTimeout(() => router.push('/dashboard'), 500)
+              } else {
+                setStatus('Premier accès. Initialisation...')
+                setTimeout(() => router.push('/onboarding'), 500)
+              }
             }
+          } catch (e) {
+            console.error('Callback error or timeout:', e)
+            setStatus('Initialisation générique...')
+            // Fallback to onboarding or dashboard
+            setTimeout(() => router.push('/onboarding'), 1000)
           }
         }
       }
