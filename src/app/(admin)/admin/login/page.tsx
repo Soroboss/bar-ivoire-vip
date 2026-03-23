@@ -40,6 +40,7 @@ export default function AdminLoginPage() {
         router.push('/admin/dashboard')
       }
     } catch (error: any) {
+      console.error('[AdminLogin] Auth error:', error)
       toast.error(error.message || 'Accès refusé')
     } finally {
       setLoading(false)
