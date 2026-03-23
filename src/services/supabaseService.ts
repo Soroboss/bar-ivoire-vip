@@ -114,7 +114,7 @@ export const supabaseService = {
       .insert([{
         establishment_id: order.establishment_id,
         table_id: order.tableId,
-        total: order.total,
+        total_amount: order.total,
         status: order.status
       }])
       .select()
@@ -127,7 +127,7 @@ export const supabaseService = {
       product_id: item.productId,
       name: item.name,
       quantity: item.quantity,
-      price: item.price
+      unit_price: item.price
     }))
 
     const { error: itemsError } = await supabase
@@ -153,9 +153,9 @@ export const supabaseService = {
       total: Number(o.total_amount),
       status: o.status === 'en cours' ? 'pending' : o.status === 'payée' ? 'completed' : 'cancelled',
       createdAt: o.created_at,
-      items: o.order_items.map((i: any) => ({
+      items: (o.order_items || []).map((i: any) => ({
         productId: i.product_id,
-        name: i.name,
+        name: i.name || 'Produit',
         quantity: i.quantity,
         price: Number(i.unit_price)
       }))
