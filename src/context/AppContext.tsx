@@ -123,90 +123,75 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   async function loadUserData(userId: string) {
     console.log('[AppContext] Starting data load for user:', userId)
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('TIMEOUT_EXCEEDED')), 15000)
-    )
-
+    
     try {
       setLoading(true)
       
-      // We wrap the whole loading logic in a Promise.race to handle hang-ups
-      await Promise.race([
-        (async () => {
-          console.log('[AppContext] Fetching establishments...')
-          const ests = await supabaseService.getEstablishments()
-          console.log('[AppContext] Establishments loaded:', ests.length)
-          setAllEstablishments(ests)
-          
-          const userEst = ests.find(e => e.userId === userId) || ests[0]
-          
-          if (userEst && userEst.id) {
-            console.log('[AppContext] Selected establishment:', userEst.name)
-            setEstablishment(userEst)
-            
-            console.log('[AppContext] Fetching detailed data...')
-            
-            console.log('[AppContext] -> Products...')
-            const prods = await supabaseService.getProducts(userEst.id)
-            setProducts(prods)
-            
-            console.log('[AppContext] -> Clients...')
-            const cls = await supabaseService.getClients(userEst.id)
-            setClients(cls)
-            
-            console.log('[AppContext] -> Staff...')
-            const stf = await supabaseService.getStaff(userEst.id)
-            setStaff(stf)
-            
-            console.log('[AppContext] -> Expenses...')
-            const exps = await supabaseService.getExpenses(userEst.id)
-            setExpenses(exps)
-            
-            console.log('[AppContext] -> Orders...')
-            const ords = await supabaseService.getOrders(userEst.id)
-            setOrders(ords)
-            
-            console.log('[AppContext] -> Tables...')
-            const tbls = await supabaseService.getTables(userEst.id)
-            setTables(tbls)
-            
-            console.log('[AppContext] Detailed data loaded successfully')
-          } else {
-            console.warn('[AppContext] No establishment found for user')
-          }
-
-          console.log('[AppContext] Fetching user profile...')
-          const { data: profile, error: profError } = await supabase.from('profiles').select('role').eq('id', userId).single()
-          
-          if (profError) {
-            console.error('[AppContext] Profile error:', profError)
-          }
-
-          if (profile) {
-            console.log('[AppContext] User role identified:', profile.role)
-            setUserRole(profile.role)
-            if (profile.role === 'SUPER_ADMIN') {
-              console.log('[AppContext] loading SaaS transactions for SuperAdmin...')
-              const adminData = await supabaseService.getSaaSTransactions()
-              console.log('[AppContext] SaaS transactions loaded:', adminData.length)
-              setSaaSTransactions(adminData)
-            }
-          }
-        })(),
-        timeoutPromise
-      ])
-
-      console.log('[AppContext] Data load completed successfully')
-    } catch (error: any) {
-      if (error.message === 'TIMEOUT_EXCEEDED') {
-        console.error('[AppContext] Error: Loading timed out after 15s. Probable database hang.')
-        toast.error('Le chargement prend trop de temps. Vérifiez votre connexion.')
-      } else {
-        console.error('[AppContext] Global load error:', error)
-        toast.error('Erreur lors de la synchronisation des données.')
+      // 1. Load Profile & Role
+      let currentRole = null
+      try {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
+        if (profile) {
+          currentRole = profile.role
+          setUserRole(currentRole)
+          console.log('[AppContext] Role:', currentRole)
+        }
+      } catch (e) {
+        console.error('[AppContext] Profile fetch error:', e)
       }
+
+      // 2. Load Establishments
+      let ests: Establishment[] = []
+      try {
+        ests = await supabaseService.getEstablishments()
+        setAllEstablishments(ests || [])
+      } catch (e) {
+        console.error('[AppContext] Establishments fetch error:', e)
+      }
+
+      // 3. Identify and Load User Establishment Data
+      const userEst = ests.find(e => e.userId === userId) || ests[0]
+      if (userEst) {
+        setEstablishment(userEst)
+        console.log('[AppContext] Target Establishment:', userEst.name)
+        
+        try {
+          const [prods, stff, clnts, ords, tbls, exps] = await Promise.all([
+            supabaseService.getProducts(userEst.id).catch(() => []),
+            supabaseService.getStaff(userEst.id).catch(() => []),
+            supabaseService.getClients(userEst.id).catch(() => []),
+            supabaseService.getOrders(userEst.id).catch(() => []),
+            supabaseService.getTables(userEst.id).catch(() => []),
+            supabaseService.getExpenses(userEst.id).catch(() => [])
+          ])
+          
+          setProducts(prods)
+          setStaff(stff)
+          setClients(clnts)
+          setOrders(ords)
+          setTables(tbls)
+          setExpenses(exps)
+        } catch (e) {
+          console.error('[AppContext] Dependent data fetch error:', e)
+        }
+      }
+
+      // 4. Load SaaS Transactions if Admin
+      if (currentRole === 'SUPER_ADMIN') {
+        try {
+          const saasData = await supabaseService.getSaaSTransactions()
+          setSaaSTransactions(saasData || [])
+        } catch (e) {
+          console.error('[AppContext] SaaS Transactions error:', e)
+        }
+      }
+
+    } catch (error: any) {
+      console.error('[AppContext] Unexpected global load error:', error)
+      toast.error('Erreur lors de la synchronisation des données.')
     } finally {
       setLoading(false)
+      console.log('[AppContext] Loading finished')
     }
   }
 

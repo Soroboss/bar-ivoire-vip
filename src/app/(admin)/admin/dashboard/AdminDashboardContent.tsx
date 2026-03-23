@@ -67,7 +67,7 @@ export default function AdminDashboardContent() {
   
   const revenueChartData = (saasTransactions || []).length > 0 
     ? saasTransactions
-        .filter((t: any) => t.created_at) // Ensure date exists
+        .filter((t: any) => t.created_at && !isNaN(new Date(t.created_at).getTime())) // Ensure date is valid
         .map((t: any) => ({
           date: format(new Date(t.created_at), 'dd/MM', { locale: fr }),
           revenue: Number(t.amount) || 0
