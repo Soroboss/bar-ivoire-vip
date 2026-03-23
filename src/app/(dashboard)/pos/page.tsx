@@ -16,17 +16,10 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 
-const TABLES = [
-  { id: 'T1', name: 'Table 1', status: 'Libre' },
-  { id: 'T2', name: 'Table 2', status: 'Occupée' },
-  { id: 'T3', name: 'Table 3', status: 'Libre' },
-  { id: 'T4', name: 'Salon VIP 1', status: 'Occupée' },
-  { id: 'T5', name: 'Terasse 1', status: 'Libre' },
-  { id: 'T6', name: 'Comptoir', status: 'Libre' },
-]
+// TABLES are now fetched from AppContext
 
 export default function POSPage() {
-  const { products, createOrder, establishment, loading } = useAppContext()
+  const { products, createOrder, establishment, loading, tables } = useAppContext()
   const [selectedTable, setSelectedTable] = useState<string | null>(null)
   const [cart, setCart] = useState<{ productId: string, name: string, quantity: number, price: number }[]>([])
   const [search, setSearch] = useState('')
@@ -116,21 +109,25 @@ export default function POSPage() {
             <h2 className="text-xl font-bold">Tables</h2>
           </div>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-            {TABLES.map(table => (
-              <button
-                key={table.id}
-                onClick={() => setSelectedTable(table.id)}
-                className={`p-3 rounded-xl border text-sm font-medium transition-all ${
-                  selectedTable === table.id 
-                    ? 'bg-[#D4AF37] border-[#D4AF37] text-[#1A1A2E]' 
-                    : table.status === 'Occupée'
-                      ? 'bg-red-500/10 border-red-500/20 text-red-500'
-                      : 'bg-[#252545] border-[#3A3A5A] text-[#A0A0B8] hover:border-[#D4AF37]'
-                }`}
-              >
-                {table.name}
-              </button>
-            ))}
+            {tables.length === 0 ? (
+              <p className="col-span-full text-sm text-[#A0A0B8]">Aucune table configurée.</p>
+            ) : (
+              tables.map(table => (
+                <button
+                  key={table.id}
+                  onClick={() => setSelectedTable(table.id)}
+                  className={`p-3 rounded-xl border text-sm font-medium transition-all ${
+                    selectedTable === table.id 
+                      ? 'bg-[#D4AF37] border-[#D4AF37] text-[#1A1A2E]' 
+                      : table.status === 'Occupée'
+                        ? 'bg-red-500/10 border-red-500/20 text-red-500'
+                        : 'bg-[#252545] border-[#3A3A5A] text-[#A0A0B8] hover:border-[#D4AF37]'
+                  }`}
+                >
+                  {table.name}
+                </button>
+              ))
+            )}
           </div>
         </section>
 
@@ -180,7 +177,7 @@ export default function POSPage() {
           </div>
           {selectedTable && (
             <Badge className="bg-[#D4AF37] text-[#1A1A2E]">
-              {TABLES.find(t => t.id === selectedTable)?.name}
+              {tables.find(t => t.id === selectedTable)?.name}
             </Badge>
           )}
         </div>

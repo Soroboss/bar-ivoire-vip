@@ -88,6 +88,25 @@ export const supabaseService = {
     return data as Product
   },
 
+  async updateProduct(id: string, updates: Partial<Product>) {
+    const { data, error } = await supabase
+      .from('products')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return data as Product
+  },
+
+  async deleteProduct(id: string) {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id)
+    if (error) throw error
+  },
+
   // Orders
   async createOrder(order: any) {
     const { data: orderData, error: orderError } = await supabase
@@ -117,6 +136,62 @@ export const supabaseService = {
 
     if (itemsError) throw itemsError
     return orderData
+  },
+
+  async getOrders(establishmentId: string) {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('establishment_id', establishmentId)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    return data.map((o: any) => ({
+      id: o.id,
+      tableId: o.table_id,
+      total: Number(o.total_amount),
+      status: o.status === 'en cours' ? 'pending' : o.status === 'payée' ? 'completed' : 'cancelled',
+      createdAt: o.created_at,
+      items: o.order_items.map((i: any) => ({
+        productId: i.product_id,
+        name: i.name,
+        quantity: i.quantity,
+        price: Number(i.unit_price)
+      }))
+    })) as Order[]
+  },
+
+  // Tables
+  async getTables(establishmentId: string) {
+    const { data, error } = await supabase
+      .from('tables')
+      .select('*')
+      .eq('establishment_id', establishmentId)
+      .order('name', { ascending: true })
+    
+    if (error) throw error
+    return data.map((t: any) => ({
+      id: t.id,
+      name: t.name,
+      status: t.status === 'libre' ? 'Libre' : 'Occupée',
+      capacity: t.capacity
+    }))
+  },
+
+  async addTable(table: any) {
+    const { data, error } = await supabase
+      .from('tables')
+      .insert([table])
+      .select()
+      .single()
+    if (error) throw error
+    return {
+      id: data.id,
+      name: data.name,
+      status: data.status === 'libre' ? 'Libre' : 'Occupée',
+      capacity: data.capacity
+    }
   },
 
   // Clients

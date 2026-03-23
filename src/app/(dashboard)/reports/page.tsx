@@ -30,7 +30,7 @@ import { useState, useEffect } from "react"
 const COLORS = ['#D4AF37', '#A68226', '#1A1A2E', '#F4E4BC', '#4CAF50']
 
 export default function ReportsPage() {
-  const { orders, loading } = useAppContext()
+  const { orders, products, loading } = useAppContext()
 
   if (loading) {
     return (
@@ -42,12 +42,20 @@ export default function ReportsPage() {
 
   const totalRevenue = orders.reduce((acc, o) => acc + o.total, 0)
   
-  const categoryData = orders.length > 0 ? [
-    { name: 'Bières', value: totalRevenue * 0.45 },
-    { name: 'Spiritueux', value: totalRevenue * 0.30 },
-    { name: 'Vins', value: totalRevenue * 0.15 },
-    { name: 'Softs/G Grill', value: totalRevenue * 0.10 },
-  ] : []
+  // Real category distribution from order items
+  const categoryRevenue = orders.reduce((acc: any, order) => {
+    order.items.forEach(item => {
+      const product = products.find(p => p.id === item.productId)
+      const category = product?.category || 'Inconnu'
+      acc[category] = (acc[category] || 0) + (item.price * item.quantity)
+    })
+    return acc
+  }, {})
+
+  const categoryData = Object.entries(categoryRevenue).map(([name, value]) => ({
+    name,
+    value: Number(value)
+  })).sort((a,b) => b.value - a.value)
 
   const salesByDay = orders.reduce((acc: any, o) => {
     const day = format(new Date(o.createdAt), 'EEE', { locale: fr })

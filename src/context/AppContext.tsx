@@ -68,11 +68,14 @@ type AppContextType = {
   saasTransactions: any[]
   establishment: Establishment | null
   allEstablishments: Establishment[]
+  tables: any[]
   loading: boolean
   user: User | null
   session: Session | null
   userRole: string | null
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>
+  deleteProduct: (id: string) => Promise<void>
   updateStock: (productId: string, quantity: number) => void
   createOrder: (order: Omit<Order, 'id' | 'createdAt'>) => Promise<void>
   addExpense: (expense: any) => Promise<void>
@@ -82,6 +85,7 @@ type AppContextType = {
   registerEstablishment: (est: Omit<Establishment, 'id' | 'status' | 'trialEndsAt' | 'plan' | 'createdAt'>) => Promise<void>
   validateEstablishment: (id: string, status: Establishment['status']) => Promise<void>
   switchEstablishment: (id: string) => Promise<void>
+  addTable: (name: string, capacity: number) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -96,6 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [saasTransactions, setSaaSTransactions] = useState<any[]>([])
   const [establishment, setEstablishment] = useState<Establishment | null>(null)
   const [allEstablishments, setAllEstablishments] = useState<Establishment[]>([])
+  const [tables, setTables] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -117,38 +122,77 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   async function loadUserData(userId: string) {
+    console.log('[AppContext] Starting data load for user:', userId)
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('TIMEOUT_EXCEEDED')), 15000)
+    )
+
     try {
       setLoading(true)
-      const ests = await supabaseService.getEstablishments()
-      setAllEstablishments(ests)
       
-      const userEst = ests.find(e => e.userId === userId) || ests[0]
-      if (userEst) {
-        setEstablishment(userEst)
-        const [prods, cls, stf, exps] = await Promise.all([
-          supabaseService.getProducts(userEst.id),
-          supabaseService.getClients(userEst.id),
-          supabaseService.getStaff(userEst.id),
-          supabaseService.getExpenses(userEst.id)
-        ])
-        setProducts(prods)
-        setClients(cls)
-        setStaff(stf)
-        setExpenses(exps)
-      }
+      // We wrap the whole loading logic in a Promise.race to handle hang-ups
+      await Promise.race([
+        (async () => {
+          console.log('[AppContext] Fetching establishments...')
+          const ests = await supabaseService.getEstablishments()
+          console.log('[AppContext] Establishments loaded:', ests.length)
+          setAllEstablishments(ests)
+          
+          const userEst = ests.find(e => e.userId === userId) || ests[0]
+          if (userEst) {
+            console.log('[AppContext] Selected establishment:', userEst.name)
+            setEstablishment(userEst)
+            
+            console.log('[AppContext] Fetching detailed data (products, clients, staff, expenses, orders, tables)...')
+            const [prods, cls, stf, exps, ords, tbls] = await Promise.all([
+              supabaseService.getProducts(userEst.id),
+              supabaseService.getClients(userEst.id),
+              supabaseService.getStaff(userEst.id),
+              supabaseService.getExpenses(userEst.id),
+              supabaseService.getOrders(userEst.id),
+              supabaseService.getTables(userEst.id)
+            ])
+            console.log('[AppContext] Detailed data loaded')
+            setProducts(prods)
+            setClients(cls)
+            setStaff(stf)
+            setExpenses(exps)
+            setOrders(ords)
+            setTables(tbls)
+          } else {
+            console.warn('[AppContext] No establishment found for user')
+          }
 
-      // If Super Admin, load global stats
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
-      if (profile) {
-        setUserRole(profile.role)
-        if (profile.role === 'SUPER_ADMIN') {
-          const adminData = await supabaseService.getSaaSTransactions()
-          setSaaSTransactions(adminData)
-        }
-      }
+          console.log('[AppContext] Fetching user profile...')
+          const { data: profile, error: profError } = await supabase.from('profiles').select('role').eq('id', userId).single()
+          
+          if (profError) {
+            console.error('[AppContext] Profile error:', profError)
+          }
 
-    } catch (error) {
-      console.error('Error loading Supabase data:', error)
+          if (profile) {
+            console.log('[AppContext] User role identified:', profile.role)
+            setUserRole(profile.role)
+            if (profile.role === 'SUPER_ADMIN') {
+              console.log('[AppContext] loading SaaS transactions for SuperAdmin...')
+              const adminData = await supabaseService.getSaaSTransactions()
+              console.log('[AppContext] SaaS transactions loaded:', adminData.length)
+              setSaaSTransactions(adminData)
+            }
+          }
+        })(),
+        timeoutPromise
+      ])
+
+      console.log('[AppContext] Data load completed successfully')
+    } catch (error: any) {
+      if (error.message === 'TIMEOUT_EXCEEDED') {
+        console.error('[AppContext] Error: Loading timed out after 15s. Probable database hang.')
+        toast.error('Le chargement prend trop de temps. Vérifiez votre connexion.')
+      } else {
+        console.error('[AppContext] Global load error:', error)
+        toast.error('Erreur lors de la synchronisation des données.')
+      }
     } finally {
       setLoading(false)
     }
@@ -163,6 +207,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSaaSTransactions([])
     setEstablishment(null)
     setAllEstablishments([])
+    setTables([])
     setUserRole(null)
   }
 
@@ -179,6 +224,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toast.success('Produit ajouté au catalogue Cloud')
     } catch (e) {
       toast.error('Erreur lors de l\'ajout')
+    }
+  }
+
+  const updateProduct = async (id: string, updates: Partial<Product>) => {
+    try {
+      const updated = await supabaseService.updateProduct(id, updates)
+      setProducts(products.map(p => p.id === id ? updated : p))
+      toast.success('Produit mis à jour')
+    } catch (e) {
+      toast.error('Erreur lors de la modification')
+    }
+  }
+
+  const deleteProduct = async (id: string) => {
+    try {
+      await supabaseService.deleteProduct(id)
+      setProducts(products.filter(p => p.id !== id))
+      toast.success('Produit supprimé')
+    } catch (e) {
+      toast.error('Erreur lors de la suppression')
     }
   }
 
@@ -270,16 +335,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     try {
       setEstablishment(target)
-      const [prods, cls, stf, exps] = await Promise.all([
+      const [prods, cls, stf, exps, ords, tbls] = await Promise.all([
         supabaseService.getProducts(target.id),
         supabaseService.getClients(target.id),
         supabaseService.getStaff(target.id),
-        supabaseService.getExpenses(target.id)
+        supabaseService.getExpenses(target.id),
+        supabaseService.getOrders(target.id),
+        supabaseService.getTables(target.id)
       ])
       setProducts(prods)
       setClients(cls)
       setStaff(stf)
       setExpenses(exps)
+      setOrders(ords)
+      setTables(tbls)
       toast.success(`Passage à l'établissement : ${target.name}`)
     } catch (e) {
       toast.error('Erreur lors du changement')
@@ -288,11 +357,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const addTable = async (name: string, capacity: number) => {
+    if (!establishment) return
+    try {
+      const newTable = await supabaseService.addTable({ 
+        establishment_id: establishment.id, 
+        name, 
+        capacity,
+        status: 'libre'
+      })
+      setTables([...tables, newTable])
+      toast.success('Table ajoutée')
+    } catch (e) {
+      toast.error('Erreur table')
+    }
+  }
+
   return (
     <AppContext.Provider value={{ 
-      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, loading, user, session, userRole,
-      addProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
-      switchEstablishment, signOut
+      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, tables, loading, user, session, userRole,
+      addProduct, updateProduct, deleteProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
+      switchEstablishment, addTable, signOut
     }}>
       {children}
     </AppContext.Provider>

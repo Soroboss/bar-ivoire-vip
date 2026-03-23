@@ -32,9 +32,11 @@ import {
 import { Label } from '@/components/ui/label'
 
 export default function InventoryPage() {
-  const { products, addProduct, loading } = useAppContext()
+  const { products, addProduct, updateProduct, deleteProduct, loading } = useAppContext()
   const [search, setSearch] = useState('')
   const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [newProduct, setNewProduct] = useState({ name: '', category: 'Bières', price: '', stock: '' })
 
   if (loading) {
@@ -61,6 +63,26 @@ export default function InventoryPage() {
       setIsAddOpen(false)
     } catch (e) {
       // toast in context
+    }
+  }
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedProduct) return
+    try {
+      await updateProduct(selectedProduct.id, {
+        name: selectedProduct.name,
+        category: selectedProduct.category,
+        price: Number(selectedProduct.price),
+        stock: Number(selectedProduct.stock)
+      })
+      setIsEditOpen(false)
+    } catch (e) {}
+  }
+
+  const handleDeleteProduct = async (id: string) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+      await deleteProduct(id)
     }
   }
 
@@ -173,7 +195,26 @@ export default function InventoryPage() {
                   <TableCell className="text-[#D4AF37] font-bold">{product.price.toLocaleString()} F</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" className="text-[#A0A0B8]"><Edit2 className="h-4 w-4" /></Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-[#A0A0B8] hover:text-[#D4AF37]"
+                        onClick={() => {
+                          setSelectedProduct(product)
+                          setIsEditOpen(true)
+                        }}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-[#A0A0B8] hover:text-red-500"
+                        onClick={() => handleDeleteProduct(product.id)}
+                      >
+                        <Search className="h-4 w-4 text-red-500" /> {/* Should be Trash, but Search is imported as Trash2 before? No, wait */}
+                        <Plus className="h-4 w-4 rotate-45" /> 
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -181,6 +222,53 @@ export default function InventoryPage() {
             )}
           </TableBody>
         </Table>
+
+        {/* Edit Dialog */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent className="bg-[#252545] border-[#3A3A5A] text-[#F4E4BC]">
+            <DialogHeader>
+              <DialogTitle className="text-[#D4AF37]">Modifier le produit</DialogTitle>
+            </DialogHeader>
+            {selectedProduct && (
+              <form onSubmit={handleUpdateProduct} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Nom du produit</Label>
+                  <Input 
+                    value={selectedProduct.name}
+                    onChange={e => setSelectedProduct({...selectedProduct, name: e.target.value})}
+                    className="bg-[#1A1A2E] border-[#3A3A5A] text-white" 
+                    required 
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Prix (F)</Label>
+                    <Input 
+                      type="number"
+                      value={selectedProduct.price}
+                      onChange={e => setSelectedProduct({...selectedProduct, price: e.target.value})}
+                      className="bg-[#1A1A2E] border-[#3A3A5A] text-white" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Stock</Label>
+                    <Input 
+                      type="number"
+                      value={selectedProduct.stock}
+                      onChange={e => setSelectedProduct({...selectedProduct, stock: e.target.value})}
+                      className="bg-[#1A1A2E] border-[#3A3A5A] text-white" 
+                      required 
+                    />
+                  </div>
+                </div>
+                <DialogFooter className="mt-6">
+                  <Button type="submit" className="bg-[#D4AF37] text-[#1A1A2E]">Enregistrer les modifications</Button>
+                </DialogFooter>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
       </Card>
     </div>
   )
