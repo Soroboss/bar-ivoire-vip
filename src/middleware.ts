@@ -49,17 +49,24 @@ export async function middleware(request: NextRequest) {
 
     const { data: { session } } = await supabase.auth.getSession()
 
-    const isProtectedPage = pathname.startsWith('/dashboard') || 
+    const isProtectedPage = (pathname.startsWith('/dashboard') || 
                             pathname.startsWith('/admin') || 
-                            pathname.startsWith('/onboarding')
-    const isAuthPage = pathname.startsWith('/login')
+                            pathname.startsWith('/onboarding')) && 
+                            !pathname.startsWith('/admin/login')
+    const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/admin/login')
 
     if (!session && isProtectedPage) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      // If trying to access admin without session, send to admin/login instead of /login ?
+      // Actually, standardizing on /login is fine, but for admin let's send to /admin/login
+      const redirectUrl = pathname.startsWith('/admin') ? '/admin/login' : '/login'
+      return NextResponse.redirect(new URL(redirectUrl, request.url))
     }
 
     if (session && isAuthPage) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      // If admin, send to admin dashboard, else to user dashboard
+      // Note: This is a simplification. Real logic should check user role.
+      const redirectUrl = pathname.startsWith('/admin') ? '/admin/dashboard' : '/dashboard'
+      return NextResponse.redirect(new URL(redirectUrl, request.url))
     }
 
     return response
