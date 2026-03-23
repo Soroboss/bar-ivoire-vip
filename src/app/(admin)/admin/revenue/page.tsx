@@ -226,7 +226,7 @@ export default function SaaSRevenuePage() {
                         boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
                       }}
                       itemStyle={{ color: '#D4AF37', fontWeight: '900', fontSize: '14px', fontStyle: 'italic' }}
-                      labelStyle={{ color: '#A0A0B8', marginBottom: '6px', fontSize: '9px', textTransform: 'uppercase', fontBlack: '900', tracking: '0.2em' }}
+                      labelStyle={{ color: '#A0A0B8', marginBottom: '6px', fontSize: '9px', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.2em' }}
                       cursor={{ stroke: 'rgba(212,175,55,0.2)', strokeWidth: 2 }}
                     />
                     <Area 
