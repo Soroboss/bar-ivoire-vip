@@ -17,9 +17,10 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!loading) {
       if (!establishment) {
-        // Rediriger vers la création d'établissement ou onboarding si aucun n'existe
+        // Aucun établissement : rediriger vers l'inscription
         router.push('/onboarding')
-      } else if (establishment.status === 'Pending' && pathname !== '/onboarding') {
+      } else if (establishment.status !== 'Active') {
+        // Bloque Pending ET Suspended → page d'attente
         router.push('/onboarding')
       }
     }

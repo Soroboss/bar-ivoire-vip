@@ -16,11 +16,11 @@ export default function AuthCallbackPage() {
         if (event === 'SIGNED_IN' && session) {
           setStatus('Connecté ! Redirection...')
           // Small delay to ensure cookies are set
-          setTimeout(() => router.push('/dashboard'), 500)
+          setTimeout(() => router.push('/onboarding'), 500)
         }
         if (event === 'TOKEN_REFRESHED' && session) {
           setStatus('Connecté ! Redirection...')
-          setTimeout(() => router.push('/dashboard'), 500)
+          setTimeout(() => router.push('/onboarding'), 500)
         }
       }
     )
