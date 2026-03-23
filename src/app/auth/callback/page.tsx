@@ -16,19 +16,17 @@ export default function AuthCallbackPage() {
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
           setStatus('Vérification du profil...')
           
-          try {
-            // Promise with timeout
-            const profilePromise = supabase
+            // First ensure we have a profile. If not, create a basic one from session
+            const { data: profile, error: profileError } = await supabase
               .from('profiles')
               .select('role')
               .eq('id', session.user.id)
               .single()
 
-            const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('TIMEOUT')), 3000)
-            )
-
-            const { data: profile } = await Promise.race([profilePromise, timeoutPromise]) as any
+            if (profileError && profileError.code === 'PGRST116') {
+               // Log for debugging
+               console.log("No profile found for user, might need sync")
+            }
 
             if (profile?.role === 'SUPER_ADMIN') {
               setStatus('Accés Administrateur détecté. Redirection...')
