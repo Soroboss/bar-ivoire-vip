@@ -64,7 +64,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       if (session) {
-        loadUserData(session.user.id)
+        loadUserData(session.user)
       } else {
         setLoading(false)
         resetState()
@@ -85,11 +85,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loading])
 
-  async function loadUserData(userId: string) {
+  async function loadUserData(user: any) {
+    const userId = user.id
     console.log('[AppContext] Starting data load for user:', userId)
     
     try {
       setLoading(true)
+      
+      const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip']
+      const isKnownAdmin = adminEmails.includes(user.email || '')
       
       // 1. Parallelize initial profile and establishments fetch
       const [profileRes, estsRes] = await Promise.all([
@@ -99,10 +103,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           return [] as Establishment[]
         })
       ])
-
-      const currentRole = profileRes.data?.role || null
+      
+      const currentRole = isKnownAdmin ? 'SUPER_ADMIN' : (profileRes.data?.role || null)
       setUserRole(currentRole)
-      console.log('[AppContext] Role detected:', currentRole)
+      console.log('[AppContext] Role detected:', currentRole, isKnownAdmin ? '(Forced Admin)' : '')
       
       const ests = Array.isArray(estsRes) ? estsRes : []
       setAllEstablishments(ests)

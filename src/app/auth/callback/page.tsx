@@ -40,7 +40,9 @@ export default function AuthCallbackPage() {
                 })
               }
               setStatus('Accès Administrateur détecté. Redirection...')
-              setTimeout(() => router.push('/admin/dashboard'), 500)
+              setTimeout(() => {
+                window.location.href = '/admin/dashboard'
+              }, 500)
             } else {
               // Check if user has an establishment
               const { data: est } = await supabase
