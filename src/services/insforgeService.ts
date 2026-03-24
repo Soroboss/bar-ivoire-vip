@@ -323,7 +323,7 @@ export const insforgeService = {
     const { data, error } = await insforge.database
       .from('profiles')
       .select('*, roles(name)')
-      .in('role', ['Admin', 'Gérant', 'Gestionnaire', 'Analyste', 'Financier', "Agent d'encaissement"])
+      .in('role', ['SUPER_ADMIN', 'ADMIN', 'CASHIER', 'WAITER', 'BARMAN'])
       .order('created_at', { ascending: false })
     if (error) throw error
     return (data as any[] || []).map(p => ({
@@ -353,7 +353,7 @@ export const insforgeService = {
 
     const { error: updateError } = await insforge.database
       .from('profiles')
-      .update({ role })
+      .update({ role: role })
       .eq('id', profile.id)
     
     if (updateError) throw updateError

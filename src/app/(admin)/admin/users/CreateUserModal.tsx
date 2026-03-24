@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Loader2, Plus, UserPlus, ShieldAlert } from "lucide-react"
 import { toast } from 'sonner'
+import { useAppContext } from '@/context/AppContext'
 
 type Permission = {
   key: string
@@ -28,13 +29,23 @@ const PERMISSIONS_LIST: Permission[] = [
   { key: 'export', label: 'Exporter des données' },
 ]
 
-const ROLE_PRESETS: Record<string, string[]> = {
-  "Admin": ['dashboard', 'staff', 'sales', 'cash', 'revenue', 'settings', 'establishments', 'stats', 'export'],
-  "Gérant": ['dashboard', 'staff', 'sales', 'cash', 'revenue', 'stats', 'export'],
-  "Gestionnaire": ['dashboard', 'sales', 'staff', 'stats'],
-  "Analyste": ['dashboard', 'revenue', 'stats', 'export'],
-  "Financier": ['dashboard', 'revenue', 'cash', 'export'],
-  "Agent d'encaissement": ['sales', 'cash'],
+const ROLE_PRESETS: Record<string, { label: string, perms: string[] }> = {
+  "ADMIN": { 
+    label: "Administrateur", 
+    perms: ['dashboard', 'staff', 'sales', 'cash', 'revenue', 'settings', 'establishments', 'stats', 'export'] 
+  },
+  "CASHIER": { 
+    label: "Gérant (Caisse)", 
+    perms: ['dashboard', 'staff', 'sales', 'cash', 'revenue', 'stats', 'export'] 
+  },
+  "WAITER": { 
+    label: "Serveur", 
+    perms: ['dashboard', 'sales', 'staff', 'stats'] 
+  },
+  "BARMAN": { 
+    label: "Barman", 
+    perms: ['dashboard', 'revenue', 'stats', 'export'] 
+  },
 }
 
 interface CreateUserModalProps {
@@ -42,6 +53,7 @@ interface CreateUserModalProps {
 }
 
 export function CreateUserModal({ onSuccess }: CreateUserModalProps) {
+  const { getAuthToken } = useAppContext()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   
@@ -50,14 +62,14 @@ export function CreateUserModal({ onSuccess }: CreateUserModalProps) {
     lastName: '',
     email: '',
     phone: '',
-    role: 'Gérant'
+    role: 'ADMIN'
   })
   
   const [permissions, setPermissions] = useState<Record<string, boolean>>({})
 
   // Apply preset permissions when role changes
   useEffect(() => {
-    const preset = ROLE_PRESETS[formData.role] || []
+    const preset = ROLE_PRESETS[formData.role]?.perms || []
     const newPerms: Record<string, boolean> = {}
     PERMISSIONS_LIST.forEach(p => {
       newPerms[p.key] = preset.includes(p.key)
@@ -84,9 +96,15 @@ export function CreateUserModal({ onSuccess }: CreateUserModalProps) {
         permissions
       }
 
+      const token = getAuthToken()
+      console.log("[CreateUserModal] Token for request:", token ? (token.substring(0, 10) + "...") : "null")
+      
       const res = await fetch('/api/admin/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload)
       })
 
@@ -98,7 +116,7 @@ export function CreateUserModal({ onSuccess }: CreateUserModalProps) {
 
       toast.success("Utilisateur créé avec succès. Un email d'activation a été envoyé.")
       setOpen(false)
-      setFormData({ firstName: '', lastName: '', email: '', phone: '', role: 'Gérant' })
+      setFormData({ firstName: '', lastName: '', email: '', phone: '', role: 'ADMIN' })
       onSuccess()
 
     } catch (e: any) {
@@ -110,10 +128,12 @@ export function CreateUserModal({ onSuccess }: CreateUserModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button onClick={() => setOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 gap-2 h-12 px-6 rounded-xl">
-        <UserPlus className="h-4 w-4" />
-        Ajouter un utilisateur
-      </Button>
+      <DialogTrigger>
+        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 gap-2 h-12 px-6 rounded-xl">
+          <UserPlus className="h-4 w-4" />
+          Ajouter un utilisateur
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-card border-white/10 shadow-2xl rounded-2xl p-0">
         <DialogHeader className="p-6 border-b border-white/5 sticky top-0 bg-card/80 backdrop-blur-xl z-10">
           <DialogTitle className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2">
@@ -163,8 +183,8 @@ export function CreateUserModal({ onSuccess }: CreateUserModalProps) {
                   <SelectValue placeholder="Sélectionnez un rôle" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-white/10 font-bold">
-                  {Object.keys(ROLE_PRESETS).map(role => (
-                    <SelectItem key={role} value={role}>{role}</SelectItem>
+                  {Object.entries(ROLE_PRESETS).map(([id, data]) => (
+                    <SelectItem key={id} value={id}>{data.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

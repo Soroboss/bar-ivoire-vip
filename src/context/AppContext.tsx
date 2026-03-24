@@ -39,6 +39,8 @@ type AppContextType = {
   switchEstablishment: (id: string) => Promise<void>
   addTable: (name: string, capacity: number) => Promise<void>
   signOut: () => Promise<void>
+  login: (email: string, pass: string) => Promise<any>
+  getAuthToken: () => string | null
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -64,39 +66,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
     const authProvider = insforge.auth as any;
 
-    authProvider.getCurrentSession().then(({ data: { session } }: any) => {
+    // Get initial user state
+    authProvider.getCurrentUser().then(({ data }: any) => {
       if (!mounted) return;
-      const activeUser = session?.user || null
-      setUser(activeUser)
+      const activeUser = data?.user || null;
+      setUser(activeUser);
       if (activeUser) {
-        loadUserData(activeUser)
+        loadUserData(activeUser);
       } else {
-        setLoading(false)
-        resetState()
+        setLoading(false);
+        resetState();
       }
-    })
+    }).catch((err: any) => {
+      console.error('[AppContext] Initial auth check failed:', err);
+      if (mounted) {
+        setLoading(false);
+        resetState();
+      }
+    });
 
-    const { data: { subscription } } = authProvider.onAuthStateChange((_event: any, session: any) => {
-      if (!mounted) return;
-      const activeUser = session?.user || null
-      // Only reload if user actually changed (prevents infinite loops on minor token refreshes)
-      setUser((prev: any) => {
-        if (prev?.id !== activeUser?.id) {
-          if (activeUser) {
-            setLoading(true)
-            loadUserData(activeUser)
-          } else {
-            resetState()
-            setLoading(false)
-          }
-        }
-        return activeUser;
-      })
-    })
+    // Note: onAuthStateChange is not available in @insforge/sdk 1.2.0.
+    // Auth state changes are handled manually through login/signOut functions.
 
     return () => {
       mounted = false;
-      subscription.unsubscribe()
     }
   }, [])
 
@@ -214,7 +207,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await insforge.auth.signOut()
+    setUser(null)
+    resetState()
     toast.success('Déconnexion réussie')
+  }
+
+  const login = async (email: string, pass: string) => {
+    try {
+      setLoading(true)
+      const { data, error } = await insforge.auth.signInWithPassword({ email, password: pass })
+      if (error) throw error
+      
+      if (data?.user) {
+        setUser(data.user)
+        await loadUserData(data.user)
+      }
+      return { data, error }
+    } catch (err: any) {
+      setLoading(false)
+      throw err
+    }
+  }
+
+  const getAuthToken = () => {
+    const auth = insforge.auth as any
+    // Try multiple paths to find the most up-to-date token
+    return (
+      auth.tokenManager?.getAccessToken() || 
+      auth.http?.userToken || 
+      auth.session?.accessToken ||
+      null
+    )
   }
 
   const addProduct = async (p: Omit<Product, 'id'>) => {
@@ -394,7 +417,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       isSignedIn: isSignedIn, 
       userRole, userPermissions,
       addProduct, updateProduct, deleteProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
-      switchEstablishment, addTable, signOut
+      switchEstablishment, addTable, signOut, login, getAuthToken
     }}>
       {children}
     </AppContext.Provider>

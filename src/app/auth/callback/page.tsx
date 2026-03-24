@@ -98,9 +98,9 @@ export default function AuthCallbackPage() {
         // Wait a bit for slow network/hydration
         const timer = setTimeout(async () => {
           if (!mounted) return
-          const { data: retry } = await (insforge.auth as any).getCurrentSession()
-          if (retry?.session?.user) {
-            await checkProfile(retry.session.user)
+          const { data } = await (insforge.auth as any).getCurrentUser()
+          if (data?.user) {
+            await checkProfile(data.user)
           } else {
             setStatus('Session non trouvée. Réorientation...')
             const source = localStorage.getItem('authSource')

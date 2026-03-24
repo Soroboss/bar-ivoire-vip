@@ -3,24 +3,21 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Users, Search, Mail, ShieldCheck, MoreVertical, UserPlus, Filter, Loader2, Star, Zap, ShieldAlert, LayoutDashboard, Fingerprint } from "lucide-react"
+import { Users, Search, ShieldCheck, UserPlus, Loader2, Star, ShieldAlert } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 
 import { useState, useEffect } from "react"
 import { insforgeService } from "@/services/insforgeService"
 import { toast } from "sonner"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-
-import { motion, AnimatePresence, Variants } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { CreateUserModal } from "./CreateUserModal"
 
 export default function SaaSUsersPage() {
   const [admins, setAdmins] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [promoteEmail, setPromoteEmail] = useState('')
-  const [promoteRole, setPromoteRole] = useState('Gérant')
+  const [promoteRole, setPromoteRole] = useState('CASHIER')
   const [isPromoting, setIsPromoting] = useState(false)
   const [search, setSearch] = useState('')
   const [isMounted, setIsMounted] = useState(false)
@@ -51,7 +48,7 @@ export default function SaaSUsersPage() {
       await insforgeService.assignRoleByEmail(promoteEmail, promoteRole)
       toast.success(`${promoteEmail} a été promu ${promoteRole}`)
       setPromoteEmail('')
-      setPromoteRole('Gérant')
+      setPromoteRole('CASHIER')
       fetchAdmins()
     } catch (e: any) {
       if (e.message?.includes('non trouvé') || e.message?.includes('not found')) {
@@ -92,7 +89,6 @@ export default function SaaSUsersPage() {
     
     try {
       await insforgeService.updateUserPermissions(userId, newPermissions)
-      
       toast.success('Permissions mises à jour')
       fetchAdmins()
     } catch (e) {
@@ -101,9 +97,20 @@ export default function SaaSUsersPage() {
   }
 
   const filteredAdmins = admins.filter(admin => 
-    admin.email?.toLowerCase().includes(search.toLowerCase()) ||
-    admin.full_name?.toLowerCase().includes(search.toLowerCase())
+    (admin.email?.toLowerCase().includes(search.toLowerCase()) ||
+    admin.full_name?.toLowerCase().includes(search.toLowerCase()))
   )
+
+  const getRoleLabel = (role: string) => {
+    const map: Record<string, string> = {
+      'ADMIN': 'Administrateur',
+      'CASHIER': 'Gérant (Caisse)',
+      'WAITER': 'Serveur',
+      'BARMAN': 'Barman',
+      'SUPER_ADMIN': 'Super Admin'
+    }
+    return map[role] || role
+  }
 
   if (!isMounted) return null
 
@@ -138,12 +145,10 @@ export default function SaaSUsersPage() {
               onChange={(e) => setPromoteRole(e.target.value)}
               className="h-16 px-4 rounded-2xl border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl font-black text-white focus:ring-primary/20 transition-all"
             >
-              <option value="Admin" className="text-black">Admin</option>
-              <option value="Gérant" className="text-black">Gérant</option>
-              <option value="Gestionnaire" className="text-black">Gestionnaire</option>
-              <option value="Analyste" className="text-black">Analyste</option>
-              <option value="Financier" className="text-black">Financier</option>
-              <option value="Agent d'encaissement" className="text-black">Agent d'encaissement</option>
+              <option value="ADMIN" className="text-black">Administrateur</option>
+              <option value="CASHIER" className="text-black">Gérant (Caisse)</option>
+              <option value="WAITER" className="text-black">Serveur</option>
+              <option value="BARMAN" className="text-black">Barman</option>
             </select>
             <Button 
               type="submit"
@@ -161,8 +166,8 @@ export default function SaaSUsersPage() {
 
       <div className="grid gap-6 md:grid-cols-3">
         {[
-          { label: 'Admins', count: admins.filter(a => a.role === 'Admin').length, icon: Star, color: "text-primary", bg: "bg-primary/10" },
-          { label: 'Gérants', count: admins.filter(a => a.role === 'Gérant').length, icon: ShieldCheck, color: "text-white", bg: "bg-white/10" },
+          { label: 'Administrateurs', count: admins.filter(a => a.role === 'ADMIN').length, icon: Star, color: "text-primary", bg: "bg-primary/10" },
+          { label: 'Gérants', count: admins.filter(a => a.role === 'CASHIER').length, icon: ShieldCheck, color: "text-white", bg: "bg-white/10" },
           { label: 'Total Membres', count: admins.length, icon: Users, color: "text-muted-foreground", bg: "bg-white/5" },
         ].map((stat, i) => (
           <Card key={i} className="premium-card rounded-2xl overflow-hidden group border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl">
@@ -227,63 +232,68 @@ export default function SaaSUsersPage() {
                      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/20">Aucune archive correspondante</p>
                   </TableCell>
                 </TableRow>
-              ) : filteredAdmins.map((admin) => (
-                <TableRow key={admin.id} className="border-white/5 hover:bg-white/[0.02] transition-all group">
-                  <TableCell className="pl-8 py-8">
-                    <div className="flex items-center gap-6">
-                      <div className="h-14 w-14 rounded-[1.2rem] bg-white/5 flex items-center justify-center text-primary font-black border border-white/10 shadow-2xl group-hover:rotate-6 transition-all duration-500 text-xl">
-                        {admin.email?.[0].toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-black text-white text-lg leading-none mb-2 uppercase tracking-tighter">{admin.full_name || 'Collaborateur'}</p>
-                        <p className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-widest">{admin.email}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={cn(
-                      "px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border-white/10 shadow-2xl",
-                      admin.role === 'Admin' ? "bg-primary text-primary-foreground" : "bg-white/5 text-muted-foreground border-white/5"
-                    )}>
-                      {admin.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-2.5">
-                        {Object.entries(admin.permissions || {
-                          "dashboard": true,
-                          "inventory": true,
-                          "revenue": true,
-                          "staff": true,
-                        }).map(([key, isActive]) => (
-                          <button
-                            key={key}
-                            onClick={() => togglePermission(admin.id, admin.permissions, key)}
-                            className={cn(
-                                "px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all duration-500",
-                                isActive 
-                                  ? 'bg-primary/10 text-primary border border-primary/20 shadow-xl' 
-                                  : 'bg-white/5 text-muted-foreground/20 border border-white/5 opacity-40 hover:opacity-100 hover:border-white/20'
-                            )}
-                          >
-                            {key}
-                          </button>
-                        ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right pr-8">
-                     <Button 
-                       variant="ghost" 
-                       size="icon" 
-                       onClick={() => handleRevoke(admin.id)}
-                       title="Révoquer l'accès"
-                       className="h-12 w-12 text-muted-foreground/10 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all shadow-2xl"
-                     >
-                       <ShieldAlert className="h-5 w-5" />
-                     </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              ) : (
+                <AnimatePresence>
+                  {filteredAdmins.map((admin) => (
+                    <motion.tr 
+                      key={admin.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="border-white/5 hover:bg-white/[0.02] transition-all group"
+                    >
+                      <TableCell className="pl-8 py-8">
+                        <div className="flex items-center gap-6">
+                          <div className="h-14 w-14 rounded-[1.2rem] bg-white/5 flex items-center justify-center text-primary font-black border border-white/10 shadow-2xl group-hover:rotate-6 transition-all duration-500 text-xl">
+                            {admin.email?.[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-black text-white text-lg leading-none mb-2 uppercase tracking-tighter">{admin.full_name || 'Collaborateur'}</p>
+                            <p className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-widest">{admin.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={cn(
+                          "px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border-white/10 shadow-2xl",
+                          admin.role === 'ADMIN' || admin.role === 'SUPER_ADMIN' ? "bg-primary text-primary-foreground" : "bg-white/5 text-muted-foreground border-white/5"
+                        )}>
+                          {getRoleLabel(admin.role)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-2.5">
+                            {Object.entries(admin.permissions || {}).map(([key, isActive]) => (
+                              <button
+                                key={key}
+                                onClick={() => togglePermission(admin.id, admin.permissions, key)}
+                                className={cn(
+                                    "px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all duration-500",
+                                    isActive 
+                                      ? 'bg-primary/10 text-primary border border-primary/20 shadow-xl' 
+                                      : 'bg-white/5 text-muted-foreground/20 border border-white/5 opacity-40 hover:opacity-100 hover:border-white/20'
+                                )}
+                              >
+                                {key}
+                              </button>
+                            ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-8">
+                         <Button 
+                           variant="ghost" 
+                           size="icon" 
+                           onClick={() => handleRevoke(admin.id)}
+                           title="Révoquer l'accès"
+                           className="h-12 w-12 text-muted-foreground/10 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all shadow-2xl"
+                         >
+                           <ShieldAlert className="h-5 w-5" />
+                         </Button>
+                      </TableCell>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              )}
             </TableBody>
           </Table>
         </CardContent>

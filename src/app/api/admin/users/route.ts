@@ -1,57 +1,68 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js' // Fallback to raw supabase to use service_role safely
+import { createClient } from '@insforge/sdk'
 
 export async function POST(request: Request) {
+  const requestId = Math.random().toString(36).slice(2, 10)
+  console.log(`[API-Admin-Users][${requestId}] POST request received`)
+
   try {
-    const { firstName, lastName, email, phone, role, fullName, permissions } = await request.json()
+    const body = await request.json()
+    const { email, phone, role, fullName, permissions } = body
+    console.log(`[API-Admin-Users][${requestId}] Payload:`, { email, role, fullName })
 
     const authHeader = request.headers.get('Authorization')
     if (!authHeader) {
+      console.error(`[API-Admin-Users][${requestId}] Missing Authorization header`)
       return NextResponse.json({ error: "Non autorisé." }, { status: 401 })
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_INSFORGE_BASE_URL!
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!
+    const token = authHeader.replace('Bearer ', '')
+    if (!token || token === 'null') {
+      console.error(`[API-Admin-Users][${requestId}] Invalid token: "${token}"`)
+      return NextResponse.json({ error: "Session invalide. Veuillez vous reconnecter." }, { status: 401 })
+    }
 
-    // Client anonyme pour l'inscription uniquement (ne pas contaminer la session)
-    const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    })
+    const baseUrl = process.env.NEXT_PUBLIC_INSFORGE_BASE_URL!
+    const anonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!
 
-    // Client Admin (hérite du token de l'utilisateur qui a fait la requête)
-    const adminClient = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-      global: { headers: { Authorization: authHeader } }
-    })
+    if (!baseUrl || !anonKey) {
+      console.error(`[API-Admin-Users][${requestId}] Missing environment variables`)
+      throw new Error("Configuration serveur incomplète (URL/KEY manquantes).")
+    }
 
-    // 1. Inviter l'utilisateur (on génère un mot de passe sécurisé qu'il devra changer)
-    // Comme InsForge ne fournit pas de service_role facilement, on passe par le signUp standard
-    // Le système lui enverra directement le mail de confirmation habituel.
+    const anonClient = createClient({ baseUrl, anonKey })
+    const adminClient = createClient({ baseUrl, anonKey })
+    adminClient.getHttpClient().setAuthToken(token)
+
+    console.log(`[API-Admin-Users][${requestId}] Calling signUp for: ${email}`)
     const tempPassword = Math.random().toString(36).slice(-12) + "A!1a"
     const { data: authData, error: authError } = await anonClient.auth.signUp({
       email,
       password: tempPassword,
-      options: {
-        data: {
-          full_name: fullName,
-          phone,
-        }
-      }
+      name: fullName
     })
 
     if (authError) {
-      if (authError.message.includes('already registered')) {
+      console.error(`[API-Admin-Users][${requestId}] Auth Error:`, authError)
+      if (authError.message?.includes('already registered') || authError.message?.includes('already exists')) {
         return NextResponse.json({ error: "Cet email est déjà enregistré." }, { status: 400 })
       }
-      throw authError
+      return NextResponse.json({ error: authError.message || "Erreur lors de l'inscription" }, { status: 400 })
     }
 
-    const userId = authData.user?.id
-    if (!userId) throw new Error("ID utilisateur non généré.")
+    // Retrieve userId (may be null if verification required)
+    const userId = authData?.user?.id || (authData as any)?.id || (authData as any)?.user_id || null
+    
+    // RACE CONDITION MITIGATION: If userId is null, we wait 1.5s for the auth.users record to propagate 
+    // before calling the RPC which performs an email lookup.
+    if (!userId) {
+       console.log(`[API-Admin-Users][${requestId}] userId null (unverified), waiting for DB propagation...`)
+       await new Promise(resolve => setTimeout(resolve, 1500))
+    }
 
-    // 2. Mettre à jour la table profiles avec le rôle et les permissions
-    // On utilise la fonction RPC 'admin_create_profile' configurée en SECURITY DEFINER
-    const { error: profileError } = await adminClient.rpc('admin_create_profile', {
+    console.log(`[API-Admin-Users][${requestId}] Executing admin_create_profile_v2 for ${email}`)
+
+    const { error: profileError } = await adminClient.database.rpc('admin_create_profile_v2', {
       p_id: userId,
       p_email: email,
       p_full_name: fullName,
@@ -61,18 +72,21 @@ export async function POST(request: Request) {
     })
 
     if (profileError) {
-      console.error("Erreur mise à jour profil (RPC):", profileError)
+      console.error(`[API-Admin-Users][${requestId}] RPC Profile Error:`, profileError)
+      return NextResponse.json({ error: `Erreur liaison profil: ${profileError.message}` }, { status: 500 })
     }
 
-    // Return the result with the temp password so the frontend can optionally show it
+    console.log(`[API-Admin-Users][${requestId}] Success: Profile linked for ${email}`)
+
     return NextResponse.json({ 
       success: true, 
-      user: authData.user, 
-      tempPassword 
+      user: (authData && authData.user) ? authData.user : { id: userId, email }, 
+      tempPassword,
+      requireEmailVerification: authData?.requireEmailVerification || false
     }, { status: 200 })
     
   } catch (error: any) {
-    console.error("User Creation API Error:", error)
+    console.error(`[API-Admin-Users][${requestId}] Global Error:`, error)
     return NextResponse.json(
       { error: error.message || "Erreur interne du serveur" },
       { status: 500 }

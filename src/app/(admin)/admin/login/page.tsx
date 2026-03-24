@@ -11,8 +11,10 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { insforgeService } from '@/services/insforgeService'
 import Link from 'next/link'
+import { useAppContext } from '@/context/AppContext'
 
 export default function AdminLoginPage() {
+  const { login } = useAppContext()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -30,7 +32,7 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      const { data, error } = await insforge.auth.signInWithPassword({ email, password })
+    const { data, error } = await login(email, password)
       if (error) throw error
       const user = data?.user
       
