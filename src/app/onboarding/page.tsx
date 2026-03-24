@@ -69,7 +69,7 @@ export default function OnboardingPage() {
                     phone: phone || 'Non précisé',
                     whatsapp: phone,
                     location: 'À préciser',
-                    type: 'Bar VIP',
+                    type: 'bar',
                     currency: 'FCFA',
                     taxRate: 0,
                     invoiceNote: '',

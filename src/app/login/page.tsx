@@ -77,6 +77,7 @@ export default function LoginPage() {
   const handleGoogleAuth = async () => {
     setLoading(true)
     try {
+      localStorage.setItem('authSource', 'partner')
       const { error } = await insforge.auth.signInWithOAuth({
         provider: 'google',
         redirectTo: `${window.location.origin}/auth/callback`
