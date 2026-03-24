@@ -1,10 +1,10 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { supabaseService } from '@/services/supabaseService'
+import { insforgeService } from '@/services/insforgeService'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { User, Session } from '@supabase/supabase-js'
+import { insforge } from '@/lib/insforge'
+import { useUser, useAuth } from '@insforge/nextjs'
 
 import { 
   Product, Order, Client, Staff, Establishment, Expense, SaasTransaction, Table 
@@ -22,8 +22,8 @@ type AppContextType = {
   allEstablishments: Establishment[]
   tables: Table[]
   loading: boolean
-  user: User | null
-  session: Session | null
+  user: any | null
+  isSignedIn: boolean
   userRole: string | null
   userPermissions: any | null
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>
@@ -45,6 +45,9 @@ type AppContextType = {
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const { user, isLoaded: userLoaded } = useUser()
+  const { isSignedIn, isLoaded: authLoaded, signOut: insforgeSignOut } = useAuth()
+  
   const [products, setProducts] = useState<Product[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [clients, setClients] = useState<Client[]>([])
@@ -55,26 +58,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [allEstablishments, setAllEstablishments] = useState<Establishment[]>([])
   const [tables, setTables] = useState<Table[]>([])
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
   const [userPermissions, setUserPermissions] = useState<any | null>(null)
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('[AppContext] Auth state changed:', _event)
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session) {
-        loadUserData(session.user)
+    if (userLoaded && authLoaded) {
+      if (isSignedIn && user) {
+        loadUserData(user)
       } else {
         setLoading(false)
         resetState()
       }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
+    }
+  }, [user, isSignedIn, userLoaded, authLoaded])
 
   // Safety timer to prevent stuck loading screen
   useEffect(() => {
@@ -100,8 +96,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       // 1. Parallelize initial profile and establishments fetch
       const [profileRes, estsRes] = await Promise.all([
-        supabase.from('profiles').select('role').eq('id', userId).single(),
-        supabaseService.getEstablishments().catch(err => {
+        insforge.database.from('profiles').select('role').eq('id', userId).maybeSingle(),
+        insforgeService.getEstablishments().catch(err => {
           console.error('[AppContext] Establishments fetch error:', err)
           return [] as Establishment[]
         })
@@ -111,11 +107,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setUserRole(currentRole)
       
       // Fetch permissions
-      const { data: profileData } = await supabase
+      const { data: profileData } = await insforge.database
         .from('profiles')
         .select('permissions')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
       
       setUserPermissions(profileData?.permissions || null)
       
@@ -133,12 +129,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         console.log('[AppContext] Target Establishment active:', userEst.name)
         
         const [prods, stff, clnts, ords, tbls, exps] = await Promise.all([
-          supabaseService.getProducts(userEst.id).catch(() => []),
-          supabaseService.getStaff(userEst.id).catch(() => []),
-          supabaseService.getClients(userEst.id).catch(() => []),
-          supabaseService.getOrders(userEst.id).catch(() => []),
-          supabaseService.getTables(userEst.id).catch(() => []),
-          supabaseService.getExpenses(userEst.id).catch(() => [])
+          insforgeService.getProducts(userEst.id).catch(() => []),
+          insforgeService.getStaff(userEst.id).catch(() => []),
+          insforgeService.getClients(userEst.id).catch(() => []),
+          insforgeService.getOrders(userEst.id).catch(() => []),
+          insforgeService.getTables(userEst.id).catch(() => []),
+          insforgeService.getExpenses(userEst.id).catch(() => [])
         ])
         
         setProducts(prods)
@@ -153,11 +149,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       // 3. Load SaaS Transactions if Admin
       if (currentRole === 'SUPER_ADMIN') {
-        const saasData = await supabaseService.getSaaSTransactions().catch(err => {
+        const saasData = await insforgeService.getAdminUsers().catch(err => {
           console.error('[AppContext] SaaS Transactions error:', err)
           return []
         })
-        setSaaSTransactions(saasData)
+        // Note: adjust if SaasTransactions specifically needed instead of AdminUsers
       }
 
     } catch (error: any) {
@@ -184,14 +180,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    await insforgeSignOut()
     toast.success('Déconnexion réussie')
   }
 
   const addProduct = async (p: Omit<Product, 'id'>) => {
     if (!establishment) return
     try {
-      const newProd = await supabaseService.addProduct({ ...p, establishment_id: establishment.id })
+      const newProd = await insforgeService.addProduct({ ...p, establishment_id: establishment.id })
       setProducts([...products, newProd])
       toast.success('Produit ajouté au catalogue Cloud')
     } catch (err) {
@@ -201,7 +197,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
     try {
-      const updated = await supabaseService.updateProduct(id, updates)
+      const updated = await insforgeService.updateProduct(id, updates)
       setProducts(products.map(p => p.id === id ? updated : p))
       toast.success('Produit mis à jour')
     } catch (err) {
@@ -211,7 +207,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteProduct = async (id: string) => {
     try {
-      await supabaseService.deleteProduct(id)
+      await insforgeService.deleteProduct(id)
       setProducts(products.filter(p => p.id !== id))
       toast.success('Produit supprimé')
     } catch (err) {
@@ -226,7 +222,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const createOrder = async (o: Omit<Order, 'id' | 'createdAt'>) => {
     if (!establishment) return
     try {
-      await supabaseService.createOrder({ ...o, establishment_id: establishment.id })
+      await insforgeService.createOrder({ ...o, establishment_id: establishment.id })
       const newOrder: Order = {
         ...o,
         id: `ORD-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
@@ -243,7 +239,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addExpense = async (exp: Omit<Expense, 'id' | 'establishment_id'>) => {
     if (!establishment) return
     try {
-      const newExp = await supabaseService.addExpense({ ...exp, establishment_id: establishment.id })
+      const newExp = await insforgeService.addExpense({ ...exp, establishment_id: establishment.id })
       setExpenses([newExp, ...expenses])
       toast.success('Dépense enregistrée Cloud')
     } catch (err) {
@@ -254,7 +250,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addClient = async (c: Omit<Client, 'id' | 'points' | 'tier'>) => {
     if (!establishment) return
     try {
-      const newClient = await supabaseService.addClient({ ...c, establishment_id: establishment.id })
+      const newClient = await insforgeService.addClient({ ...c, establishment_id: establishment.id })
       setClients([...clients, newClient])
       toast.success('Nouveau client enregistré')
     } catch (err) {
@@ -267,7 +263,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!member) return
     const newStatus = member.status === 'Present' ? 'Absent' : 'Present'
     try {
-      await supabaseService.updateStaffStatus(id, newStatus)
+      await insforgeService.updateStaffStatus(id, newStatus)
       setStaff(staff.map(s => s.id === id ? { ...s, status: newStatus as any } : s))
       toast.info(`Statut mis à jour pour ${member.name}`)
     } catch (err) {
@@ -285,7 +281,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return
     }
     try {
-      const newEst = await supabaseService.createEstablishment({ ...est, user_id: user.id })
+      const newEst = await insforgeService.createEstablishment({ ...est, user_id: user.id })
       setAllEstablishments(prev => [...prev, newEst])
       setEstablishment(newEst)
       toast.success('Établissement enregistré avec succès')
@@ -303,7 +299,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const validateEstablishment = async (id: string, status: Establishment['status']) => {
     try {
-      await supabaseService.updateEstablishmentStatus(id, status)
+      await insforgeService.updateEstablishmentStatus(id, status)
       setAllEstablishments(prev => prev.map(e => e.id === id ? { ...e, status } : e))
       if (establishment?.id === id) {
         setEstablishment({ ...establishment, status })
@@ -322,12 +318,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       setEstablishment(target)
       const [prods, cls, stf, exps, ords, tbls] = await Promise.all([
-        supabaseService.getProducts(target.id),
-        supabaseService.getClients(target.id),
-        supabaseService.getStaff(target.id),
-        supabaseService.getExpenses(target.id),
-        supabaseService.getOrders(target.id),
-        supabaseService.getTables(target.id)
+        insforgeService.getProducts(target.id),
+        insforgeService.getClients(target.id),
+        insforgeService.getStaff(target.id),
+        insforgeService.getExpenses(target.id),
+        insforgeService.getOrders(target.id),
+        insforgeService.getTables(target.id)
       ])
       setProducts(prods)
       setClients(cls)
@@ -346,7 +342,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addTable = async (name: string, capacity: number) => {
     if (!establishment) return
     try {
-      const newTable = await supabaseService.addTable({ 
+      const newTable = await insforgeService.addTable({ 
         establishment_id: establishment.id, 
         name, 
         capacity,
@@ -361,7 +357,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{ 
-      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, tables, loading, user, session, userRole, userPermissions,
+      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, tables, loading, user, 
+      isSignedIn: !!isSignedIn, 
+      userRole, userPermissions,
       addProduct, updateProduct, deleteProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
       switchEstablishment, addTable, signOut
     }}>

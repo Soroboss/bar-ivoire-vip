@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase'
+import { insforge } from '@/lib/insforge'
 import { useRouter } from 'next/navigation'
 
 const menuItems = [
@@ -38,27 +38,28 @@ export function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    await insforge.auth.signOut()
     router.push('/admin/login')
   }
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white border-r border-slate-100 selection:bg-blue-50">
+    <div className="flex flex-col h-full bg-background border-r border-white/5 selection:bg-primary/10">
       {/* Logo Section */}
-      <div className="p-8 border-b border-slate-50">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-100">
-            <ShieldCheck className="h-6 w-6" />
+      <div className="p-10 border-b border-white/5 bg-white/[0.02]">
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-2xl shadow-primary/20 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+            <ShieldCheck className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="font-bold text-slate-900 text-base leading-none">Administration</h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Ivoire Bar VIP</p>
+            <h1 className="font-black text-white text-lg leading-none uppercase tracking-tighter italic">Régie <span className="gold-gradient-text">Elite</span></h1>
+            <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-[0.3em] mt-1 italic">Infrastructure Orbitale</p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-8 space-y-1">
+      <nav className="flex-1 px-6 py-10 space-y-2">
+        <p className="text-[10px] text-muted-foreground/20 font-black uppercase tracking-[0.6em] mb-6 pl-4 italic">Menu Stratégique</p>
         {menuItems.map((item) => {
           const isActive = pathname === item.path
           return (
@@ -66,37 +67,43 @@ export function AdminSidebar() {
               key={item.path} 
               href={item.path}
               className={cn(
-                "group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200",
+                "group flex items-center gap-5 px-6 py-4 rounded-2xl transition-all duration-500 border border-transparent",
                 isActive 
-                  ? "bg-blue-50 text-blue-600 border border-blue-100/50" 
-                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                  ? "bg-primary/10 text-primary border-primary/20 shadow-lg shadow-primary/5" 
+                  : "text-muted-foreground/60 hover:text-white hover:bg-white/5 hover:border-white/5"
               )}
             >
               <item.icon className={cn(
-                "h-5 w-5 transition-colors",
-                isActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+                "h-5 w-5 transition-all duration-500",
+                isActive ? "text-primary scale-110" : "text-muted-foreground group-hover:text-white group-hover:scale-110 group-hover:rotate-12"
               )} />
-              <span className="font-semibold text-sm">{item.name}</span>
+              <span className="font-black text-[11px] uppercase tracking-widest italic">{item.name}</span>
+              {isActive && (
+                <div className="ml-auto animate-pulse flex h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(212,175,55,0.8)]" />
+              )}
             </Link>
           )
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 space-y-4">
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-200" />
-            <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">Système Actif</p>
+      <div className="p-6 space-y-4">
+        <div className="p-6 rounded-[1.8rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl group hover:border-emerald-500/20 transition-all duration-500">
+          <div className="flex items-center gap-4">
+            <div className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+            </div>
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] italic">Statut Optimal</p>
           </div>
         </div>
 
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all font-bold text-sm"
+          className="flex items-center gap-5 w-full px-6 py-4 rounded-2xl text-muted-foreground/40 hover:text-red-500 hover:bg-red-500/5 transition-all duration-500 font-black text-[10px] uppercase tracking-widest italic"
         >
-          <LogOut className="h-5 w-5" />
-          Déconnexion
+          <LogOut className="h-5 w-5 translate-y-[-1px]" />
+          Déconnexion Sécurisée
         </button>
       </div>
     </div>
@@ -105,14 +112,14 @@ export function AdminSidebar() {
   return (
     <>
       {/* Mobile Trigger */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-b border-slate-100 flex items-center px-6 z-[100] justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar/80 backdrop-blur-xl border-b border-white/5 flex items-center px-6 z-[100] justify-between">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
             <ShieldCheck className="h-5 w-5" />
           </div>
-          <span className="font-bold text-slate-900 text-sm">Admin</span>
+          <span className="font-bold text-white text-sm">Admin</span>
         </div>
-        <Button variant="ghost" size="icon" className="text-slate-500" onClick={() => setIsOpen(!isOpen)}>
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
       </div>

@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ShieldCheck, Mail, Lock, Loader2, ArrowLeft } from "lucide-react"
-import { supabase } from '@/lib/supabase'
+import { insforge } from '@/lib/insforge'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { insforgeService } from '@/services/insforgeService'
 import Link from 'next/link'
 
 export default function AdminLoginPage() {
@@ -29,18 +30,15 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error } = await insforge.auth.signInWithPassword({ email, password })
       if (error) throw error
+      const user = data?.user
       
       if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
+        const profile = await insforgeService.getProfileByUserId(user.id)
 
         if (profile?.role !== 'SUPER_ADMIN') {
-          await supabase.auth.signOut()
+          await insforge.auth.signOut()
           throw new Error('Accès restreint aux administrateurs.')
         }
 
@@ -55,24 +53,27 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm space-y-8">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 selection:bg-primary/20">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-20">
+        <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-primary/10 blur-[120px] rounded-full" />
+      </div>
+      <div className="w-full max-w-sm space-y-8 relative z-10">
         <div className="text-center space-y-3">
-          <Link href="/login" className="inline-flex items-center text-xs font-bold text-slate-400 hover:text-blue-600 transition-all mb-4 group">
+          <Link href="/login" className="inline-flex items-center text-xs font-bold text-muted-foreground hover:text-primary transition-all mb-4 group tracking-tight uppercase">
             <ArrowLeft className="h-3 w-3 mr-2 group-hover:-translate-x-1 transition-transform" />
-            Retour au portail client
+            Portail Client
           </Link>
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 shadow-xl shadow-slate-200 mb-2">
-            <ShieldCheck className="h-7 w-7 text-white" />
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-xl shadow-primary/20 mb-2">
+            <ShieldCheck className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 uppercase">SaaS Admin</h1>
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest opacity-60">Accès Sécurisé • Régie Centrale</p>
+          <h1 className="text-2xl font-black tracking-tighter text-white uppercase"><span className="text-primary">SaaS</span> Admin</h1>
+          <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">Accès Sécurisé • Régie Centrale</p>
         </div>
 
-        <Card className="border-none shadow-2xl shadow-slate-200/60 rounded-3xl overflow-hidden bg-white">
+        <Card className="border border-white/5 shadow-2xl shadow-black/50 rounded-3xl overflow-hidden bg-card backdrop-blur-xl">
           <CardHeader className="pt-10 px-10 pb-4">
-            <CardTitle className="text-xl font-bold text-slate-900 text-center">Identification</CardTitle>
-            <CardDescription className="text-center text-slate-500 font-medium text-xs">Veuillez entrer vos identifiants de sécurité</CardDescription>
+            <CardTitle className="text-xl font-bold text-white text-center tracking-tight uppercase">Identification</CardTitle>
+            <CardDescription className="text-center text-muted-foreground font-medium text-xs">Veuillez entrer vos identifiants de sécurité</CardDescription>
           </CardHeader>
           <CardContent className="p-10">
             <Button
@@ -80,11 +81,9 @@ export default function AdminLoginPage() {
                 setLoading(true)
                 try {
                   localStorage.setItem('authSource', 'admin')
-                  const { error } = await supabase.auth.signInWithOAuth({
+                  const { error } = await insforge.auth.signInWithOAuth({
                     provider: 'google',
-                    options: {
-                      redirectTo: `${window.location.origin}/auth/callback`,
-                    },
+                    redirectTo: `${window.location.origin}/auth/callback`
                   })
                   if (error) throw error
                 } catch (error: any) {
@@ -94,7 +93,7 @@ export default function AdminLoginPage() {
               }}
               disabled={loading}
               variant="outline"
-              className="w-full h-12 rounded-xl border-slate-200 font-bold text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-3 mb-6"
+              className="w-full h-12 rounded-xl border-white/10 bg-white/5 font-bold text-white hover:bg-white/10 transition-all flex items-center justify-center gap-3 mb-6"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -107,10 +106,10 @@ export default function AdminLoginPage() {
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-100"></div>
+                <div className="w-full border-t border-white/5"></div>
               </div>
-              <div className="relative flex justify-center text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                <span className="bg-white px-4">Clé d'administration</span>
+              <div className="relative flex justify-center text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground/60">
+                <span className="bg-card px-4">Clé d'administration</span>
               </div>
             </div>
 
@@ -139,7 +138,7 @@ export default function AdminLoginPage() {
               <Button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-slate-900 hover:bg-black text-white font-bold h-14 rounded-xl transition-all shadow-xl shadow-slate-200"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-14 rounded-xl transition-all shadow-xl shadow-primary/20"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : 'INITIALISER LA SESSION'}
               </Button>
@@ -147,7 +146,7 @@ export default function AdminLoginPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-[10px] text-slate-300 font-bold uppercase tracking-widest">
+        <p className="text-center text-[10px] text-white/20 font-bold uppercase tracking-[0.2em]">
           © 2026 IVOIRE TECH PROTOCOL
         </p>
       </div>

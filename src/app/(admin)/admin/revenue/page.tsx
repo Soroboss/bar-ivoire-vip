@@ -34,7 +34,7 @@ import {
   Area,
   Cell
 } from 'recharts'
-import { supabaseService } from '@/services/supabaseService'
+import { insforgeService } from '@/services/insforgeService'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { motion, AnimatePresence, Variants } from "framer-motion"
@@ -49,7 +49,7 @@ export default function SaaSRevenuePage() {
     setIsMounted(true)
     async function loadData() {
       try {
-        const data = await supabaseService.getSaaSTransactions()
+        const data = await insforgeService.getSaaSTransactions()
         setTransactions(data)
         const total = data.reduce((sum, t) => sum + Number(t.amount), 0)
         setTotalMRR(total)
@@ -136,31 +136,31 @@ export default function SaaSRevenuePage() {
       {/* KPI Financial Grid */}
       <motion.div 
         variants={itemVariants}
-        className="grid gap-6 md:grid-cols-3"
+        className="grid gap-8 md:grid-cols-3"
       >
         {[
           { label: 'Revenu Cumulé (MRR)', value: `${totalMRR.toLocaleString()} F`, icon: TrendingUp, trend: 'Net Orbital', color: '#C5A059', bg: 'from-primary/10', pulse: true },
           { label: 'Abonnements Enrôlés', value: transactions.length, icon: Globe, trend: '+12% ce mois', color: '#3B82F6', bg: 'from-blue-500/10' },
           { label: 'Panier Moyen Strat.', value: `${transactions.length > 0 ? Math.round(totalMRR / transactions.length).toLocaleString() : 0} F`, icon: Zap, trend: 'Optimisation Auto', color: '#F97316', bg: 'from-orange-500/10' },
         ].map((kpi, i) => (
-          <Card key={i} className="bg-card border-border group hover:border-primary/40 transition-all duration-500 rounded-[2.5rem] overflow-hidden shadow-sm">
+          <Card key={i} className="premium-card rounded-[2.5rem] border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl group hover:border-primary/40 transition-all duration-500 overflow-hidden">
             <div className={`absolute -bottom-10 -right-10 h-32 w-32 bg-gradient-to-br ${kpi.bg} to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 blur-2xl`} />
-            <CardContent className="p-8 relative">
-              <div className="flex justify-between items-start mb-6">
-                <div className="h-14 w-14 rounded-2xl bg-muted border border-border flex items-center justify-center transition-transform group-hover:scale-110 duration-500" style={{ color: kpi.color }}>
+            <CardContent className="p-10 relative">
+              <div className="flex justify-between items-start mb-8">
+                <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-6 duration-500 shadow-xl" style={{ color: kpi.color }}>
                    <kpi.icon className="h-7 w-7" />
                 </div>
-                <Badge variant="outline" className="border-border text-muted-foreground text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 bg-muted/50">Live Monitor</Badge>
+                <Badge className="border-white/10 text-muted-foreground/40 text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 bg-white/5 italic">Live Monitor</Badge>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.2em] mb-1">{kpi.label}</p>
+                <p className="text-[10px] text-muted-foreground/40 uppercase font-black tracking-[0.3em] mb-2 italic">{kpi.label}</p>
                 <div className="flex items-end justify-between">
-                  <h3 className="text-4xl font-black text-foreground tracking-tighter leading-none">{kpi.value}</h3>
+                  <h3 className="text-4xl font-black text-white tracking-tighter leading-none italic">{kpi.value}</h3>
                   <div className="flex flex-col items-end">
-                    <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1 mb-1" style={{ color: kpi.color }}>
+                    <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1 mb-2 italic" style={{ color: kpi.color }}>
                        <ArrowUpRight className="h-3 w-3" /> {kpi.trend}
                     </span>
-                    {kpi.pulse && <div className="h-1 w-12 bg-gradient-to-r from-transparent via-primary/40 to-transparent rounded-full animate-pulse" />}
+                    {kpi.pulse && <div className="h-1.5 w-16 bg-gradient-to-r from-transparent via-primary/60 to-transparent rounded-full animate-pulse shadow-[0_0_10px_rgba(212,175,55,0.4)]" />}
                   </div>
                 </div>
               </div>
@@ -169,70 +169,71 @@ export default function SaaSRevenuePage() {
         ))}
       </motion.div>
 
-      <div className="grid gap-8 lg:grid-cols-5">
+      <div className="grid gap-10 lg:grid-cols-5">
         {/* Performance Area Chart */}
         <motion.div variants={itemVariants} className="lg:col-span-3">
-          <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden flex flex-col h-full shadow-sm">
-            <CardHeader className="p-8 border-b border-border bg-muted/20">
+          <Card className="premium-card rounded-[2.5rem] border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl flex flex-col h-full overflow-hidden">
+            <CardHeader className="p-10 border-b border-white/5 bg-white/[0.02]">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
-                     <TrendingUp className="h-6 w-6 text-primary" />
+                <div className="flex items-center gap-5">
+                  <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-xl">
+                     <TrendingUp className="h-7 w-7 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-foreground text-2xl font-black uppercase italic">Performance <span className="gold-gradient-text">Réseau</span></CardTitle>
-                    <CardDescription className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em] italic mt-1">Vitesse de croissance quotidienne</CardDescription>
+                    <CardTitle className="text-white text-2xl font-black uppercase italic tracking-tighter leading-none">Performance <span className="gold-gradient-text">Réseau</span></CardTitle>
+                    <CardDescription className="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em] italic mt-2">Vitesse de croissance quotidienne</CardDescription>
                   </div>
                 </div>
                 <div className="group relative">
-                   <div className="flex items-center gap-2 bg-secondary px-4 py-2 rounded-xl border border-border group-hover:border-primary/30 transition-all cursor-pointer">
-                      <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Optimisé</span>
+                   <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 group-hover:border-primary/30 transition-all cursor-pointer">
+                      <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 italic">Optimisé</span>
                    </div>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-8 pt-12 flex-1 flex flex-col justify-end">
-              <div className="h-[320px] w-full relative z-10">
+            <CardContent className="p-10 pt-16 flex-1 flex flex-col justify-end">
+              <div className="h-[340px] w-full relative z-10">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={REVENUE_BY_DAY}>
                     <defs>
                       <linearGradient id="finColor" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4}/>
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.6}/>
                         <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.02)" vertical={false} />
                     <XAxis 
                       dataKey="date" 
-                      stroke="#94A3B8" 
-                      fontSize={9} 
+                      stroke="rgba(255,255,255,0.2)" 
+                      fontSize={10} 
                       tickLine={false} 
                       axisLine={false} 
-                      dy={15} 
+                      dy={20} 
                       fontStyle="italic"
                       fontWeight="900" 
                     />
                     <YAxis hide />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: '#FFFFFF', 
-                        border: '1px solid #E2E8F0', 
-                        borderRadius: '20px', 
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                        backgroundColor: 'rgba(10, 15, 30, 0.95)', 
+                        border: '1px solid rgba(212, 175, 55, 0.2)', 
+                        borderRadius: '24px', 
+                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                        backdropFilter: 'blur(16px)'
                       }}
                       itemStyle={{ color: 'var(--primary)', fontWeight: '900', fontSize: '14px', fontStyle: 'italic' }}
-                      labelStyle={{ color: '#1E293B', marginBottom: '6px', fontSize: '9px', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.2em' }}
-                      cursor={{ stroke: 'rgba(197,160,89,0.2)', strokeWidth: 2 }}
+                      labelStyle={{ color: 'rgba(255,255,255,0.4)', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.2em', fontStyle: 'italic' }}
+                      cursor={{ stroke: 'rgba(212, 175, 55, 0.15)', strokeWidth: 2 }}
                     />
                     <Area 
                       type="monotone" 
                       dataKey="amount" 
                       stroke="var(--primary)" 
-                      strokeWidth={4} 
+                      strokeWidth={5} 
                       fillOpacity={1} 
                       fill="url(#finColor)"
-                      animationDuration={2000}
+                      animationDuration={3000}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -243,34 +244,36 @@ export default function SaaSRevenuePage() {
 
         {/* Transaction Orbital Feed */}
         <motion.div variants={itemVariants} className="lg:col-span-2">
-          <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden flex flex-col h-full shadow-sm">
-            <CardHeader className="p-8 border-b border-border bg-muted/20">
+          <Card className="premium-card rounded-[2.5rem] border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl flex flex-col h-full overflow-hidden">
+            <CardHeader className="p-10 border-b border-white/5 bg-white/[0.02]">
               <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-foreground text-xl font-black uppercase italic">Flux <span className="gold-gradient-text">Temps Réel</span></CardTitle>
-                  <CardDescription className="text-muted-foreground text-[9px] font-bold uppercase tracking-[0.2em] italic">Données Interceptées</CardDescription>
+                <div className="space-y-2">
+                  <CardTitle className="text-white text-xl font-black uppercase italic tracking-tighter">Flux <span className="gold-gradient-text">Temps Réel</span></CardTitle>
+                  <CardDescription className="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em] italic">Données Interceptées</CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <div className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)] animate-pulse" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.6)] animate-pulse" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1 overflow-y-auto max-h-[440px] scrollbar-hide">
+            <CardContent className="p-0 flex-1 overflow-y-auto max-h-[460px] scrollbar-hide">
               <Table>
-                <TableHeader className="bg-muted/30 border-b border-border">
+                <TableHeader className="bg-white/[0.03] border-b border-white/5">
                   <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="text-primary uppercase text-[8px] font-black tracking-widest pl-8 py-6">Unité / Date</TableHead>
-                    <TableHead className="text-right text-primary uppercase text-[8px] font-black tracking-widest pr-8 py-6">Volume XOF</TableHead>
+                    <TableHead className="text-primary uppercase text-[9px] font-black tracking-widest pl-10 py-8 italic">Unité / Date</TableHead>
+                    <TableHead className="text-right text-primary uppercase text-[9px] font-black tracking-widest pr-10 py-8 italic">Volume XOF</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <AnimatePresence mode="popLayout">
                     {transactions.length === 0 ? (
-                       <TableRow className="hover:bg-transparent">
-                        <TableCell colSpan={2} className="text-center py-24">
-                          <div className="flex flex-col items-center gap-4 opacity-20">
-                            <Sparkles className="h-10 w-10 text-primary" />
-                            <p className="text-sm font-black uppercase text-muted-foreground tracking-widest italic text-center px-6 leading-relaxed">Aucune transaction interceptée sur le réseau actuel</p>
+                       <TableRow className="hover:bg-transparent border-none">
+                        <TableCell colSpan={2} className="text-center py-32">
+                          <div className="flex flex-col items-center gap-6 opacity-20">
+                            <div className="h-20 w-20 rounded-[1.8rem] bg-white/5 flex items-center justify-center">
+                              <Sparkles className="h-10 w-10 text-primary" />
+                            </div>
+                            <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.4em] italic text-center px-12 leading-relaxed">Aucune transaction interceptée sur le réseau actuel</p>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -280,31 +283,31 @@ export default function SaaSRevenuePage() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: idx * 0.05 }}
-                        className="border-border hover:bg-muted/50 transition-all group cursor-default"
+                        className="border-white/5 hover:bg-white/[0.02] transition-all duration-500 group cursor-default"
                       >
-                        <TableCell className="pl-8 py-5">
-                          <div className="flex items-center gap-4">
-                            <div className="h-11 w-11 rounded-[1.25rem] bg-gradient-to-br from-primary/10 to-transparent border border-border flex items-center justify-center text-primary group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
-                               <Building2 className="h-5 w-5" />
+                        <TableCell className="pl-10 py-7">
+                          <div className="flex items-center gap-5">
+                            <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 shadow-xl group-hover:rotate-6">
+                               <Building2 className="h-7 w-7" />
                             </div>
                             <div>
-                              <p className="font-black text-foreground text-sm group-hover:text-primary transition-colors uppercase italic tracking-tighter leading-none mb-1.5">{trx.establishments?.name || 'UNITÉ INCONNUE'}</p>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className={`
-                                  text-[7px] px-2 py-0 border-border font-black uppercase tracking-widest
-                                  ${trx.plan === 'VIP' ? 'text-primary border-primary/20 bg-primary/5' : 'text-muted-foreground'}
+                              <p className="font-black text-white text-base group-hover:text-primary transition-colors uppercase italic tracking-tighter leading-none mb-2">{trx.establishments?.name || 'UNITÉ INCONNUE'}</p>
+                              <div className="flex items-center gap-3">
+                                <Badge className={`
+                                  text-[8px] px-3 py-1 rounded-lg border font-black uppercase tracking-widest italic
+                                  ${trx.plan === 'VIP' ? 'text-primary border-primary/20 bg-primary/10 shadow-[0_0_10px_rgba(212,175,55,0.2)]' : 'text-muted-foreground/30 border-white/5 bg-white/5'}
                                 `}>
                                    {trx.plan}
                                 </Badge>
-                                <span className="text-[8px] text-muted-foreground font-semibold opacity-60 uppercase">{format(new Date(trx.created_at), 'dd MMM • HH:mm')}</span>
+                                <span className="text-[9px] text-muted-foreground/20 font-black uppercase italic tracking-tighter">{format(new Date(trx.created_at), 'dd MMM • HH:mm')}</span>
                               </div>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right pr-8 py-5">
-                           <p className="text-lg font-black text-foreground tracking-tighter italic group-hover:text-primary transition-all">+{Number(trx.amount).toLocaleString()} F</p>
-                           <p className="text-[8px] text-emerald-600 font-black uppercase tracking-widest flex items-center justify-end gap-1">
-                             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> SÉCURISÉ
+                        <TableCell className="text-right pr-10 py-7">
+                           <p className="text-2xl font-black text-white tracking-tighter italic group-hover:text-primary transition-all duration-500">+{Number(trx.amount).toLocaleString()} F</p>
+                           <p className="text-[9px] text-emerald-500/50 font-black uppercase tracking-[0.2em] flex items-center justify-end gap-2 italic mt-1">
+                             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /> SÉCURISÉ
                            </p>
                         </TableCell>
                       </motion.tr>
@@ -313,9 +316,9 @@ export default function SaaSRevenuePage() {
                 </TableBody>
               </Table>
             </CardContent>
-            <div className="p-6 border-t border-border bg-muted/20">
-               <Button variant="ghost" className="w-full text-muted-foreground hover:text-primary flex items-center justify-center gap-3 font-black text-[9px] uppercase tracking-[0.2em] h-12 rounded-2xl border border-border hover:border-primary/30 transition-all">
-                  Grand Registre des Flux <ChevronRight className="h-3 w-3" />
+            <div className="p-8 border-t border-white/5 bg-white/[0.02]">
+               <Button variant="ghost" className="w-full text-muted-foreground/30 hover:text-primary flex items-center justify-center gap-4 font-black text-[10px] uppercase tracking-[0.3em] h-14 rounded-2xl border border-white/5 hover:border-primary/30 transition-all duration-500 italic">
+                  Grand Registre des Flux <ChevronRight className="h-4 w-4" />
                </Button>
             </div>
           </Card>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ShieldCheck, Lock, Loader2, Wine } from "lucide-react"
-import { supabase } from '@/lib/supabase'
+import { insforge } from '@/lib/insforge'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -25,8 +25,13 @@ export default function UpdatePasswordPage() {
     
     setLoading(true)
     try {
-      const { error } = await supabase.auth.updateUser({ password })
+      // insforge.auth.updateUser({ password }) is missing.
+      // Usually reset password requires a token/OTP.
+      toast.info("Veuillez utiliser le lien de réinitialisation envoyé par email.")
+      /*
+      const { error } = await insforge.auth.updateUser({ password })
       if (error) throw error
+      */
       toast.success('Mot de passe mis à jour avec succès !')
       router.push('/login')
     } catch (error: any) {

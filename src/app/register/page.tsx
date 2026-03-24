@@ -9,14 +9,14 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { useState, Suspense } from 'react'
 import { Loader2, Wine, Building2, User, Phone, Mail, MapPin, ArrowLeft, Check } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
-import { supabaseService } from '@/services/supabaseService'
+import { insforge } from '@/lib/insforge'
+import { insforgeService } from '@/services/insforgeService'
 import { Establishment } from '@/types'
 import { toast } from 'sonner'
 
 const planLabels: Record<string, { name: string; color: string }> = {
   starter: { name: 'Starter — 15 000 FCFA/mois', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  business: { name: 'Business — 35 000 FCFA/mois', color: 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20' },
+  business: { name: 'Business — 35 000 FCFA/mois', color: 'bg-primary/10 text-primary border-primary/20' },
   vip: { name: 'VIP Premium — 75 000 FCFA/mois', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
 }
 
@@ -56,25 +56,23 @@ function RegisterForm() {
     try {
       // Créer le compte avec un mot de passe temporaire (le partenaire le créera après validation)
       const tempPassword = `TMP_${crypto.randomUUID()}_${Date.now()}`
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await insforge.auth.signUp({
         email: formData.email,
-        password: tempPassword,
-        options: {
-          data: { full_name: formData.fullName },
-        },
+        password: tempPassword
       })
       if (error) throw error
 
       // Créer l'établissement en Pending
-      if (data.user) {
-        await supabaseService.createEstablishment({
+      const user = data?.user
+      if (user) {
+        await insforgeService.createEstablishment({
           name: formData.barName,
           owner: formData.fullName,
           phone: formData.phone,
           whatsapp: formData.phone,
           location: formData.location || 'À préciser',
           type: 'Bar VIP',
-          user_id: data.user.id,
+          user_id: user.id,
           plan: (planToDb[selectedPlan] || 'Trial') as Establishment['plan'],
         })
       }
@@ -91,29 +89,29 @@ function RegisterForm() {
   // Écran de succès
   if (success) {
     return (
-      <div className="min-h-screen bg-[#0F0F1A] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 selection:bg-primary/20">
         <div className="max-w-md w-full text-center space-y-8 animate-in fade-in zoom-in duration-500">
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-green-500 to-green-600 text-white shadow-2xl shadow-green-500/20 mx-auto">
             <Check className="h-10 w-10" />
           </div>
           <div className="space-y-3">
-            <h1 className="text-3xl font-black text-white">Inscription reçue ! 🎉</h1>
-            <p className="text-[#A0A0B8] leading-relaxed">
-              Votre demande pour <span className="text-[#D4AF37] font-bold">"{formData.barName}"</span> a été soumise. 
+            <h1 className="text-3xl font-black text-white uppercase tracking-tight">Inscription reçue ! 🎉</h1>
+            <p className="text-muted-foreground leading-relaxed">
+              Votre demande pour <span className="text-primary font-bold">"{formData.barName}"</span> a été soumise. 
               Nos administrateurs valideront votre compte sous <span className="text-white font-bold">2 heures maximum</span>.
             </p>
-            <p className="text-[#A0A0B8] text-sm">
+            <p className="text-muted-foreground text-sm">
               Vous recevrez un email à <span className="text-white font-bold">{formData.email}</span> avec un lien pour créer votre mot de passe et accéder à votre espace.
             </p>
           </div>
           <div className="pt-4 space-y-3">
             <Link href="https://wa.me/2250102030405" target="_blank">
-              <Button className="w-full bg-[#D4AF37] hover:bg-[#A68226] text-[#1A1A2E] font-bold py-6 rounded-xl">
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-6 rounded-xl shadow-lg shadow-primary/10">
                 Contacter le support VIP
               </Button>
             </Link>
             <Link href="/">
-              <Button variant="ghost" className="w-full text-[#A0A0B8] hover:text-white">
+              <Button variant="ghost" className="w-full text-muted-foreground hover:text-white">
                 <ArrowLeft className="h-4 w-4 mr-2" /> Retour à l'accueil
               </Button>
             </Link>
@@ -124,98 +122,98 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F0F1A] flex items-center justify-center p-6">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#D4AF37] opacity-[0.03] blur-[120px] rounded-full" />
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 selection:bg-primary/20">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
       </div>
 
       <div className="w-full max-w-lg space-y-8 relative z-10">
         {/* Header */}
         <div className="text-center space-y-3">
-          <Link href="/" className="inline-flex items-center gap-2 text-[#A0A0B8] hover:text-white text-sm transition-colors mb-4">
+          <Link href="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary text-sm transition-colors mb-4 uppercase font-bold tracking-widest">
             <ArrowLeft className="h-4 w-4" /> Retour
           </Link>
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#D4AF37] to-[#A68226] text-[#1A1A2E] shadow-2xl shadow-[#D4AF37]/20">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-primary text-primary-foreground shadow-2xl shadow-primary/20">
             <Wine className="h-8 w-8" />
           </div>
-          <h1 className="text-3xl font-black tracking-tighter text-white">
-            Rejoignez <span className="text-[#D4AF37]">IVOIRE BAR VIP</span>
+          <h1 className="text-4xl font-black tracking-tighter text-white uppercase">
+            Rejoignez <span className="text-primary">IVOIRE BAR VIP</span>
           </h1>
-          <Badge className={`${planInfo.color} border uppercase text-[10px] font-black px-3`}>
+          <Badge className={`${planInfo.color} border uppercase text-[10px] font-black px-3 py-1 ring-1 ring-white/5`}>
             Forfait : {planInfo.name}
           </Badge>
         </div>
 
         {/* Form */}
-        <Card className="bg-[#1A1A2E]/50 border-[#3A3A5A] backdrop-blur-xl shadow-2xl border-t-[#D4AF37]/50 border-t-2">
-          <CardContent className="pt-8 pb-8">
+        <Card className="bg-card/50 border-white/5 backdrop-blur-3xl shadow-2xl border-t-primary/50 border-t-2 rounded-[2rem] overflow-hidden">
+          <CardContent className="pt-10 pb-10 px-8">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="barName" className="text-[#A0A0B8]">Nom de l'établissement *</Label>
+                <Label htmlFor="barName" className="text-muted-foreground font-bold text-[10px] uppercase ml-1 tracking-widest">Nom de l'établissement *</Label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                   <Input id="barName" placeholder="Ex: Le Maquis des VIP" required
                     value={formData.barName} onChange={update('barName')}
-                    className="bg-[#0F0F1A] border-[#3A3A5A] pl-10 text-white focus:border-[#D4AF37]" />
+                    className="bg-white/5 border-white/5 h-12 pl-12 rounded-xl text-white focus:ring-primary/20 transition-all font-bold" />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-[#A0A0B8]">Nom complet du gérant *</Label>
+                <Label htmlFor="fullName" className="text-muted-foreground font-bold text-[10px] uppercase ml-1 tracking-widest">Nom complet du gérant *</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                   <Input id="fullName" placeholder="Jean Kouadio" required
                     value={formData.fullName} onChange={update('fullName')}
-                    className="bg-[#0F0F1A] border-[#3A3A5A] pl-10 text-white focus:border-[#D4AF37]" />
+                    className="bg-white/5 border-white/5 h-12 pl-12 rounded-xl text-white focus:ring-primary/20 transition-all font-bold" />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-[#A0A0B8]">Numéro WhatsApp *</Label>
+                <Label htmlFor="phone" className="text-muted-foreground font-bold text-[10px] uppercase ml-1 tracking-widest">Numéro WhatsApp *</Label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                   <Input id="phone" type="tel" placeholder="07 01 02 03 04" required
                     value={formData.phone} onChange={update('phone')}
-                    className="bg-[#0F0F1A] border-[#3A3A5A] pl-10 text-white focus:border-[#D4AF37]" />
+                    className="bg-white/5 border-white/5 h-12 pl-12 rounded-xl text-white focus:ring-primary/20 transition-all font-bold" />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#A0A0B8]">Adresse email *</Label>
+                <Label htmlFor="email" className="text-muted-foreground font-bold text-[10px] uppercase ml-1 tracking-widest">Adresse email *</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                   <Input id="email" type="email" placeholder="contact@monbar.ci" required
                     value={formData.email} onChange={update('email')}
-                    className="bg-[#0F0F1A] border-[#3A3A5A] pl-10 text-white focus:border-[#D4AF37]" />
+                    className="bg-white/5 border-white/5 h-12 pl-12 rounded-xl text-white focus:ring-primary/20 transition-all font-bold" />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location" className="text-[#A0A0B8]">Localisation (quartier, ville)</Label>
+                <Label htmlFor="location" className="text-muted-foreground font-bold text-[10px] uppercase ml-1 tracking-widest">Localisation (quartier, ville)</Label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B8]" />
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                   <Input id="location" placeholder="Cocody, Abidjan"
                     value={formData.location} onChange={update('location')}
-                    className="bg-[#0F0F1A] border-[#3A3A5A] pl-10 text-white focus:border-[#D4AF37]" />
+                    className="bg-white/5 border-white/5 h-12 pl-12 rounded-xl text-white focus:ring-primary/20 transition-all font-bold" />
                 </div>
               </div>
 
               <Button type="submit" disabled={loading}
-                className="w-full bg-[#D4AF37] hover:bg-[#A68226] text-[#1A1A2E] font-bold py-6 rounded-xl shadow-lg shadow-[#D4AF37]/20 text-base">
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black py-7 rounded-xl shadow-lg shadow-primary/10 text-base uppercase tracking-tighter">
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Soumettre mon inscription"}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-xs text-[#3A3A5A]">
+              <p className="text-xs text-muted-foreground/40 font-bold uppercase tracking-widest">
                 Déjà inscrit ?{' '}
-                <Link href="/login" className="text-[#D4AF37] hover:underline font-bold">Se connecter</Link>
+                <Link href="/login" className="text-primary hover:underline font-black outline-none">Se connecter</Link>
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <p className="text-center text-[10px] text-[#3A3A5A] font-medium uppercase tracking-widest">
+        <p className="text-center text-[10px] text-white/10 font-black uppercase tracking-[0.4em]">
           Sécurisé par IVOIRE TECH • © 2026 IVOIRE BAR VIP
         </p>
       </div>
@@ -226,8 +224,8 @@ function RegisterForm() {
 export default function RegisterPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0F0F1A] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#D4AF37]" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     }>
       <RegisterForm />

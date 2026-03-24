@@ -49,41 +49,42 @@
 }
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #1E293B; /* Slate 800 for better contrast */
-  --card: #FFFFFF;
-  --card-foreground: #1E293B;
-  --popover: #FFFFFF;
-  --popover-foreground: #1E293B;
-  --primary: #2563EB; /* Clean, trustable Indigo Blue */
-  --primary-foreground: #FFFFFF;
-  --secondary: #F8FAFC;
-  --secondary-foreground: #1E293B;
-  --muted: #F8FAFC;
-  --muted-foreground: #64748B;
-  --accent: #F1F5F9;
-  --accent-foreground: #1E293B;
-  --destructive: #EF4444;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #2563EB;
-  --radius: 0.75rem;
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #1E293B;
-  --sidebar-primary: #2563EB;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F8FAFC;
-  --sidebar-accent-foreground: #2563EB;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #2563EB;
+  --background: #0F0F1A;
+  --foreground: #FFFFFF;
+  --card: #1A1A2E;
+  --card-foreground: #FFFFFF;
+  --popover: #1A1A2E;
+  --popover-foreground: #FFFFFF;
+  --primary: #D4AF37; /* Gold VIP */
+  --primary-foreground: #1A1A2E;
+  --secondary: #252542;
+  --secondary-foreground: #FFFFFF;
+  --muted: #252542;
+  --muted-foreground: #A0A0B8; /* Improved readability on dark */
+  --accent: #D4AF37;
+  --accent-foreground: #1A1A2E;
+  --destructive: #FF4D4D;
+  --border: #3A3A5A;
+  --input: #3A3A5A;
+  --ring: #D4AF37;
+  --radius: 1rem;
+  --sidebar: #0A0A15;
+  --sidebar-foreground: #A0A0B8;
+  --sidebar-primary: #D4AF37;
+  --sidebar-primary-foreground: #1A1A2E;
+  --sidebar-accent: #1A1A2E;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #3A3A5A;
+  --sidebar-ring: #D4AF37;
 }
 
 .dark {
-  --background: #FFFFFF; /* Staying light as per user request */
-  --foreground: #1E293B;
-  --card: #FFFFFF;
-  --card-foreground: #1E293B;
-  --border: #E2E8F0;
+  --background: #0F0F1A;
+  --foreground: #FFFFFF;
+  --card: #1A1A2E;
+  --card-foreground: #FFFFFF;
+  --border: #3A3A5A;
+  --muted-foreground: #A0A0B8;
 }
 
 @layer utilities {
@@ -177,6 +178,6 @@
     @apply font-sans;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight text-slate-900;
+    @apply font-bold tracking-tight text-foreground;
   }
 }

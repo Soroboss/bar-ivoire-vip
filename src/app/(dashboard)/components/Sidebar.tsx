@@ -22,8 +22,9 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useAppContext } from '@/context/AppContext'
-import { supabase } from '@/lib/supabase'
+import { insforge } from '@/lib/insforge'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const MENU_ITEMS = [
   { icon: LayoutDashboard, label: 'Tableau de bord', href: '/dashboard', permission: 'dashboard' },
@@ -44,7 +45,7 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut()
+      await insforge.auth.signOut()
       toast.success('Déconnexion réussie')
       router.push('/login')
     } catch (error) {
@@ -63,34 +64,35 @@ export function Sidebar() {
       </Button>
 
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-[#020617] border-r border-white/10 transform transition-transform duration-500 ease-out lg:translate-x-0 flex flex-col font-montserrat shadow-[10px_0_30px_rgba(0,0,0,0.5)]",
+        "fixed inset-y-0 left-0 z-40 w-72 bg-sidebar border-r border-white/5 transform transition-transform duration-500 ease-out lg:translate-x-0 flex flex-col font-montserrat shadow-[20px_0_50px_rgba(0,0,0,0.8)]",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-[50px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 blur-[80px] pointer-events-none" />
 
-        <div className="p-6 border-b border-white/5 bg-white/[0.02] relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-blue-600/20 rounded-xl flex items-center justify-center text-blue-400 font-bold text-lg border border-blue-500/30 shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+        <div className="p-10 border-b border-white/5 bg-white/[0.02] relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-xl border border-primary/30 shadow-[0_0_20px_rgba(212,175,55,0.3)] italic">
               I
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-white uppercase">
-                Ivoire <span className="text-blue-500">VIP</span>
+              <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">
+                Ivoire <span className="gold-gradient-text">VIP</span>
               </h1>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 mt-1 italic">SaaS Opérationnel</p>
             </div>
           </div>
           {establishment && (
-            <div className="mt-5 flex items-center gap-3 bg-white/5 p-2 rounded-lg border border-white/10 backdrop-blur-sm">
-              <Badge variant="outline" className="bg-blue-600 border-none text-white text-[9px] font-bold px-2 py-0.5 shadow-[0_0_10px_rgba(37,99,235,0.4)]">
+            <div className="mt-8 flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 backdrop-blur-md shadow-xl group hover:border-primary/20 transition-all duration-500">
+              <Badge className="bg-primary text-primary-foreground text-[9px] font-black px-3 py-1 rounded-lg shadow-lg shadow-primary/20 italic tracking-widest uppercase">
                 {establishment.plan}
               </Badge>
-              <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest truncate">{establishment.name}</span>
+              <span className="text-[10px] text-white font-black uppercase tracking-[0.2em] truncate italic">{establishment.name}</span>
             </div>
           )}
         </div>
 
-        <nav className="flex-1 px-4 space-y-2 overflow-y-auto py-6 relative z-10 scrollbar-hide">
-          <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-6">Navigation</p>
+        <nav className="flex-1 px-6 space-y-2 overflow-y-auto py-8 relative z-10 scrollbar-hide">
+          <p className="px-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-8 italic">Navigation Centrale</p>
           {MENU_ITEMS.filter(item => {
             if (userRole === 'SUPER_ADMIN') return true
             if (!userPermissions) return true 
@@ -103,34 +105,37 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
+                  "flex items-center gap-5 px-5 py-4 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-1",
                   isActive 
-                    ? "bg-blue-600/10 border-blue-500/30 border shadow-[0_0_20px_rgba(37,99,235,0.15)] text-blue-400" 
-                    : "text-slate-400 border border-transparent hover:bg-white/5 hover:text-white"
+                    ? "bg-primary/10 border-primary/30 border shadow-[0_0_30px_rgba(212,175,55,0.2)] text-primary" 
+                    : "text-muted-foreground/40 border border-transparent hover:bg-white/5 hover:text-white"
                 )}
                 onClick={() => setIsOpen(false)}
               >
                 {isActive && (
-                  <div className="absolute inset-y-0 left-0 w-1 bg-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.8)]" />
+                  <motion.div 
+                    layoutId="active-indicator"
+                    className="absolute inset-y-0 left-0 w-1.5 bg-primary shadow-[0_0_15px_rgba(212,175,55,1)]" 
+                  />
                 )}
                 <Icon className={cn(
-                  "h-5 w-5 transition-all duration-300",
-                  isActive ? "text-blue-400 scale-110" : "text-slate-500 group-hover:text-white"
+                  "h-5 w-5 transition-all duration-500",
+                  isActive ? "text-primary scale-110" : "text-muted-foreground/40 group-hover:text-white group-hover:scale-110"
                 )} />
-                <span className="text-sm font-bold tracking-wide">{item.label}</span>
+                <span className="text-xs font-black tracking-[0.1em] uppercase italic">{item.label}</span>
               </Link>
             )
           })}
         </nav>
 
-        <div className="p-6 border-t border-white/5 relative z-10 bg-white/[0.01]">
+        <div className="p-8 border-t border-white/5 relative z-10 bg-white/[0.01]">
           <Button
             variant="ghost"
-            className="w-full justify-start text-slate-500 hover:text-red-400 hover:bg-red-500/10 gap-4 rounded-xl h-12 group transition-all"
+            className="w-full justify-start text-white/20 hover:text-red-500 hover:bg-red-500/10 gap-5 rounded-2xl h-14 group transition-all duration-500 border border-transparent hover:border-red-500/20"
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-bold uppercase tracking-widest">Quitter la session</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] italic">Terminer Session</span>
           </Button>
         </div>
       </aside>

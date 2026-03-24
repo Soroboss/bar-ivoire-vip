@@ -1,83 +1,10 @@
-import { supabase } from '@/lib/supabase'
+import { insforge } from '@/lib/insforge'
 import { 
   Establishment, Product, Order, Client, Staff, 
   Expense, SaasTransaction, Table, Profile 
 } from '@/types'
 
-// Database row types (Snake Case)
-interface EstablishmentRow {
-  id: string
-  name: string
-  owner: string
-  phone: string
-  location: string
-  type: string
-  logo_url?: string
-  currency: string
-  tax_rate: number
-  invoice_note: string
-  status: 'Pending' | 'Active' | 'Suspended'
-  trial_ends_at: string
-  plan: 'Trial' | 'Business' | 'VIP' | 'Enterprise'
-  created_at: string
-  user_id: string
-}
-
-interface ProductRow {
-  id: string
-  establishment_id: string
-  name: string
-  category: string
-  price: number
-  stock: number
-  unit: string
-  image_url?: string
-}
-
-interface OrderRow {
-  id: string
-  establishment_id: string
-  table_id: string
-  total_amount: number
-  status: string
-  created_at: string
-}
-
-interface OrderItemRow {
-  id: string
-  order_id: string
-  product_id: string
-  name: string
-  quantity: number
-  unit_price: number
-}
-
-interface TableRow {
-  id: string
-  establishment_id: string
-  name: string
-  status: 'libre' | 'occupée'
-  capacity: number
-}
-
-interface ExpenseRow {
-  id: string
-  establishment_id: string
-  description: string
-  amount: number
-  category: string
-  date: string
-  status?: string
-}
-
-interface OrderInput {
-  establishment_id: string
-  tableId: string
-  total: number
-  status: string
-  items: { productId: string; name: string; quantity: number; price: number }[]
-}
-
+// Mappers
 const mapEstablishment = (est: any): Establishment => ({
   id: est.id,
   name: est.name || 'Sans nom',
@@ -89,6 +16,7 @@ const mapEstablishment = (est: any): Establishment => ({
   currency: est.currency || 'XOF',
   taxRate: Number(est.tax_rate) || 0,
   invoiceNote: est.invoice_note || '',
+  whatsapp: est.whatsapp || '',
   status: (est.status || 'Pending') as Establishment['status'],
   trialEndsAt: est.trial_ends_at || new Date().toISOString(),
   plan: (est.plan || 'Trial') as Establishment['plan'],
@@ -96,25 +24,33 @@ const mapEstablishment = (est: any): Establishment => ({
   userId: est.user_id || ''
 })
 
-export const supabaseService = {
+const mapProduct = (p: any): Product => ({
+  id: p.id,
+  name: p.name,
+  category: p.category || 'Général',
+  price: Number(p.selling_price) || 0,
+  stock: p.stock_quantity || 0,
+  unit: p.unit || 'bouteille',
+  image: p.image_url || ''
+})
+
+export const insforgeService = {
   // Establishments
   async getEstablishments(): Promise<Establishment[]> {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('establishments')
       .select('*')
       .order('created_at', { ascending: false })
     if (error) throw error
     
-    return (data as EstablishmentRow[] || []).map(mapEstablishment)
+    return (data || []).map(mapEstablishment)
   },
 
   async createEstablishment(est: Partial<Establishment> & { user_id: string }): Promise<Establishment> {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('establishments')
       .insert([{
         name: est.name,
-        owner: est.owner,
-        phone: est.phone,
         location: est.location,
         type: est.type,
         currency: est.currency || 'XOF',
@@ -122,16 +58,17 @@ export const supabaseService = {
         invoice_note: est.invoiceNote || 'Merci de votre visite !',
         user_id: est.user_id,
         status: 'Pending',
-        plan: est.plan || 'Trial'
+        plan: est.plan || 'Trial',
+        whatsapp: est.whatsapp
       }])
       .select()
       .single()
     if (error) throw error
-    return mapEstablishment(data as EstablishmentRow)
+    return mapEstablishment(data)
   },
 
   async updateEstablishmentStatus(id: string, status: string) {
-    const { error } = await supabase
+    const { error } = await insforge.database
       .from('establishments')
       .update({ status })
       .eq('id', id)
@@ -139,41 +76,59 @@ export const supabaseService = {
   },
 
   async updateEstablishmentPlan(id: string, plan: string) {
-    const { error } = await supabase
+    const { error } = await insforge.database
       .from('establishments')
       .update({ plan })
       .eq('id', id)
     if (error) throw error
   },
 
+  async renewEstablishment(id: string, months: number, plan: string, amount: number) {
+    const trialEndsAt = new Date()
+    trialEndsAt.setMonth(trialEndsAt.getMonth() + months)
+    
+    const { error: updateError } = await insforge.database
+      .from('establishments')
+      .update({ 
+        plan,
+        trial_ends_at: trialEndsAt.toISOString(),
+        status: 'Active'
+      })
+      .eq('id', id)
+    
+    if (updateError) throw updateError
+
+    // Log transaction
+    await insforge.database
+      .from('saas_transactions')
+      .insert([{
+        establishment_id: id,
+        amount,
+        plan,
+        status: 'Completed'
+      }])
+  },
+
   // Products
   async getProducts(establishmentId: string): Promise<Product[]> {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('products')
       .select('*')
       .eq('establishment_id', establishmentId)
     if (error) throw error
     
-    return (data as ProductRow[] || []).map(p => ({
-      id: p.id,
-      name: p.name,
-      category: p.category,
-      price: p.price,
-      stock: p.stock,
-      unit: p.unit,
-      image: p.image_url
-    }))
+    return (data || []).map(mapProduct)
   },
 
   async addProduct(product: Omit<Product, 'id'> & { establishment_id: string }): Promise<Product> {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('products')
       .insert([{
         establishment_id: product.establishment_id,
         name: product.name,
         category: product.category,
-        price: product.price,
-        stock: product.stock,
+        selling_price: product.price,
+        stock_quantity: product.stock,
         unit: product.unit,
         image_url: product.image
       }])
@@ -181,26 +136,17 @@ export const supabaseService = {
       .single()
     if (error) throw error
     
-    const p = data as ProductRow
-    return {
-      id: p.id,
-      name: p.name,
-      category: p.category,
-      price: p.price,
-      stock: p.stock,
-      unit: p.unit,
-      image: p.image_url
-    }
+    return mapProduct(data)
   },
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('products')
       .update({
         name: updates.name,
         category: updates.category,
-        price: updates.price,
-        stock: updates.stock,
+        selling_price: updates.price,
+        stock_quantity: updates.stock,
         unit: updates.unit,
         image_url: updates.image
       })
@@ -209,20 +155,11 @@ export const supabaseService = {
       .single()
     if (error) throw error
     
-    const p = data as ProductRow
-    return {
-      id: p.id,
-      name: p.name,
-      category: p.category,
-      price: p.price,
-      stock: p.stock,
-      unit: p.unit,
-      image: p.image_url
-    }
+    return mapProduct(data)
   },
 
   async deleteProduct(id: string) {
-    const { error } = await supabase
+    const { error } = await insforge.database
       .from('products')
       .delete()
       .eq('id', id)
@@ -230,8 +167,8 @@ export const supabaseService = {
   },
 
   // Orders
-  async createOrder(order: OrderInput) {
-    const { data: orderData, error: orderError } = await supabase
+  async createOrder(order: any) {
+    const { data: orderData, error: orderError } = await insforge.database
       .from('orders')
       .insert([{
         establishment_id: order.establishment_id,
@@ -244,24 +181,24 @@ export const supabaseService = {
 
     if (orderError) throw orderError
 
-    const items = order.items.map((item) => ({
-      order_id: (orderData as OrderRow).id,
+    const items = order.items.map((item: any) => ({
+      order_id: (orderData as any).id,
       product_id: item.productId,
       name: item.name,
       quantity: item.quantity,
       unit_price: item.price
     }))
 
-    const { error: itemsError } = await supabase
+    const { error: itemsError } = await insforge.database
       .from('order_items')
       .insert(items)
 
     if (itemsError) throw itemsError
-    return orderData as OrderRow
+    return orderData
   },
 
   async getOrders(establishmentId: string): Promise<Order[]> {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('orders')
       .select('*, order_items(*)')
       .eq('establishment_id', establishmentId)
@@ -269,13 +206,13 @@ export const supabaseService = {
     
     if (error) throw error
     
-    return ((data as (OrderRow & { order_items: OrderItemRow[] })[]) || []).map((o) => ({
+    return ((data as any[]) || []).map((o) => ({
       id: o.id,
       tableId: o.table_id,
       total: Number(o.total_amount),
       status: (o.status === 'en cours' ? 'pending' : o.status === 'payée' ? 'completed' : 'cancelled') as Order['status'],
       createdAt: o.created_at,
-      items: (o.order_items || []).map((i) => ({
+      items: (o.order_items || []).map((i: any) => ({
         productId: i.product_id,
         name: i.name || 'Produit',
         quantity: i.quantity,
@@ -286,14 +223,14 @@ export const supabaseService = {
 
   // Tables
   async getTables(establishmentId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('tables')
       .select('*')
       .eq('establishment_id', establishmentId)
       .order('name', { ascending: true })
     
     if (error) throw error
-    return ((data as TableRow[]) || []).map((t) => ({
+    return ((data as any[]) || []).map((t) => ({
       id: t.id,
       name: t.name,
       status: (t.status === 'libre' ? 'Libre' : 'Occupée') as 'Libre' | 'Occupée',
@@ -301,14 +238,14 @@ export const supabaseService = {
     }))
   },
 
-  async addTable(table: Omit<TableRow, 'id'>) {
-    const { data, error } = await supabase
+  async addTable(table: any) {
+    const { data, error } = await insforge.database
       .from('tables')
       .insert([table])
       .select()
       .single()
     if (error) throw error
-    const t = data as TableRow
+    const t = data as any
     return {
       id: t.id,
       name: t.name,
@@ -319,8 +256,8 @@ export const supabaseService = {
 
   // Clients
   async getClients(establishmentId: string): Promise<Client[]> {
-    const { data, error } = await supabase
-      .from('clients')
+    const { data, error } = await insforge.database
+      .from('clients_vip')
       .select('*')
       .eq('establishment_id', establishmentId)
     if (error) throw error
@@ -328,8 +265,8 @@ export const supabaseService = {
   },
 
   async addClient(client: Omit<Client, 'id' | 'points' | 'tier'> & { establishment_id: string }): Promise<Client> {
-    const { data, error } = await supabase
-      .from('clients')
+    const { data, error } = await insforge.database
+      .from('clients_vip')
       .insert([client])
       .select()
       .single()
@@ -339,119 +276,51 @@ export const supabaseService = {
 
   // Staff
   async getStaff(establishmentId: string): Promise<Staff[]> {
-    const { data, error } = await supabase
-      .from('staff')
+    const { data, error } = await insforge.database
+      .from('profiles')
       .select('*')
       .eq('establishment_id', establishmentId)
     if (error) throw error
-    return (data || []) as Staff[]
+    return (data || []).map((s: any) => ({
+      id: s.id,
+      name: s.full_name,
+      role: s.role,
+      status: 'Present'
+    })) as Staff[]
   },
 
   async updateStaffStatus(id: string, status: string) {
-    const { error } = await supabase
-      .from('staff')
+    const { error } = await insforge.database
+      .from('profiles')
       .update({ status })
       .eq('id', id)
     if (error) throw error
   },
 
-  // SaaS Transactions (Global)
-  async getSaaSTransactions(): Promise<SaasTransaction[]> {
-    const { data, error } = await supabase
-      .from('saas_transactions')
-      .select('*, establishments(name)')
-      .order('created_at', { ascending: false })
-    if (error) throw error
-    return (data as SaasTransaction[]) || []
-  },
-
-  // Expenses (Establishment Level)
+  // Expenses
   async getExpenses(establishmentId: string): Promise<Expense[]> {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('expenses')
       .select('*')
       .eq('establishment_id', establishmentId)
       .order('date', { ascending: false })
     if (error) throw error
-    return (data as ExpenseRow[] || []).map(e => ({
-      id: e.id,
-      establishment_id: e.establishment_id,
-      description: e.description,
-      amount: e.amount,
-      category: e.category,
-      date: e.date,
-      status: e.status
-    }))
+    return (data || []) as Expense[]
   },
 
   async addExpense(expense: Omit<Expense, 'id'>): Promise<Expense> {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('expenses')
-      .insert([{
-        establishment_id: expense.establishment_id,
-        description: expense.description,
-        amount: expense.amount,
-        category: expense.category,
-        date: expense.date,
-        status: expense.status
-      }])
+      .insert([expense])
       .select()
       .single()
     if (error) throw error
-    const e = data as ExpenseRow
-    return {
-      id: e.id,
-      establishment_id: e.establishment_id,
-      description: e.description,
-      amount: e.amount,
-      category: e.category,
-      date: e.date,
-      status: e.status
-    }
-  },
-
-  async renewEstablishment(id: string, months: number, plan: string, amount: number) {
-    const { data: est, error: getError } = await supabase
-      .from('establishments')
-      .select('trial_ends_at')
-      .eq('id', id)
-      .single()
-    
-    if (getError) throw getError
-
-    const currentExpiry = (est as EstablishmentRow).trial_ends_at ? new Date((est as EstablishmentRow).trial_ends_at) : new Date()
-    const baseDate = currentExpiry > new Date() ? currentExpiry : new Date()
-    const newExpiry = new Date(baseDate.setMonth(baseDate.getMonth() + months))
-
-    const { error: updateError } = await supabase
-      .from('establishments')
-      .update({ 
-        trial_ends_at: newExpiry.toISOString(),
-        plan: plan,
-        status: 'Active'
-      })
-      .eq('id', id)
-    
-    if (updateError) throw updateError
-
-    const { error: txError } = await supabase
-      .from('saas_transactions')
-      .insert([{
-        establishment_id: id,
-        amount: amount,
-        plan: plan,
-        status: 'success',
-        payment_method: 'admin_manual'
-      }])
-    
-    if (txError) throw txError
-
-    return newExpiry
+    return data as Expense
   },
 
   // Admin Management
   async getAdminUsers(): Promise<Profile[]> {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('profiles')
       .select('*, roles(name)')
       .in('role', ['SUPER_ADMIN', 'ADMIN'])
@@ -463,14 +332,24 @@ export const supabaseService = {
     })) as Profile[]
   },
 
+  async getProfileByUserId(userId: string): Promise<Profile | null> {
+    const { data, error } = await insforge.database
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+    if (error) return null
+    return data as Profile
+  },
+
   async promoteUserToAdmin(email: string): Promise<boolean> {
-    const { data: role } = await supabase
+    const { data: role } = await insforge.database
       .from('roles')
       .select('id')
       .eq('name', 'super_admin')
       .single()
 
-    const { data: profile, error: findError } = await supabase
+    const { data: profile, error: findError } = await insforge.database
       .from('profiles')
       .select('id')
       .eq('email', email)
@@ -478,7 +357,7 @@ export const supabaseService = {
     
     if (findError) throw new Error("Utilisateur non trouvé dans les profils.")
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await insforge.database
       .from('profiles')
       .update({ 
         role: 'SUPER_ADMIN',
@@ -491,7 +370,7 @@ export const supabaseService = {
   },
 
   async revokeAdminAccess(userId: string) {
-    const { error } = await supabase
+    const { error } = await insforge.database
       .from('profiles')
       .update({ 
         role: 'USER',
@@ -503,27 +382,25 @@ export const supabaseService = {
     return true
   },
 
-  // RBAC Management
+  // RBAC
   async getRoles() {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('roles')
-      .select('*, role_permissions(permissions(*))')
-      .order('created_at', { ascending: false })
+      .select('*, role_permissions(*, permissions(*))')
     if (error) throw error
-    return data || []
+    return data
   },
 
   async getPermissions() {
-    const { data, error } = await supabase
+    const { data, error } = await insforge.database
       .from('permissions')
       .select('*')
-      .order('name', { ascending: true })
     if (error) throw error
-    return data || []
+    return data
   },
 
-  async createRole(name: string, description: string) {
-    const { data, error } = await supabase
+  async createRole(name: string, description?: string) {
+    const { data, error } = await insforge.database
       .from('roles')
       .insert([{ name, description }])
       .select()
@@ -533,14 +410,41 @@ export const supabaseService = {
   },
 
   async updateRolePermissions(roleId: string, permissionIds: string[]) {
-    // First, delete existing
-    await supabase.from('role_permissions').delete().eq('role_id', roleId)
-    
-    // Then insert new
+    // Delete existing
+    const { error: delError } = await insforge.database
+      .from('role_permissions')
+      .delete()
+      .eq('role_id', roleId)
+    if (delError) throw delError
+
+    // Insert new
     if (permissionIds.length > 0) {
-      const inserts = permissionIds.map(pid => ({ role_id: roleId, permission_id: pid }))
-      const { error } = await supabase.from('role_permissions').insert(inserts)
-      if (error) throw error
+      const toInsert = permissionIds.map(pid => ({
+        role_id: roleId,
+        permission_id: pid
+      }))
+      const { error: insError } = await insforge.database
+        .from('role_permissions')
+        .insert(toInsert)
+      if (insError) throw insError
     }
+  },
+
+  // Transactions
+  async getSaaSTransactions(): Promise<SaasTransaction[]> {
+    const { data, error } = await insforge.database
+      .from('saas_transactions')
+      .select('*, establishments(name)')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data as SaasTransaction[]
+  },
+
+  async updateUserPermissions(userId: string, permissions: any) {
+    const { error } = await insforge.database
+      .from('profiles')
+      .update({ permissions })
+      .eq('id', userId)
+    if (error) throw error
   }
 }

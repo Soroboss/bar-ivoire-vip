@@ -36,19 +36,19 @@ import { fr } from "date-fns/locale"
 import { useState, useEffect } from "react"
 import { motion } from 'framer-motion'
 
-const COLORS = ['#2563eb', '#64748b', '#94a3b8', '#cbd5e1', '#f1f5f9']
+const COLORS = ['#D4AF37', '#94a3b8', '#64748b', '#475569', '#1e293b']
 
 export default function ReportsPage() {
   const { orders, products, loading } = useAppContext()
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
         <div className="space-y-4 animate-pulse">
-           <div className="h-16 w-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto">
-             <Activity className="h-8 w-8 text-blue-600" />
+           <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto">
+             <Activity className="h-8 w-8 text-primary" />
            </div>
-           <p className="text-sm font-medium text-slate-500">Analyse des données...</p>
+           <p className="text-sm font-black text-muted-foreground/40 uppercase tracking-[0.3em]">Calcul des KPIs...</p>
         </div>
       </div>
     )
@@ -89,20 +89,20 @@ export default function ReportsPage() {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-4">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="h-2 w-8 bg-blue-600 rounded-full" />
-            <p className="subheading text-blue-600">Analytique</p>
+            <div className="h-2 w-8 bg-primary rounded-full shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
+            <p className="subheading text-primary font-bold">Analytique VIP</p>
           </div>
           <h1 className="heading-xl">Rapports & Analyses</h1>
-          <p className="text-slate-500 font-medium leading-relaxed max-w-2xl">
+          <p className="text-muted-foreground font-medium leading-relaxed max-w-2xl">
             Visualisez vos performances de vente, suivez vos produits phares et optimisez votre stratégie commerciale basée sur les données.
           </p>
         </div>
         
         <div className="flex gap-3">
-          <Button variant="outline" className="h-12 border-slate-200 text-slate-600 hover:bg-slate-50 font-bold px-6 rounded-xl transition-all shadow-sm">
-            <Calendar className="mr-2 h-4 w-4" /> {format(new Date(), 'MMM yyyy', { locale: fr })}
+          <Button variant="outline" className="h-12 bg-white/5 border-white/10 text-white hover:bg-white/10 font-black px-6 rounded-xl transition-all shadow-sm uppercase text-[10px] tracking-widest">
+            <Calendar className="mr-2 h-4 w-4 text-primary" /> {format(new Date(), 'MMM yyyy', { locale: fr })}
           </Button>
-          <Button className="bg-blue-600 text-white font-bold h-12 px-8 hover:bg-blue-700 shadow-lg shadow-blue-100 rounded-xl flex items-center gap-2 transition-all">
+          <Button className="bg-primary text-primary-foreground font-black h-12 px-8 hover:bg-primary/90 shadow-lg shadow-primary/10 rounded-xl flex items-center gap-2 transition-all uppercase text-[10px] tracking-widest">
             <Download className="mr-2 h-4 w-4" /> Export Z-Report
           </Button>
         </div>
@@ -110,22 +110,22 @@ export default function ReportsPage() {
 
       <div className="grid gap-6 md:grid-cols-3">
         {[
-          { label: 'Chiffre d\'affaires', value: `${totalRevenue.toLocaleString()} F`, icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: 'Croissance moyenne', value: '+14.2%', icon: ArrowUpRight, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: 'Volume commandes', value: orders.length, icon: ShoppingCart, color: "text-slate-600", bg: "bg-slate-50" },
+          { label: 'Chiffre d\'affaires', value: `${totalRevenue.toLocaleString()} F`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
+          { label: 'Croissance moyenne', value: '+14.2%', icon: ArrowUpRight, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+          { label: 'Volume commandes', value: orders.length, icon: ShoppingCart, color: "text-white", bg: "bg-white/10" },
         ].map((stat, i) => (
           <Card key={i} className="premium-card rounded-2xl overflow-hidden group">
             <CardContent className="p-8">
               <div className="flex items-center gap-6">
                 <div className={cn(
-                    "h-14 w-14 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-white group-hover:shadow-sm",
+                    "h-14 w-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110 border border-white/5",
                     stat.bg, stat.color
                 )}>
                   <stat.icon className="h-7 w-7" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold text-slate-900 leading-none">{stat.value}</p>
+                  <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] mb-2">{stat.label}</p>
+                  <p className="text-2xl font-black text-white leading-none tracking-tight italic">{stat.value}</p>
                 </div>
               </div>
             </CardContent>
@@ -134,24 +134,24 @@ export default function ReportsPage() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <Card className="premium-card rounded-2xl overflow-hidden border-none shadow-sm">
-          <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/20">
+        <Card className="premium-card rounded-[2rem] overflow-hidden border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl">
+          <CardHeader className="p-8 border-b border-white/5">
              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Ventes Hebdomadaires</h2>
-                  <p className="text-xs font-medium text-slate-500 mt-1">Évolution de votre CA sur les 7 derniers jours.</p>
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">Ventes Hebdomadaires</h2>
+                  <p className="text-xs font-medium text-muted-foreground mt-1">Évolution de votre CA sur les 7 derniers jours.</p>
                 </div>
              </div>
           </CardHeader>
           <CardContent className="p-8 h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                 <XAxis 
                   dataKey="day" 
-                  stroke="#94a3b8" 
+                  stroke="#475569" 
                   fontSize={10} 
-                  fontWeight={700} 
+                  fontWeight={900} 
                   axisLine={false} 
                   tickLine={false}
                   tickFormatter={(val) => val.toUpperCase()}
@@ -159,21 +159,21 @@ export default function ReportsPage() {
                 />
                 <YAxis hide />
                 <Tooltip 
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', fontWeight: 700, fontSize: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} 
+                  cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', fontWeight: 900, fontSize: '12px', color: '#fff' }} 
                 />
-                <Bar dataKey="sales" fill="#2563eb" radius={[6, 6, 0, 0]} barSize={40} />
+                <Bar dataKey="sales" fill="#D4AF37" radius={[12, 12, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="premium-card rounded-2xl overflow-hidden border-none shadow-sm">
-          <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/20">
+        <Card className="premium-card rounded-[2rem] overflow-hidden border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl">
+          <CardHeader className="p-8 border-b border-white/5">
              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Top Catégories</h2>
-                  <p className="text-xs font-medium text-slate-500 mt-1">Répartition de vos revenus par type de produit.</p>
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">Top Catégories</h2>
+                  <p className="text-xs font-medium text-muted-foreground mt-1">Répartition de vos revenus par type de produit.</p>
                 </div>
              </div>
           </CardHeader>
@@ -197,9 +197,9 @@ export default function ReportsPage() {
             </ResponsiveContainer>
             <div className="flex flex-wrap gap-4 mt-8 justify-center">
               {categoryData.map((item, i) => (
-                <div key={item.name} className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 transition-all">
+                <div key={item.name} className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 transition-all hover:bg-white/10">
                   <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[i] }} />
-                  <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{item.name}</span>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{item.name}</span>
                 </div>
               ))}
             </div>

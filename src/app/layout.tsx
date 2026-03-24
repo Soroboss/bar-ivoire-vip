@@ -3,6 +3,12 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
 import { Toaster } from "@/components/ui/sonner";
+import { InsforgeProvider } from "@/components/providers/InsforgeProvider";
+import {
+  SignedIn,
+  SignedOut,
+} from '@insforge/nextjs';
+
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -26,10 +32,12 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <AppProvider>
-          {children}
-          <Toaster position="top-right" expand={true} richColors theme="dark" />
-        </AppProvider>
+        <InsforgeProvider>
+          <AppProvider>
+            {children}
+            <Toaster position="top-right" expand={true} richColors theme="dark" />
+          </AppProvider>
+        </InsforgeProvider>
       </body>
     </html>
   );

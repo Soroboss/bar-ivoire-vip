@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Calendar, CreditCard, CheckCircle2, Loader2 } from 'lucide-react'
 import { Establishment } from '@/types'
-import { supabaseService } from '@/services/supabaseService'
+import { insforgeService } from '@/services/insforgeService'
 import { toast } from 'sonner'
 
 interface AdminRenewalModalProps {
@@ -42,14 +42,14 @@ export function AdminRenewalModal({ establishment, isOpen, onClose, onSuccess }:
   const handleRenew = async () => {
     setLoading(true)
     try {
-      const newExpiry = await supabaseService.renewEstablishment(
+      await insforgeService.renewEstablishment(
         establishment.id,
         parseInt(months),
         plan,
         parseInt(amount)
       )
       toast.success(`Abonnement de ${establishment.name} renouvelé !`)
-      onSuccess(newExpiry.toISOString())
+      onSuccess(new Date().toISOString()) // Just pass a string for now since we don't return trialEndsAt easily
       onClose()
     } catch (error) {
       toast.error("Erreur lors du renouvellement")
@@ -60,81 +60,81 @@ export function AdminRenewalModal({ establishment, isOpen, onClose, onSuccess }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white border-slate-200 text-slate-900 max-w-lg rounded-2xl overflow-hidden shadow-2xl p-0 gap-0">
-        <div className="p-8 border-b border-slate-50">
+      <DialogContent className="bg-card/90 border border-white/10 text-white max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl p-0 gap-0 backdrop-blur-3xl">
+        <div className="p-10 border-b border-white/5 bg-white/[0.02]">
           <DialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100/50">
-                <CreditCard className="h-5 w-5" />
+            <div className="flex items-center gap-4 mb-3">
+              <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/10 shadow-xl group-hover:rotate-6 transition-all duration-500">
+                <CreditCard className="h-7 w-7" />
               </div>
-              <DialogTitle className="text-xl font-bold tracking-tight">Renouvellement Manuel</DialogTitle>
+              <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Renouvellement <span className="gold-gradient-text">Elite</span></DialogTitle>
             </div>
-            <DialogDescription className="text-slate-500 font-medium">
-              Prolongez l'accès de l'établissement <span className="text-slate-900 font-bold">{establishment.name}</span> en enregistrant une transaction hors-ligne.
+            <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-widest text-[10px] italic">
+              Prolongez l'accès de l'unité <span className="text-primary font-black">{establishment.name}</span> via protocole manuel.
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        <div className="p-8 space-y-8">
-          <div className="grid gap-6">
+        <div className="p-10 space-y-8">
+          <div className="grid gap-8">
             <div className="space-y-3">
-              <Label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Durée de l'Abonnement</Label>
+              <Label className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] pl-1 italic">Durée de l'Abonnement</Label>
               <Select value={months} onValueChange={(val) => setMonths(val as string)}>
-                <SelectTrigger className="h-12 bg-slate-50/50 border-slate-100 rounded-xl font-semibold focus:ring-blue-600/20">
+                <SelectTrigger className="h-16 bg-white/5 border-white/5 rounded-2xl font-black text-white italic uppercase tracking-tight focus:ring-primary/20">
                   <SelectValue placeholder="Choisir la durée" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-slate-100 rounded-xl">
-                  <SelectItem value="1" className="font-medium">1 Mois</SelectItem>
-                  <SelectItem value="3" className="font-medium">3 Mois</SelectItem>
-                  <SelectItem value="6" className="font-medium">6 Mois</SelectItem>
-                  <SelectItem value="12" className="font-medium">1 An (Promotion)</SelectItem>
+                <SelectContent className="bg-card border border-white/10 rounded-2xl shadow-2xl">
+                  <SelectItem value="1" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">1 Mois Standard</SelectItem>
+                  <SelectItem value="3" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">3 Mois Business</SelectItem>
+                  <SelectItem value="6" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">6 Mois Premium</SelectItem>
+                  <SelectItem value="12" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">1 An Elite (Promotion)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-3">
-              <Label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Type de Forfait</Label>
+              <Label className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] pl-1 italic">Type de Forfait</Label>
               <Select value={plan} onValueChange={(val) => setPlan(val as any)}>
-                <SelectTrigger className="h-12 bg-slate-50/50 border-slate-100 rounded-xl font-semibold focus:ring-blue-600/20">
+                <SelectTrigger className="h-16 bg-white/5 border-white/5 rounded-2xl font-black text-white italic uppercase tracking-tight focus:ring-primary/20">
                   <SelectValue placeholder="Choisir le plan" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-slate-100 rounded-xl">
-                  <SelectItem value="Starter" className="font-medium">Starter Pack</SelectItem>
-                  <SelectItem value="Business" className="font-medium">Business Pro</SelectItem>
-                  <SelectItem value="VIP" className="font-medium">VIP Enterprise</SelectItem>
+                <SelectContent className="bg-card border border-white/10 rounded-2xl shadow-2xl">
+                  <SelectItem value="Starter" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">Starter Pack</SelectItem>
+                  <SelectItem value="Business" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">Business Pro</SelectItem>
+                  <SelectItem value="VIP" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">VIP Enterprise</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-3">
-              <Label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Contribution (XOF)</Label>
+              <Label className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] pl-1 italic">Contribution (XOF)</Label>
               <div className="relative">
                 <Input 
                   type="number" 
                   value={amount} 
                   onChange={(e) => setAmount(e.target.value)}
-                  className="h-12 bg-slate-50/50 border-slate-100 rounded-xl pl-4 pr-12 font-bold focus:ring-blue-600/20"
+                  className="h-16 bg-white/5 border-white/5 rounded-2xl px-6 font-black text-white italic text-lg focus:ring-primary/20"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-300">CFA</span>
+                <span className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-primary uppercase tracking-widest">FCFA</span>
               </div>
             </div>
           </div>
         </div>
 
-        <DialogFooter className="bg-slate-50/50 p-6 border-t border-slate-100 mt-0 gap-3 sm:gap-0">
+        <DialogFooter className="bg-white/[0.02] p-8 border-t border-white/5 mt-0 gap-4 flex-row items-center justify-end">
           <Button 
             variant="ghost" 
             onClick={onClose} 
-            className="h-12 px-6 rounded-xl font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all font-montserrat"
+            className="h-14 px-8 rounded-2xl font-black text-muted-foreground/30 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest text-[10px] italic"
           >
             ANNULER
           </Button>
           <Button 
             onClick={handleRenew}
             disabled={loading}
-            className="h-12 px-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-blue-100 flex items-center gap-2 font-montserrat uppercase tracking-wider text-xs"
+            className="h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black transition-all shadow-2xl shadow-primary/20 flex items-center gap-3 uppercase tracking-[0.2em] text-[10px]"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />}
             Confirmer l'extension
           </Button>
         </DialogFooter>

@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ShieldCheck, Mail, Phone, Loader2, Wine, Building2 } from "lucide-react"
-import { supabase } from '@/lib/supabase'
+import { insforge } from '@/lib/insforge'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { supabaseService } from '@/services/supabaseService'
+import { insforgeService } from '@/services/insforgeService'
 import Link from 'next/link'
 
 export default function LoginPage() {
@@ -33,32 +33,31 @@ export default function LoginPage() {
           setLoading(false)
           return
         }
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await insforge.auth.signUp({
           email,
-          password,
-          options: { 
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-            data: { full_name: fullName }
-          }
+          password
         })
         if (error) throw error
         
-        if (data.user) {
-          await supabaseService.createEstablishment({
+        const user = data?.user
+        if (user) {
+          // Update profile with full name if needed, or assume it's handled via metadata if we can find the right way.
+          // For now, let's just proceed with establishment creation.
+          await insforgeService.createEstablishment({
             name: barName,
             owner: fullName,
             phone: phone || 'Non précisé',
             whatsapp: phone,
             location: 'À préciser',
             type: 'Bar VIP',
-            user_id: data.user.id
+            user_id: user.id
           })
         }
         
         toast.success('Inscription réussie ! Validation en cours.')
         router.push('/onboarding')
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { error } = await insforge.auth.signInWithPassword({ email, password })
         if (error) throw error
         toast.success('Connexion réussie')
         router.push('/dashboard')
@@ -78,11 +77,9 @@ export default function LoginPage() {
   const handleGoogleAuth = async () => {
     setLoading(true)
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { error } = await insforge.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+        redirectTo: `${window.location.origin}/auth/callback`
       })
       if (error) throw error
     } catch (error: any) {
@@ -92,22 +89,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm space-y-8">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 selection:bg-primary/20">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-20">
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-primary/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-purple-500/10 blur-[100px] rounded-full" />
+      </div>
+      <div className="w-full max-w-sm space-y-8 relative z-10">
         <div className="text-center space-y-3">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-100 mb-2">
-            <Wine className="h-6 w-6 text-white" />
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20 mb-2">
+            <Wine className="h-6 w-6 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Ivoire Bar VIP</h1>
-          <p className="text-slate-500 text-xs font-medium uppercase tracking-widest">Gestion de régie premium</p>
+          <h1 className="text-3xl font-black tracking-tighter text-white uppercase">Ivoire Bar <span className="text-primary">VIP</span></h1>
+          <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.3em]">Gestion de régie premium</p>
         </div>
 
-        <Card className="border-none shadow-xl shadow-slate-200/50 rounded-2xl overflow-hidden bg-white">
+        <Card className="border border-white/5 shadow-2xl shadow-black/50 rounded-3xl overflow-hidden bg-card backdrop-blur-xl">
           <CardHeader className="pt-8 px-8 pb-4">
-            <CardTitle className="text-xl font-bold text-slate-900 text-center">
+            <CardTitle className="text-xl font-bold text-white text-center">
               {isSignUp ? 'Créer un compte' : 'Bon retour'}
             </CardTitle>
-            <CardDescription className="text-center text-slate-500 font-medium">
+            <CardDescription className="text-center text-muted-foreground font-medium">
               {isSignUp ? 'Commencez à gérer votre établissement' : 'Connectez-vous à votre espace'}
             </CardDescription>
           </CardHeader>
@@ -116,7 +117,7 @@ export default function LoginPage() {
               onClick={handleGoogleAuth}
               disabled={loading}
               variant="outline"
-              className="w-full h-12 rounded-xl border-slate-200 font-bold text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-3"
+              className="w-full h-12 rounded-xl border-white/10 bg-white/5 font-bold text-white hover:bg-white/10 transition-all flex items-center justify-center gap-3"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -129,10 +130,10 @@ export default function LoginPage() {
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-100"></div>
+                <div className="w-full border-t border-white/5"></div>
               </div>
-              <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                <span className="bg-white px-4">ou par email</span>
+              <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                <span className="bg-card px-4">ou par email</span>
               </div>
             </div>
 
@@ -140,56 +141,56 @@ export default function LoginPage() {
               {isSignUp && (
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Établissement</Label>
+                    <Label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Établissement</Label>
                     <div className="relative">
-                      <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                      <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input 
                         placeholder="Nom du bar" 
                         required 
                         value={barName}
                         onChange={(e) => setBarName(e.target.value)}
-                        className="bg-slate-50 border-none h-12 pl-12 rounded-xl font-bold text-slate-900 focus:ring-blue-100 transition-all"
+                        className="bg-white/5 border-white/5 h-12 pl-12 rounded-xl font-bold text-white placeholder:text-muted-foreground focus:ring-primary/20 transition-all"
                       />
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Nom Complet</Label>
+                    <Label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Nom Complet</Label>
                     <Input 
                       placeholder="Votre nom" 
                       required 
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="bg-slate-50 border-none h-12 px-4 rounded-xl font-bold text-slate-900 focus:ring-blue-100 transition-all"
+                      className="bg-white/5 border-white/5 h-12 px-4 rounded-xl font-bold text-white placeholder:text-muted-foreground focus:ring-primary/20 transition-all"
                     />
                   </div>
                 </div>
               )}
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Email</Label>
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Email</Label>
                 <Input 
                   type="email" 
                   placeholder="nom@exemple.com" 
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-slate-50 border-none h-12 px-4 rounded-xl font-bold text-slate-900 focus:ring-blue-100 transition-all"
+                  className="bg-white/5 border-white/5 h-12 px-4 rounded-xl font-bold text-white placeholder:text-muted-foreground focus:ring-primary/20 transition-all"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Mot de passe</Label>
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Mot de passe</Label>
                 <Input 
                   type="password" 
                   placeholder="••••••••"
                   required 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-slate-50 border-none h-12 px-4 rounded-xl font-bold text-slate-900 focus:ring-blue-100 transition-all"
+                  className="bg-white/5 border-white/5 h-12 px-4 rounded-xl font-bold text-white placeholder:text-muted-foreground focus:ring-primary/20 transition-all"
                 />
               </div>
               <Button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 rounded-xl shadow-lg shadow-blue-100 transition-all"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-12 rounded-xl shadow-lg shadow-primary/10 transition-all"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : (isSignUp ? 'Créer mon compte' : 'Se connecter')}
               </Button>
@@ -198,7 +199,7 @@ export default function LoginPage() {
             <div className="mt-8 flex flex-col items-center gap-4">
               <button 
                 onClick={() => setIsSignUp(!isSignUp)}
-                className="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors"
+                className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
               >
                 {isSignUp ? 'Déjà inscrit ? Connexion' : 'Pas de compte ? Créer un bar'}
               </button>
@@ -209,12 +210,12 @@ export default function LoginPage() {
         <div className="text-center space-y-4">
           <Link 
             href="/admin/login" 
-            className="text-[10px] text-slate-400 hover:text-slate-600 uppercase tracking-widest font-bold transition-colors inline-flex items-center gap-2"
+            className="text-[10px] text-muted-foreground hover:text-primary uppercase tracking-[0.3em] font-bold transition-colors inline-flex items-center gap-2"
           >
             <ShieldCheck className="h-3 w-3" />
             Portail Administrateur
           </Link>
-          <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">
+          <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.2em]">
             © 2026 IVOIRE BAR VIP
           </p>
         </div>
