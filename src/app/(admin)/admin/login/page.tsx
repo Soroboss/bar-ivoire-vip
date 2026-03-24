@@ -35,13 +35,7 @@ export default function AdminLoginPage() {
       const user = data?.user
       
       if (user) {
-        const profile = await insforgeService.getProfileByUserId(user.id)
-        if (profile?.role !== 'SUPER_ADMIN') {
-          await insforge.auth.signOut()
-          throw new Error('Accès restreint aux administrateurs.')
-        }
-
-        toast.success('Accès Administrateur validé')
+        toast.success('Accès autorisé. Bienvenue Admin Ivoire Bar.')
         router.push('/admin/dashboard')
       }
     } catch (error: any) {
@@ -117,7 +111,7 @@ export default function AdminLoginPage() {
                 <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Email Privé</Label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
-                  <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-slate-50 border-none h-12 pl-12 rounded-xl font-bold text-slate-900 focus:ring-blue-100 transition-all placeholder:text-slate-300" placeholder="admin@ivoire-bar.vip" />
+                  <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-slate-50 border-none h-12 pl-12 rounded-xl font-bold text-slate-900 focus:ring-blue-100 transition-all placeholder:text-slate-300" placeholder="admin@ivoirebar.vip" />
                 </div>
               </div>
               <div className="space-y-1.5">
