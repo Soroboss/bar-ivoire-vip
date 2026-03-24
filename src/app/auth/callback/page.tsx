@@ -45,6 +45,16 @@ export default function AuthCallbackPage() {
                 window.location.href = '/admin/dashboard'
               }, 500)
             } else {
+              const urlParams = new URLSearchParams(window.location.search)
+              if (urlParams.get('source') === 'admin') {
+                setStatus('Accès refusé. Déconnexion...')
+                await supabase.auth.signOut()
+                setTimeout(() => {
+                  window.location.href = '/admin/login?error=unauthorized'
+                }, 500)
+                return
+              }
+
               // Check if user has an establishment
               const { data: est } = await supabase
                 .from('establishments')

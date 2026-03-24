@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ShieldCheck, Mail, Lock, Loader2, ArrowLeft, Crown } from "lucide-react"
+import { ShieldCheck, Mail, Lock, Loader2, ArrowLeft } from "lucide-react"
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -16,6 +16,14 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'unauthorized') {
+      toast.error('Accès restreint aux administrateurs')
+      router.replace('/admin/login')
+    }
+  }, [router])
 
   const handleAdminAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,7 +82,7 @@ export default function AdminLoginPage() {
                   const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                      redirectTo: `${window.location.origin}/auth/callback`,
+                      redirectTo: `${window.location.origin}/auth/callback?source=admin`,
                     },
                   })
                   if (error) throw error
