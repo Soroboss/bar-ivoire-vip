@@ -105,19 +105,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         })
       ])
       
-      const currentRole = profileRes.data?.role || null
+      const currentRole = profileRes.data?.role ? profileRes.data.role.toString().toUpperCase() : null
       setUserRole(currentRole)
       
-      // Fetch permissions
-      const { data: profileData } = await insforge.database
-        .from('profiles')
-        .select('permissions')
-        .eq('id', userId)
-        .maybeSingle()
+      console.log('[AppContext] Role detected and normalized:', currentRole)
       
-      setUserPermissions(profileData?.permissions || null)
-      
-      console.log('[AppContext] Role detected:', currentRole)
+      // Fetch permissions if they exist
+      if (profileRes.data) {
+        const { data: profileData } = await insforge.database
+          .from('profiles')
+          .select('permissions')
+          .eq('id', userId)
+          .maybeSingle()
+        setUserPermissions(profileData?.permissions || null)
+      }
       
       const ests = Array.isArray(estsRes) ? estsRes : []
       setAllEstablishments(ests)

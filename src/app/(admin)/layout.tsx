@@ -37,8 +37,9 @@ export default function AdminLayout({
     }
 
     // if user is present but role check finished and failed, redirect
-    if (roleChecked && !hasAccess) {
-      console.log('[AdminLayout] User is not SUPER_ADMIN, redirecting. Role:', userRole)
+    // Be very careful: only redirect if userRole is explicitly not null AND not SUPER_ADMIN
+    if (user && userRole !== null && userRole !== 'SUPER_ADMIN') {
+      console.log('[AdminLayout] Access Denied. Role is:', userRole)
       router.push('/admin/login?error=unauthorized')
     }
   }, [user, userRole, loading, router, isLoginPage])
@@ -77,7 +78,7 @@ export default function AdminLayout({
     return <>{children}</>
   }
 
-  if (userRole !== 'SUPER_ADMIN') {
+  if (user && userRole !== 'SUPER_ADMIN' && userRole !== null) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <div className="h-20 w-20 rounded-2xl bg-card shadow-xl shadow-red-500/5 border border-red-500/20 flex items-center justify-center mb-8">
