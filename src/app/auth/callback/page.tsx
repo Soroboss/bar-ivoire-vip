@@ -40,13 +40,16 @@ export default function AuthCallbackPage() {
                   updated_at: new Date().toISOString()
                 })
               }
+              localStorage.removeItem('authSource')
               setStatus('Accès Administrateur détecté. Redirection...')
               setTimeout(() => {
                 window.location.href = '/admin/dashboard'
               }, 500)
             } else {
-              const urlParams = new URLSearchParams(window.location.search)
-              if (urlParams.get('source') === 'admin') {
+              const source = localStorage.getItem('authSource') || new URLSearchParams(window.location.search).get('source')
+              localStorage.removeItem('authSource')
+              
+              if (source === 'admin') {
                 setStatus('Accès refusé. Déconnexion...')
                 await supabase.auth.signOut()
                 setTimeout(() => {

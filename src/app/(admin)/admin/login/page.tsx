@@ -79,10 +79,11 @@ export default function AdminLoginPage() {
               onClick={async () => {
                 setLoading(true)
                 try {
+                  localStorage.setItem('authSource', 'admin')
                   const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                      redirectTo: `${window.location.origin}/auth/callback?source=admin`,
+                      redirectTo: `${window.location.origin}/auth/callback`,
                     },
                   })
                   if (error) throw error
