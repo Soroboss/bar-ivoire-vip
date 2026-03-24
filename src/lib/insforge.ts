@@ -5,10 +5,5 @@ const anonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY || '';
 
 export const insforge = createClient({
   baseUrl,
-  anonKey,
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
+  anonKey
 });
