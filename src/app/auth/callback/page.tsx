@@ -53,51 +53,65 @@ export default function AuthCallbackPage() {
       setStatus('Vérification des protocoles VIP...')
       try {
         const profile = await insforgeService.getProfileByUserId(u.id)
-        const isKnownAdmin = profile?.role === 'SUPER_ADMIN'
-
-        if (isKnownAdmin) {
-          if (!profile || profile.role !== 'SUPER_ADMIN') {
-            setStatus('Élévation des privilèges Admin...')
-            await insforge.database.from('profiles').upsert({
-              id: u.id,
-              email: u.email,
-              role: 'SUPER_ADMIN',
-              full_name: u.user_metadata?.full_name || 'Admin',
-              updated_at: new Date().toISOString()
-            })
-          }
+        
+        // If we found a SUPER_ADMIN, proceed normally
+        if (profile?.role === 'SUPER_ADMIN') {
           localStorage.removeItem('authSource')
           setStatus('Accès Administratif Validé. Liaison...')
           setTimeout(() => {
             window.location.href = '/admin/dashboard'
           }, 800)
-        } else {
-          const source = localStorage.getItem('authSource')
-          localStorage.removeItem('authSource')
-          
-          if (source === 'admin') {
-            setStatus('Accès refusé (Admin requis).')
-            await insforge.auth.signOut()
-            setTimeout(() => {
-              window.location.href = '/admin/login?error=unauthorized'
-            }, 1000)
-            return
-          }
+          return
+        }
 
-          // Check if user has an establishment
-          const { data: est } = await insforge.database
-            .from('establishments')
-            .select('id')
-            .eq('user_id', u.id)
-            .maybeSingle()
-          
-          if (est) {
-            setStatus('Accès Partenaire Détecté. Liaison...')
-            setTimeout(() => window.location.href = '/dashboard', 800)
-          } else {
-            setStatus('Nouveau Partenaire détecté. Initialisation...')
-            setTimeout(() => window.location.href = '/onboarding', 800)
-          }
+        // If no profile found but we are in an admin flow, try to elevate or wait
+        const source = localStorage.getItem('authSource')
+        if (source === 'admin') {
+           setStatus('Vérification des privilèges étendus...')
+           
+           // Attempt elevation just in case (e.g. first time login)
+           const { error: upsertError } = await insforge.database.from('profiles').upsert({
+              id: u.id,
+              email: u.email,
+              role: 'SUPER_ADMIN',
+              full_name: u.user_metadata?.full_name || u.email?.split('@')[0] || 'Admin',
+              updated_at: new Date().toISOString()
+           })
+
+           if (!upsertError) {
+             localStorage.removeItem('authSource')
+             setStatus('Privilèges activés. Liaison...')
+             setTimeout(() => {
+               window.location.href = '/admin/dashboard'
+             }, 800)
+             return
+           } else {
+             // If elevation fails, then we really are not an admin
+             setStatus('Accès refusé (Admin requis).')
+             await insforge.auth.signOut()
+             localStorage.removeItem('authSource')
+             setTimeout(() => {
+               window.location.href = '/admin/login?error=unauthorized'
+             }, 1000)
+             return
+           }
+        }
+
+        // Standard user flow
+        localStorage.removeItem('authSource')
+        // Check if user has an establishment
+        const { data: est } = await insforge.database
+          .from('establishments')
+          .select('id')
+          .eq('user_id', u.id)
+          .maybeSingle()
+        
+        if (est) {
+          setStatus('Accès Partenaire Détecté. Liaison...')
+          setTimeout(() => window.location.href = '/dashboard', 800)
+        } else {
+          setStatus('Nouveau Partenaire détecté. Initialisation...')
+          setTimeout(() => window.location.href = '/onboarding', 800)
         }
       } catch (e) {
         console.error('Profile check error:', e)

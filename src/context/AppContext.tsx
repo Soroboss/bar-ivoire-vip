@@ -62,14 +62,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [userPermissions, setUserPermissions] = useState<any | null>(null)
 
   useEffect(() => {
-    if (userLoaded && authLoaded) {
-      if (isSignedIn && user) {
-        loadUserData(user)
-      } else if (userLoaded && authLoaded) {
-        // Only stop loading if we are sure there is no user or auth is done
-        setLoading(false)
-        resetState()
-      }
+    // 1. If SDK is still initializing, don't change anything
+    if (!userLoaded || !authLoaded) {
+      return
+    }
+
+    // 2. If we are signed in, load user data (this will set loading: true internally)
+    if (isSignedIn && user) {
+      loadUserData(user)
+    } 
+    // 3. If we are definitely NOT signed in, stop loading
+    else if (!isSignedIn) {
+      setLoading(false)
+      resetState()
     }
   }, [user, isSignedIn, userLoaded, authLoaded])
 
