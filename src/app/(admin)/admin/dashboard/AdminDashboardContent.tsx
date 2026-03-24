@@ -7,13 +7,12 @@ import {
   BarChart3, 
   TrendingUp,
   Clock, 
-  ShieldCheck,
   Building2,
   Activity,
   Zap,
   XCircle,
   ChevronRight,
-  Sparkles
+  CheckCircle2
 } from "lucide-react"
 import { useAppContext } from "@/context/AppContext"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -29,7 +28,7 @@ import {
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { motion, AnimatePresence, Variants } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function AdminDashboardContent() {
   const context = useAppContext()
@@ -41,14 +40,14 @@ export default function AdminDashboardContent() {
 
   if (!isMounted || !context || context.loading) {
     return (
-      <div className="p-6 space-y-8 bg-background min-h-screen">
-        <div className="h-32 bg-muted/50 rounded-3xl border border-border animate-pulse" />
+      <div className="p-6 md:p-10 space-y-8 bg-background min-h-screen">
+        <div className="h-24 bg-muted/30 rounded-2xl animate-pulse" />
         <div className="grid gap-6 md:grid-cols-4">
-          {[1,2,3,4].map(i => <div key={i} className="h-40 bg-muted/50 rounded-3xl border border-border animate-pulse" />)}
+          {[1,2,3,4].map(i => <div key={i} className="h-32 bg-muted/30 rounded-2xl animate-pulse" />)}
         </div>
         <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 h-96 bg-muted/50 rounded-3xl border border-border animate-pulse" />
-          <div className="h-96 bg-muted/50 rounded-3xl border border-border animate-pulse" />
+          <div className="lg:col-span-2 h-96 bg-muted/30 rounded-2xl animate-pulse" />
+          <div className="h-96 bg-muted/30 rounded-2xl animate-pulse" />
         </div>
       </div>
     )
@@ -77,188 +76,127 @@ export default function AdminDashboardContent() {
     }
   }
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
-
-  const itemVariants: Variants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100
-      }
-    }
-  }
-
   return (
-    <motion.div 
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      className="p-6 md:p-10 space-y-10 bg-background text-foreground min-h-screen selection:bg-primary/20"
-    >
-      {/* Dynamic Master Header */}
-      <motion.div 
-        variants={itemVariants}
-        className="relative group overflow-hidden rounded-[2.5rem] p-8 md:p-12 border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl"
-      >
-        <div className="absolute top-0 right-0 -m-20 w-80 h-80 bg-primary opacity-[0.05] blur-[100px] pointer-events-none group-hover:opacity-[0.1] transition-opacity duration-1000" />
-        
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 relative z-10">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em]">
-                <div className="h-1.5 w-1.5 rounded-full bg-primary heartbeat-glow" />
-                Network Live
-              </div>
-              <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase underline decoration-primary/30">v2.0.26 Stratégie</span>
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-white uppercase leading-none">
-              Super <span className="gold-gradient-text">Régie</span>
-            </h1>
-            <p className="max-w-xl text-muted-foreground text-lg leading-relaxed font-semibold">
-              Système de contrôle orbital pour l'écosystème <span className="text-white">Ivoire Bar VIP</span>. Monitoring en temps réel des actifs stratégiques et flux transactionnels.
-            </p>
+    <div className="p-6 md:p-10 space-y-8 bg-gray-50/30 dark:bg-background min-h-screen">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card border rounded-2xl p-6 md:p-8 shadow-sm">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 mb-1">
+            <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 gap-1.5 font-medium px-3 py-1">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              Système Opérationnel
+            </Badge>
           </div>
-          
-          <div className="flex items-center gap-6 p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl">
-            <div className="flex flex-col items-end">
-              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-2">Status Système</p>
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-black text-white uppercase tracking-tighter">Opérationnel</span>
-                <div className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                </div>
-              </div>
-            </div>
-          </div>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+            Vue d'ensemble Régie
+          </h1>
+          <p className="text-muted-foreground max-w-2xl">
+            Surveillez l'activité des établissements, validez les nouvelles inscriptions et analysez les revenus SaaS en temps réel.
+          </p>
         </div>
-      </motion.div>
+      </div>
 
-      {/* KPI Galaxy Grid */}
-      <motion.div 
-        variants={containerVariants}
-        className="grid gap-8 md:grid-cols-2 lg:grid-cols-4"
-      >
+      {/* KPI Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { title: "Unités Actives", value: allEstablishments.length, icon: Building2, trend: "Expansion constante", color: "#C5A059", bg: "from-primary/10" },
-          { title: "Volume MRR", value: `${mrr.toLocaleString()} F`, icon: TrendingUp, trend: "Croissance organique", color: "#10B981", bg: "from-emerald-500/10" },
-          { title: "Cycles Trial", value: trial.length, icon: Zap, trend: "Conversion en cours", color: "#3B82F6", bg: "from-blue-500/10" },
-          { title: "Validations", value: pending.length, icon: Clock, trend: pending.length > 0 ? "Action Immédiate" : "Flux Optimal", color: "#F97316", bg: "from-orange-500/10" },
+          { title: "Établissements Actifs", value: allEstablishments.length, icon: Building2, subtitle: "Total sur la plateforme" },
+          { title: "Revenus (MRR)", value: `${mrr.toLocaleString()} F`, icon: TrendingUp, subtitle: "Abonnements mensuels" },
+          { title: "En période d'essai", value: trial.length, icon: Zap, subtitle: "Comptes Trial en cours" },
+          { title: "En attente de validation", value: pending.length, icon: Clock, subtitle: "Inscriptions récentes" },
         ].map((kpi, i) => (
-          <motion.div key={i} variants={itemVariants}>
-            <Card className="premium-card rounded-[2.5rem] overflow-hidden border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl transition-all duration-500 hover:-translate-y-2 border-b-4 group" style={{ borderBottomColor: kpi.color }}>
-              <div className={`absolute -bottom-10 -right-10 h-32 w-32 bg-gradient-to-br ${kpi.bg} to-transparent opacity-0 group-hover:opacity-100 blur-2xl transition-all duration-700`} />
-              <CardHeader className="pb-4 relative z-10 p-8">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-xl">
-                    <kpi.icon className="h-7 w-7" style={{ color: kpi.color }} />
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                    Live <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                  </div>
-                </div>
-                <CardDescription className="text-muted-foreground/40 font-black uppercase text-[10px] tracking-[0.3em]">{kpi.title}</CardDescription>
-                <CardTitle className="text-4xl font-black text-white mt-1 tracking-tighter lowercase"><span className="uppercase">{kpi.value.toString().split(' ')[0]}</span> {kpi.value.toString().split(' ')[1] || ''}</CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10 pt-4 p-8">
-                <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: kpi.color }}>{kpi.trend}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      <div className="grid gap-10 lg:grid-cols-3">
-        {/* Validation Strategic List */}
-        <motion.div variants={itemVariants} className="lg:col-span-2">
-          <Card className="premium-card rounded-[2.5rem] overflow-hidden border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl h-full">
-            <CardHeader className="flex flex-row items-center justify-between p-10 border-b border-white/5 bg-white/[0.02]">
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                  <CardTitle className="text-white text-2xl font-black uppercase tracking-tighter">Flux <span className="gold-gradient-text">D'Adhésion</span></CardTitle>
-                  <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[8px] font-black uppercase heartbeat-glow">Urgent</div>
-                </div>
-                <CardDescription className="text-muted-foreground/60 text-xs font-semibold uppercase tracking-widest">Validation stratégique des nouvelles unités de la régie.</CardDescription>
+          <Card key={i} className="border bg-card shadow-sm hover:shadow-md transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.title}</CardTitle>
+              <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                <kpi.icon className="h-5 w-5" />
               </div>
-              <Button variant="ghost" className="text-primary hover:bg-primary/10 rounded-2xl group font-black text-[10px] uppercase tracking-widest h-12 px-6">
-                Manager <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground">{kpi.value.toString().split(' ')[0]} <span className="text-xl">{kpi.value.toString().split(' ')[1] || ''}</span></div>
+              <p className="text-xs text-muted-foreground mt-1">{kpi.subtitle}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-3">
+        {/* Validations Table */}
+        <div className="lg:col-span-2">
+          <Card className="h-full border bg-card shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/20 px-6 py-4">
+              <div>
+                <CardTitle className="text-lg font-bold">Nouvelles Inscriptions</CardTitle>
+                <CardDescription>Validez ou suspendez les établissements récents.</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="text-primary font-medium hover:bg-primary/10">
+                Voir tout <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="hover:bg-transparent border-white/5">
-                      <TableHead className="text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest pl-10 py-8">Plateforme / ID</TableHead>
-                      <TableHead className="text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest py-8">Commandant</TableHead>
-                      <TableHead className="text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest py-8">Statut Initial</TableHead>
-                      <TableHead className="text-right text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest pr-10 py-8">Protocole</TableHead>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="pl-6 font-semibold">Établissement</TableHead>
+                      <TableHead className="font-semibold">Responsable</TableHead>
+                      <TableHead className="font-semibold text-center">Statut</TableHead>
+                      <TableHead className="text-right pr-6 font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <AnimatePresence mode="popLayout">
                       {pending.length === 0 ? (
-                        <TableRow className="hover:bg-transparent border-none">
-                          <TableCell colSpan={4} className="text-center py-32">
-                            <motion.div 
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              className="flex flex-col items-center gap-6"
-                            >
-                              <div className="h-20 w-20 rounded-[1.8rem] bg-white/5 flex items-center justify-center">
-                                <Activity className="h-10 w-10 text-muted-foreground/20" />
-                              </div>
-                              <p className="text-[10px] font-black uppercase tracking-[0.6em] text-muted-foreground/20">Aucun protocole en attente</p>
-                            </motion.div>
+                        <TableRow className="hover:bg-transparent">
+                          <TableCell colSpan={4} className="text-center py-20 text-muted-foreground">
+                            <div className="flex flex-col items-center gap-3">
+                              <CheckCircle2 className="h-10 w-10 text-emerald-500/50" />
+                              <p>Aucun établissement en attente de validation.</p>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ) : (
                         pending.map((est) => (
-                          <TableRow key={est.id} className="border-white/5 hover:bg-white/[0.02] transition-all duration-500 group">
-                            <TableCell className="pl-10 py-8">
-                              <div className="flex items-center gap-6">
-                                <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 shadow-xl group-hover:rotate-6">
-                                  <Building2 className="h-7 w-7" />
+                          <TableRow 
+                            key={est.id} 
+                            className="group transition-colors"
+                          >
+                            <TableCell className="pl-6 py-4">
+                              <div className="flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                                  <Building2 className="h-5 w-5" />
                                 </div>
-                                <div className="">
-                                  <p className="font-black text-white text-base group-hover:text-primary transition-colors uppercase tracking-tight">{est.name}</p>
-                                  <p className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-widest mt-1">{est.location} • {est.type}</p>
+                                <div>
+                                  <p className="font-semibold text-foreground">{est.name}</p>
+                                  <p className="text-sm text-muted-foreground">{est.location} • {est.type}</p>
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="py-8">
-                              <p className="text-sm font-black text-white tracking-tight uppercase">{est.owner}</p>
-                              <p className="text-[10px] text-muted-foreground/40 font-black tracking-widest mt-1">{est.phone}</p>
+                            <TableCell className="py-4">
+                              <p className="font-medium text-foreground">{est.owner}</p>
+                              <p className="text-sm text-muted-foreground">{est.phone}</p>
                             </TableCell>
-                            <TableCell className="py-8">
-                              <Badge className="border-primary/20 text-primary bg-primary/10 text-[9px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-lg border">7 JOURS TRIAL</Badge>
+                            <TableCell className="py-4 text-center">
+                              <Badge variant="secondary" className="font-medium">Trial (7 Jours)</Badge>
                             </TableCell>
-                            <TableCell className="text-right pr-10 py-8">
-                              <div className="flex justify-end gap-3">
+                            <TableCell className="py-4 pr-6 text-right">
+                              <div className="flex justify-end gap-2">
                                 <Button 
                                   onClick={() => handleAction(est.id, est.name, 'Active')}
-                                  className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 px-6 font-black text-[10px] uppercase shadow-2xl shadow-primary/20 rounded-2xl transition-all active:scale-95 tracking-widest"
+                                  size="sm"
+                                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
                                 >
                                   Approuver
                                 </Button>
                                 <Button 
                                   onClick={() => handleAction(est.id, est.name, 'Suspended')}
-                                  variant="ghost" 
-                                  className="h-12 w-12 text-muted-foreground/20 hover:text-red-500 hover:bg-red-500/10 rounded-2xl border border-white/5 transition-all"
+                                  variant="outline" 
+                                  size="icon"
+                                  className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-red-900/50 dark:hover:bg-red-900/20"
                                 >
-                                  <XCircle className="h-6 w-6" />
+                                  <XCircle className="h-4 w-4" />
                                 </Button>
                               </div>
                             </TableCell>
@@ -271,91 +209,82 @@ export default function AdminDashboardContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
-        {/* Financial Flow Orbital Chart */}
-        <motion.div variants={itemVariants}>
-          <Card className="premium-card rounded-[2.5rem] overflow-hidden border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl flex flex-col h-full">
-            <CardHeader className="p-10 border-b border-white/5 bg-white/[0.02]">
-              <div className="flex items-center gap-4 mb-1">
-                <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary shadow-xl">
-                  <BarChart3 className="h-6 w-6" />
+        {/* Revenue Chart */}
+        <div>
+          <Card className="h-full border bg-card shadow-sm flex flex-col">
+            <CardHeader className="border-b bg-muted/20 px-6 py-4">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <BarChart3 className="h-4 w-4" />
                 </div>
-                <div>
-                  <CardTitle className="text-white text-xl font-black uppercase tracking-tighter">Flux <span className="gold-gradient-text">SaaS</span></CardTitle>
-                  <CardDescription className="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em]">Performance orbitale</CardDescription>
-                </div>
+                <CardTitle className="text-lg font-bold">Évolution des Revenus</CardTitle>
               </div>
+              <CardDescription>Transactions liées aux abonnements SaaS.</CardDescription>
             </CardHeader>
-            <CardContent className="p-10 py-12 flex-1 relative">
-              <div className="h-[300px] w-full relative z-10">
+            <CardContent className="p-6 flex-1 flex flex-col">
+              <div className="h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={revenueChartData}>
+                  <AreaChart data={revenueChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="orbitColor" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.6}/>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
                         <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.02)" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(150,150,150,0.1)" />
                     <XAxis 
                       dataKey="date" 
-                      stroke="rgba(255,255,255,0.2)" 
-                      fontSize={10} 
-                      tickLine={false} 
                       axisLine={false} 
-                      dy={15} 
-                      fontStyle="" 
+                      tickLine={false} 
+                      tick={{ fill: 'currentColor', opacity: 0.5, fontSize: 12 }}
+                      dy={10} 
                     />
-                    <YAxis hide domain={['auto', 'auto']} />
+                    <YAxis hide />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'rgba(10, 15, 30, 0.9)', 
-                        border: '1px solid rgba(212, 175, 55, 0.2)', 
-                        borderRadius: '24px', 
-                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-                        backdropFilter: 'blur(16px)'
+                        backgroundColor: 'var(--card)', 
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                       }}
-                      itemStyle={{ color: 'var(--primary)', fontWeight: '900', fontSize: '14px' }}
-                      labelStyle={{ color: 'rgba(255,255,255,0.6)', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', fontStyle: '', fontWeight: '900', letterSpacing: '0.1em' }}
-                      cursor={{ stroke: 'rgba(212, 175, 55, 0.2)', strokeWidth: 2 }}
+                      itemStyle={{ color: 'var(--primary)', fontWeight: 'bold' }}
+                      labelStyle={{ color: 'var(--muted-foreground)', marginBottom: '4px' }}
                     />
                     <Area 
                       type="monotone" 
                       dataKey="revenue" 
                       stroke="var(--primary)" 
-                      strokeWidth={5} 
+                      strokeWidth={3}
                       fillOpacity={1} 
-                      fill="url(#orbitColor)" 
-                      animationDuration={3000}
+                      fill="url(#colorRevenue)" 
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
 
-              <div className="mt-12 grid grid-cols-2 gap-6">
-                <div className="p-7 rounded-[1.8rem] bg-white/[0.02] border border-white/5 group hover:border-primary/40 transition-all duration-500">
-                  <p className="text-[9px] text-muted-foreground/30 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
-                    Dernière <Sparkles className="h-2.5 w-2.5 text-primary heartbeat-glow" />
-                  </p>
+              <div className="mt-8 pt-6 border-t border-border grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Transaction Récente</p>
                   {saasTransactions.length > 0 ? (
-                    <div className="space-y-1">
-                      <p className="text-xs font-black text-white truncate uppercase tracking-tighter">{(saasTransactions[0] as any).establishments?.name || 'Unité'}</p>
-                      <p className="text-2xl font-black text-primary">{(saasTransactions[0] as any).amount.toLocaleString()} F</p>
+                    <div>
+                      <p className="font-semibold text-foreground truncate">{(saasTransactions[0] as any).establishments?.name || 'Inconnu'}</p>
+                      <p className="text-lg font-bold text-primary mt-1">{(saasTransactions[0] as any).amount.toLocaleString()} F</p>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground/20 font-black uppercase mt-2 tracking-widest">Néant</p>
+                    <p className="text-sm font-medium text-muted-foreground mt-2">Aucune donnée</p>
                   )}
                 </div>
-                <div className="p-7 rounded-[1.8rem] bg-white/[0.02] border border-white/5 flex flex-col justify-center items-center gap-3 group hover:bg-primary/5 transition-all duration-500">
-                   <p className="text-[9px] text-muted-foreground/30 uppercase font-black tracking-[0.2em] leading-none">Status Global</p>
-                   <Badge className="w-fit bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-black text-[9px] px-5 py-2 rounded-xl tracking-widest border">OPTIMAL</Badge>
+                <div className="flex flex-col justify-center items-start border-l pl-4 border-border">
+                   <p className="text-sm text-muted-foreground mb-2">Santé du réseau</p>
+                   <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 font-semibold px-3 py-1">Optimale</Badge>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

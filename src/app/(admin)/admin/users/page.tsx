@@ -14,6 +14,7 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
 import { motion, AnimatePresence, Variants } from "framer-motion"
+import { CreateUserModal } from "./CreateUserModal"
 
 export default function SaaSUsersPage() {
   const [admins, setAdmins] = useState<any[]>([])
@@ -53,7 +54,11 @@ export default function SaaSUsersPage() {
       setPromoteRole('Gérant')
       fetchAdmins()
     } catch (e: any) {
-      toast.error(e.message || "Erreur de promotion")
+      if (e.message?.includes('non trouvé') || e.message?.includes('not found')) {
+        toast.error("Cet utilisateur n'existe pas encore. Il doit d'abord créer un compte via la page d'inscription (/register).")
+      } else {
+        toast.error(e.message || "Erreur de promotion")
+      }
     } finally {
       setIsPromoting(false)
     }
@@ -116,34 +121,42 @@ export default function SaaSUsersPage() {
           </p>
         </div>
         
-        <form onSubmit={handlePromote} className="relative w-full lg:max-w-xl group flex gap-2">
-          <Input 
-            placeholder="Email de l'utilisateur..." 
-            type="email"
-            value={promoteEmail}
-            onChange={(e) => setPromoteEmail(e.target.value)}
-            className="h-16 pl-6 rounded-2xl border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl font-black text-white placeholder:text-muted-foreground/30 focus:ring-primary/20 transition-all flex-1" 
-          />
-          <select
-            value={promoteRole}
-            onChange={(e) => setPromoteRole(e.target.value)}
-            className="h-16 px-4 rounded-2xl border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl font-black text-white focus:ring-primary/20 transition-all"
-          >
-            <option value="Admin" className="text-black">Admin</option>
-            <option value="Gérant" className="text-black">Gérant</option>
-            <option value="Gestionnaire" className="text-black">Gestionnaire</option>
-            <option value="Analyste" className="text-black">Analyste</option>
-            <option value="Financier" className="text-black">Financier</option>
-            <option value="Agent d'encaissement" className="text-black">Agent d'encaissement</option>
-          </select>
-          <Button 
-            type="submit"
-            disabled={isPromoting}
-            className="h-16 px-8 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
-          >
-            {isPromoting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Assigner'}
-          </Button>
-        </form>
+        <div className="w-full lg:max-w-xl space-y-4">
+          <div className="flex items-center gap-4 justify-end">
+            <CreateUserModal onSuccess={fetchAdmins} />
+          </div>
+          <form onSubmit={handlePromote} className="relative group flex gap-2">
+            <Input 
+              placeholder="Email du compte déjà inscrit..." 
+              type="email"
+              value={promoteEmail}
+              onChange={(e) => setPromoteEmail(e.target.value)}
+              className="h-16 pl-6 rounded-2xl border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl font-black text-white placeholder:text-muted-foreground/30 focus:ring-primary/20 transition-all flex-1" 
+            />
+            <select
+              value={promoteRole}
+              onChange={(e) => setPromoteRole(e.target.value)}
+              className="h-16 px-4 rounded-2xl border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl font-black text-white focus:ring-primary/20 transition-all"
+            >
+              <option value="Admin" className="text-black">Admin</option>
+              <option value="Gérant" className="text-black">Gérant</option>
+              <option value="Gestionnaire" className="text-black">Gestionnaire</option>
+              <option value="Analyste" className="text-black">Analyste</option>
+              <option value="Financier" className="text-black">Financier</option>
+              <option value="Agent d'encaissement" className="text-black">Agent d'encaissement</option>
+            </select>
+            <Button 
+              type="submit"
+              disabled={isPromoting}
+              className="h-16 px-8 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all"
+            >
+              {isPromoting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Assigner existant'}
+            </Button>
+          </form>
+          <p className="text-xs text-muted-foreground/60 font-medium px-2 text-right">
+            ℹ️ Ou assignez un rôle à un utilisateur déjà inscrit.
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
