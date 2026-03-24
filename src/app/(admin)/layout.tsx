@@ -19,15 +19,29 @@ export default function AdminLayout({
   const isLoginPage = pathname === '/admin/login'
 
   useEffect(() => {
+    // Determine if we should redirect
+    // We only redirect if:
+    // 1. Loading is finished
+    // 2. We are not on the login page
+    // 3. User is definitely missing OR (User is present AND role is checked and failed)
+    
+    const isReady = !loading
+    const hasUser = !!user
+    const roleChecked = userRole !== null
     const hasAccess = userRole === 'SUPER_ADMIN'
 
-    if (!loading && !isLoginPage && (!user || !hasAccess)) {
-      console.log('[AdminLayout] Access denied, redirecting to login. User:', !!user, 'Role:', userRole)
-      router.push('/admin/login')
+    // Critical: If we have a user but no role yet, DON'T redirect, just wait.
+    if (isReady && !isLoginPage) {
+      if (!hasUser || (roleChecked && !hasAccess)) {
+        console.log('[AdminLayout] Access denied, redirecting. User:', hasUser, 'Role:', userRole)
+        router.push('/admin/login')
+      }
     }
   }, [user, userRole, loading, router, isLoginPage])
 
-  if (loading) {
+  // Show loader if context is loading OR if we have a user but the role hasn't arrived yet
+  const needsProfileFetch = user && userRole === null
+  if (loading || (!isLoginPage && needsProfileFetch)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <div className="relative mb-8">

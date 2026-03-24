@@ -65,7 +65,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (userLoaded && authLoaded) {
       if (isSignedIn && user) {
         loadUserData(user)
-      } else {
+      } else if (userLoaded && authLoaded) {
+        // Only stop loading if we are sure there is no user or auth is done
         setLoading(false)
         resetState()
       }
