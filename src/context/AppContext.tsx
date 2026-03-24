@@ -64,7 +64,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
     const authProvider = insforge.auth as any;
 
-    authProvider.getSession().then(({ data: { session } }: any) => {
+    authProvider.getCurrentSession().then(({ data: { session } }: any) => {
       if (!mounted) return;
       const activeUser = session?.user || null
       setUser(activeUser)

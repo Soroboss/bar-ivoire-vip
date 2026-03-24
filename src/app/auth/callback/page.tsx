@@ -95,18 +95,10 @@ export default function AuthCallbackPage() {
 
     const handleAuth = async () => {
       try {
-        const { data, error } = await (insforge.auth as any).getSession()
-        if (data?.session?.user) {
-          await checkProfile(data.session.user)
-          return
-        }
-
-        if (error) throw error
-
         // Wait a bit for slow network/hydration
         const timer = setTimeout(async () => {
           if (!mounted) return
-          const { data: retry } = await (insforge.auth as any).getSession()
+          const { data: retry } = await (insforge.auth as any).getCurrentSession()
           if (retry?.session?.user) {
             await checkProfile(retry.session.user)
           } else {
