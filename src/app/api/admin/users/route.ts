@@ -5,32 +5,42 @@ export async function POST(request: Request) {
   try {
     const { firstName, lastName, email, phone, role, fullName, permissions } = await request.json()
 
-    const serviceRoleKey = process.env.INSFORGE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!serviceRoleKey) {
-      return NextResponse.json(
-        { error: "Configuration manquante: Clé de service (Service Role Key) introuvable dans le backend." },
-        { status: 500 }
-      )
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: "Non autorisé." }, { status: 401 })
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_INSFORGE_BASE_URL!
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!
+
+    // Client anonyme pour l'inscription uniquement (ne pas contaminer la session)
+    const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
     })
 
-    // 1. Inviter l'utilisateur (crée l'identité Auth et envoie l'email)
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      data: {
-        full_name: fullName,
-        phone,
+    // Client Admin (hérite du token de l'utilisateur qui a fait la requête)
+    const adminClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+      global: { headers: { Authorization: authHeader } }
+    })
+
+    // 1. Inviter l'utilisateur (on génère un mot de passe sécurisé qu'il devra changer)
+    // Comme InsForge ne fournit pas de service_role facilement, on passe par le signUp standard
+    // Le système lui enverra directement le mail de confirmation habituel.
+    const tempPassword = Math.random().toString(36).slice(-12) + "A!1a"
+    const { data: authData, error: authError } = await anonClient.auth.signUp({
+      email,
+      password: tempPassword,
+      options: {
+        data: {
+          full_name: fullName,
+          phone,
+        }
       }
     })
 
     if (authError) {
-      if (authError.message.includes('already been registered')) {
+      if (authError.message.includes('already registered')) {
         return NextResponse.json({ error: "Cet email est déjà enregistré." }, { status: 400 })
       }
       throw authError
@@ -40,27 +50,26 @@ export async function POST(request: Request) {
     if (!userId) throw new Error("ID utilisateur non généré.")
 
     // 2. Mettre à jour la table profiles avec le rôle et les permissions
-    // Par défaut, Supabase insère une ligne dans public.profiles via un trigger sur auth.users (si configuré)
-    // Nous faisons un upsert pour être sûrs que le rôle et les permissions y sont.
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .upsert({
-        id: userId,
-        email,
-        full_name: fullName,
-        role: role,
-        permissions: permissions,
-        phone: phone,
-        status: 'Invité', // Statut initial
-        updated_at: new Date().toISOString(),
-      })
+    // On utilise la fonction RPC 'admin_create_profile' configurée en SECURITY DEFINER
+    const { error: profileError } = await adminClient.rpc('admin_create_profile', {
+      p_id: userId,
+      p_email: email,
+      p_full_name: fullName,
+      p_role: role,
+      p_permissions: permissions,
+      p_phone: phone || ''
+    })
 
     if (profileError) {
-      console.error("Erreur mise à jour profil:", profileError)
-      // Ne pas throw l'erreur totalement car l'invite est partie, mais on logge.
+      console.error("Erreur mise à jour profil (RPC):", profileError)
     }
 
-    return NextResponse.json({ success: true, user: authData.user }, { status: 200 })
+    // Return the result with the temp password so the frontend can optionally show it
+    return NextResponse.json({ 
+      success: true, 
+      user: authData.user, 
+      tempPassword 
+    }, { status: 200 })
     
   } catch (error: any) {
     console.error("User Creation API Error:", error)
