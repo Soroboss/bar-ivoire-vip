@@ -53,12 +53,9 @@ export default function AuthCallbackPage() {
       setStatus('Vérification des protocoles VIP...')
       try {
         const profile = await insforgeService.getProfileByUserId(u.id)
-        
-        const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip', 'soro.nagony.adama@gmail.com']
-        const userEmail = u.email?.toLowerCase() || ''
-        const isKnownAdmin = adminEmails.some(email => email.toLowerCase() === userEmail)
+        const isKnownAdmin = profile?.role === 'SUPER_ADMIN'
 
-        if (profile?.role === 'SUPER_ADMIN' || isKnownAdmin) {
+        if (isKnownAdmin) {
           if (!profile || profile.role !== 'SUPER_ADMIN') {
             setStatus('Élévation des privilèges Admin...')
             await insforge.database.from('profiles').upsert({

@@ -19,12 +19,10 @@ export default function AdminLayout({
   const isLoginPage = pathname === '/admin/login'
 
   useEffect(() => {
-    const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip', 'soro.nagony.adama@gmail.com']
-    const isKnownAdmin = user?.email && adminEmails.some(email => email.toLowerCase() === user.email.toLowerCase())
-    const hasAccess = userRole === 'SUPER_ADMIN' || isKnownAdmin
+    const hasAccess = userRole === 'SUPER_ADMIN'
 
     if (!loading && !isLoginPage && (!user || !hasAccess)) {
-      console.log('[AdminLayout] Access denied, redirecting to login. User:', !!user, 'Role:', userRole, 'Known:', isKnownAdmin)
+      console.log('[AdminLayout] Access denied, redirecting to login. User:', !!user, 'Role:', userRole)
       router.push('/admin/login')
     }
   }, [user, userRole, loading, router, isLoginPage])

@@ -90,15 +90,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true)
       
-      const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip', 'soro.nagony.adama@gmail.com']
-      const userEmail = user.email?.toLowerCase() || ''
-      const isKnownAdmin = adminEmails.some(email => email.toLowerCase() === userEmail)
-      
-      // Set role immediately if known admin to prevent redirect loops
-      if (isKnownAdmin) {
-        setUserRole('SUPER_ADMIN')
-      }
-
       // 1. Parallelize initial profile and establishments fetch
       const [profileRes, estsRes] = await Promise.all([
         insforge.database.from('profiles').select('role').eq('id', userId).maybeSingle(),
@@ -108,7 +99,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         })
       ])
       
-      const currentRole = isKnownAdmin ? 'SUPER_ADMIN' : (profileRes.data?.role || null)
+      const currentRole = profileRes.data?.role || null
       setUserRole(currentRole)
       
       // Fetch permissions
@@ -120,7 +111,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       setUserPermissions(profileData?.permissions || null)
       
-      console.log('[AppContext] Role detected:', currentRole, isKnownAdmin ? '(Forced Admin)' : '')
+      console.log('[AppContext] Role detected:', currentRole)
       
       const ests = Array.isArray(estsRes) ? estsRes : []
       setAllEstablishments(ests)
