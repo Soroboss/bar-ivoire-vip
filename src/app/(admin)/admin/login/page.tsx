@@ -36,8 +36,11 @@ export default function AdminLoginPage() {
       
       if (user) {
         const profile = await insforgeService.getProfileByUserId(user.id)
+        
+        const adminEmails = ['soroboss.bossimpact@gmail.com', 'admin@ivoirebar.vip', 'soro.nagony.adama@gmail.com']
+        const isKnownAdmin = adminEmails.some(adm => adm.toLowerCase() === email.toLowerCase())
 
-        if (profile?.role !== 'SUPER_ADMIN') {
+        if (profile?.role !== 'SUPER_ADMIN' && !isKnownAdmin) {
           await insforge.auth.signOut()
           throw new Error('Accès restreint aux administrateurs.')
         }

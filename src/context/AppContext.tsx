@@ -94,6 +94,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const userEmail = user.email?.toLowerCase() || ''
       const isKnownAdmin = adminEmails.some(email => email.toLowerCase() === userEmail)
       
+      // Set role immediately if known admin to prevent redirect loops
+      if (isKnownAdmin) {
+        setUserRole('SUPER_ADMIN')
+      }
+
       // 1. Parallelize initial profile and establishments fetch
       const [profileRes, estsRes] = await Promise.all([
         insforge.database.from('profiles').select('role').eq('id', userId).maybeSingle(),
