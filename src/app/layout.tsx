@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
 import { Toaster } from "@/components/ui/sonner";
 import { InsforgeProvider } from "@/components/providers/InsforgeProvider";
+import { getAuthFromCookies } from "@insforge/nextjs";
 import {
   SignedIn,
   SignedOut,
@@ -20,11 +21,13 @@ export const metadata: Metadata = {
   description: "Gestion d'excellence pour bars et maquis en Côte d'Ivoire",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialAuth = await getAuthFromCookies();
+
   return (
     <html
       lang="fr"
@@ -32,7 +35,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <InsforgeProvider>
+        <InsforgeProvider initialState={initialAuth}>
           <AppProvider>
             {children}
             <Toaster position="top-right" expand={true} richColors theme="dark" />
