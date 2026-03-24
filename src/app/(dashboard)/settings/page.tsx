@@ -103,7 +103,7 @@ export default function SettingsPage() {
           <TabsContent value="branding" className="focus-visible:outline-none outline-none">
             <Card className="premium-card rounded-[2.5rem] overflow-hidden border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl">
               <CardHeader className="p-10 border-b border-white/5">
-                 <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">Logo de l'établissement</h2>
+                 <h2 className="text-xl font-black text-white uppercase tracking-tighter">Logo de l'établissement</h2>
                  <p className="text-xs font-medium text-muted-foreground mt-1">Définissez l'image qui apparaîtra sur vos reçus.</p>
               </CardHeader>
               <CardContent className="p-10 flex flex-col md:flex-row items-center gap-12">
@@ -121,7 +121,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-6 max-w-sm text-center md:text-left">
                   <div>
-                    <h3 className="text-xl font-black text-white leading-none mb-3 uppercase tracking-tighter italic">Image de marque</h3>
+                    <h3 className="text-xl font-black text-white leading-none mb-3 uppercase tracking-tighter">Image de marque</h3>
                     <p className="text-sm font-medium text-muted-foreground leading-relaxed">Privilégiez un logo sur fond transparent pour un rendu optimal sur les factures imprimées.</p>
                   </div>
                   <Badge variant="outline" className="bg-primary/10 text-primary border border-primary/20 text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-xl">Format recommandé: SVG / PNG</Badge>
@@ -133,26 +133,26 @@ export default function SettingsPage() {
           <TabsContent value="general" className="focus-visible:outline-none outline-none">
              <Card className="premium-card rounded-[2.5rem] overflow-hidden border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl">
                <CardHeader className="p-10 border-b border-white/5">
-                  <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">Coordonnées Pro</h2>
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter">Coordonnées Pro</h2>
                   <p className="text-xs font-medium text-muted-foreground mt-1">Gérez vos informations de contact public.</p>
                </CardHeader>
                <CardContent className="grid gap-8 md:grid-cols-2 p-10">
                  <div className="space-y-3">
-                   <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1 italic">Nom de l'établissement</Label>
+                   <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Nom de l'établissement</Label>
                    <div className="relative group">
                      <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
                      <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="bg-white/5 border-white/5 h-14 pl-12 rounded-xl font-black text-white focus:ring-primary/20 transition-all uppercase tracking-tight" />
                    </div>
                  </div>
                  <div className="space-y-3">
-                   <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1 italic">Localisation</Label>
+                   <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Localisation</Label>
                    <div className="relative group">
                      <Globe2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
                      <Input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="bg-white/5 border-white/5 h-14 pl-12 rounded-xl font-black text-white focus:ring-primary/20 transition-all uppercase tracking-tight" />
                    </div>
                  </div>
                  <div className="space-y-3">
-                   <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1 italic">Contact</Label>
+                   <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Contact</Label>
                    <div className="relative group">
                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
                      <Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="bg-white/5 border-white/5 h-14 pl-12 rounded-xl font-black text-white focus:ring-primary/20 transition-all" />
@@ -165,19 +165,19 @@ export default function SettingsPage() {
           <TabsContent value="invoice" className="focus-visible:outline-none outline-none">
             <Card className="premium-card rounded-[2.5rem] overflow-hidden border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl">
               <CardHeader className="p-10 border-b border-white/5">
-                 <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">Paramètres de Facturation</h2>
+                 <h2 className="text-xl font-black text-white uppercase tracking-tighter">Paramètres de Facturation</h2>
                  <p className="text-xs font-medium text-muted-foreground mt-1">Configurez les taxes et les notes de bas de page.</p>
               </CardHeader>
               <CardContent className="grid gap-8 md:grid-cols-2 p-10">
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1 italic">Taux de taxe (%)</Label>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Taux de taxe (%)</Label>
                   <div className="relative group">
                     <Percent className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
                     <Input type="number" value={formData.taxRate} onChange={e => setFormData({...formData, taxRate: Number(e.target.value)})} className="bg-white/5 border-white/5 h-14 pl-12 rounded-xl font-black text-white focus:ring-primary/20 transition-all" />
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1 italic">Note sur la facture</Label>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Note sur la facture</Label>
                   <div className="relative group">
                     <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
                     <Input value={formData.invoiceNote} onChange={e => setFormData({...formData, invoiceNote: e.target.value})} className="bg-white/5 border-white/5 h-14 pl-12 rounded-xl font-black text-white focus:ring-primary/20 transition-all" />
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                 <ShieldCheck className="h-8 w-8" />
               </div>
               <div>
-                <p className="text-xl font-black text-white leading-none mb-2 uppercase tracking-tighter italic">Protection des données</p>
+                <p className="text-xl font-black text-white leading-none mb-2 uppercase tracking-tighter">Protection des données</p>
                 <p className="text-xs font-medium text-muted-foreground/60">Vos paramètres sont sécurisés et synchronisés via InsForge Cloud.</p>
               </div>
             </div>

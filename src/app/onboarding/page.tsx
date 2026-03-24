@@ -44,15 +44,15 @@ export default function OnboardingPage() {
              <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-2xl shadow-primary/20 mb-2 animate-float">
                 <Building2 className="h-8 w-8 text-primary-foreground" />
              </div>
-             <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">Bienvenue <span className="gold-gradient-text italic">VIP</span></h1>
-             <p className="text-muted-foreground/60 text-[10px] font-black uppercase tracking-[0.4em] italic">Finaliser votre inscription Elite</p>
+             <h1 className="text-3xl font-black tracking-tighter text-white uppercase">Bienvenue <span className="gold-gradient-text">VIP</span></h1>
+             <p className="text-muted-foreground/60 text-[10px] font-black uppercase tracking-[0.4em]">Finaliser votre inscription Elite</p>
           </div>
 
           <Card className="premium-card rounded-[2.5rem] overflow-hidden border border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl">
             <CardContent className="p-10 space-y-8">
               <div className="text-center mb-8">
-                <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Configuration du Bar Elite</h2>
-                <p className="text-muted-foreground/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2 italic">Identifiez votre établissement sur le réseau VIP</p>
+                <h2 className="text-xl font-black text-white uppercase tracking-tighter">Configuration du Bar Elite</h2>
+                <p className="text-muted-foreground/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2">Identifiez votre établissement sur le réseau VIP</p>
               </div>
 
               <form onSubmit={async (e) => {
@@ -84,30 +84,30 @@ export default function OnboardingPage() {
                 }
               }} className="space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 ml-2 tracking-widest italic">Nom du Bar</Label>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 ml-2 tracking-widest">Nom du Bar</Label>
                   <div className="relative">
                     <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                     <Input 
                       placeholder="Ex: Le Maquis des VIP" required
                       value={barName} onChange={(e) => setBarName(e.target.value)}
-                      className="bg-white/5 border-white/5 h-14 pl-14 rounded-2xl font-black text-white italic placeholder:text-muted-foreground/20 focus:ring-primary/20 transition-all uppercase tracking-tight"
+                      className="bg-white/5 border-white/5 h-14 pl-14 rounded-2xl font-black text-white placeholder:text-muted-foreground/20 focus:ring-primary/20 transition-all uppercase tracking-tight"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 ml-2 tracking-widest italic">Gérant</Label>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 ml-2 tracking-widest">Gérant</Label>
                   <Input 
                     placeholder="Votre nom complet" required
                     value={fullName} onChange={(e) => setFullName(e.target.value)}
-                    className="bg-white/5 border-white/5 h-14 px-6 rounded-2xl font-black text-white italic placeholder:text-muted-foreground/20 focus:ring-primary/20 transition-all"
+                    className="bg-white/5 border-white/5 h-14 px-6 rounded-2xl font-black text-white placeholder:text-muted-foreground/20 focus:ring-primary/20 transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 ml-2 tracking-widest italic">Contact WhatsApp</Label>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 ml-2 tracking-widest">Contact WhatsApp</Label>
                   <Input 
                     placeholder="07 01 02 03 04"
                     value={phone} onChange={(e) => setPhone(e.target.value)}
-                    className="bg-white/5 border-white/5 h-14 px-6 rounded-2xl font-black text-white italic placeholder:text-muted-foreground/20 focus:ring-primary/20 transition-all"
+                    className="bg-white/5 border-white/5 h-14 px-6 rounded-2xl font-black text-white placeholder:text-muted-foreground/20 focus:ring-primary/20 transition-all"
                   />
                 </div>
                 <Button type="submit" disabled={submitting}
@@ -117,7 +117,7 @@ export default function OnboardingPage() {
               </form>
 
               <div className="pt-6 text-center">
-                <button onClick={signOut} className="text-[10px] font-black text-muted-foreground/30 hover:text-red-500 transition-all flex items-center justify-center gap-3 mx-auto uppercase tracking-widest italic">
+                <button onClick={signOut} className="text-[10px] font-black text-muted-foreground/30 hover:text-red-500 transition-all flex items-center justify-center gap-3 mx-auto uppercase tracking-widest">
                   <LogOut className="h-4 w-4" /> Terminer la session
                 </button>
               </div>
@@ -136,9 +136,9 @@ export default function OnboardingPage() {
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-[1.8rem] bg-primary shadow-2xl shadow-primary/20 mb-4 animate-float">
             <Building2 className="h-10 w-10 text-primary-foreground" />
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Ivoire <span className="gold-gradient-text">Bar VIP</span></h1>
+          <h1 className="text-4xl font-black text-white tracking-tighter uppercase leading-none">Ivoire <span className="gold-gradient-text">Bar VIP</span></h1>
           <div className="flex items-center justify-center gap-3">
-            <Badge className={`${establishment?.status === 'Suspended' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-primary/10 text-primary border-primary/20'} uppercase text-[9px] font-black px-5 py-2 rounded-xl border italic tracking-widest`}>
+            <Badge className={`${establishment?.status === 'Suspended' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-primary/10 text-primary border-primary/20'} uppercase text-[9px] font-black px-5 py-2 rounded-xl border tracking-widest`}>
               {establishment?.status === 'Suspended' ? 'STATUT: ACCÈS SUSPENDU' : 'VALIDATION STRATÉGIQUE EN COURS'}
             </Badge>
           </div>
@@ -155,12 +155,12 @@ export default function OnboardingPage() {
                   className={`h-full ${establishment?.status === 'Suspended' ? 'bg-red-500' : 'bg-primary'} shadow-[0_0_20px_rgba(212,175,55,0.3)]`} 
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.4em] font-black italic">
+              <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.4em] font-black">
                 {establishment?.status === 'Suspended' ? 'Action requise par le Commandement' : 'Analyse de sécurité en temps réel'}
               </p>
             </div>
 
-            <div className="space-y-6 text-center italic">
+            <div className="space-y-6 text-center">
               <h2 className="text-2xl font-black text-white leading-none uppercase tracking-tighter">
                 {establishment?.status === 'Suspended'
                   ? `Activation suspendue.`
@@ -180,13 +180,13 @@ export default function OnboardingPage() {
             <div className="grid grid-cols-2 gap-6">
               <div className="p-7 rounded-[1.8rem] bg-white/[0.02] border border-white/5 flex flex-col items-center gap-3 group/item hover:bg-primary/5 transition-all duration-500 hover:scale-105">
                 <Clock className="h-8 w-8 text-primary group-hover/item:rotate-12 transition-transform" />
-                <p className="text-[9px] text-muted-foreground/30 font-black uppercase tracking-widest italic">Activation</p>
-                <p className="text-sm font-black text-white italic tracking-tighter">&lt; 120 MIN</p>
+                <p className="text-[9px] text-muted-foreground/30 font-black uppercase tracking-widest">Activation</p>
+                <p className="text-sm font-black text-white tracking-tighter">&lt; 120 MIN</p>
               </div>
               <div className="p-7 rounded-[1.8rem] bg-white/[0.02] border border-white/5 flex flex-col items-center gap-3 group/item hover:bg-emerald-500/5 transition-all duration-500 hover:scale-105">
                 <Shield className="h-8 w-8 text-emerald-500 group-hover/item:scale-110 transition-transform" />
-                <p className="text-[9px] text-muted-foreground/30 font-black uppercase tracking-widest italic">Sécurité</p>
-                <p className="text-sm font-black text-white italic tracking-tighter uppercase">SSL/TLS AES</p>
+                <p className="text-[9px] text-muted-foreground/30 font-black uppercase tracking-widest">Sécurité</p>
+                <p className="text-sm font-black text-white tracking-tighter uppercase">SSL/TLS AES</p>
               </div>
             </div>
 
@@ -194,14 +194,14 @@ export default function OnboardingPage() {
                 <Link href="https://wa.me/2250102030405" target="_blank" className="w-full h-16 bg-primary hover:bg-primary/90 text-primary-foreground font-black rounded-2xl shadow-2xl shadow-primary/20 flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-95 uppercase tracking-[0.2em] text-[10px]">
                    Assistance VIP Haute Régie <ArrowRight className="h-5 w-5" />
                 </Link>
-                <button onClick={signOut} className="w-full py-4 text-[9px] font-black text-muted-foreground/30 hover:text-red-500 transition-all flex items-center justify-center gap-3 uppercase tracking-widest italic">
+                <button onClick={signOut} className="w-full py-4 text-[9px] font-black text-muted-foreground/30 hover:text-red-500 transition-all flex items-center justify-center gap-3 uppercase tracking-widest">
                   <LogOut className="h-4 w-4" /> Terminer la session
                 </button>
               </div>
           </CardContent>
         </Card>
 
-        <p className="text-center text-[10px] text-muted-foreground/20 font-black uppercase tracking-[0.6em] italic">
+        <p className="text-center text-[10px] text-muted-foreground/20 font-black uppercase tracking-[0.6em]">
            © 2026 IVOIRE BAR VIP • INFRASTRUCTURE LUXE ORBITALE
         </p>
       </div>

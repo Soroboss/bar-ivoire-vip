@@ -71,28 +71,28 @@ export function Sidebar() {
 
         <div className="p-10 border-b border-white/5 bg-white/[0.02] relative z-10">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-xl border border-primary/30 shadow-[0_0_20px_rgba(212,175,55,0.3)] italic">
+            <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-xl border border-primary/30 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
               I
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">
+              <h1 className="text-2xl font-black tracking-tighter text-white uppercase leading-none">
                 Ivoire <span className="gold-gradient-text">VIP</span>
               </h1>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 mt-1 italic">SaaS Opérationnel</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 mt-1">SaaS Opérationnel</p>
             </div>
           </div>
           {establishment && (
             <div className="mt-8 flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 backdrop-blur-md shadow-xl group hover:border-primary/20 transition-all duration-500">
-              <Badge className="bg-primary text-primary-foreground text-[9px] font-black px-3 py-1 rounded-lg shadow-lg shadow-primary/20 italic tracking-widest uppercase">
+              <Badge className="bg-primary text-primary-foreground text-[9px] font-black px-3 py-1 rounded-lg shadow-lg shadow-primary/20 tracking-widest uppercase">
                 {establishment.plan}
               </Badge>
-              <span className="text-[10px] text-white font-black uppercase tracking-[0.2em] truncate italic">{establishment.name}</span>
+              <span className="text-[10px] text-white font-black uppercase tracking-[0.2em] truncate">{establishment.name}</span>
             </div>
           )}
         </div>
 
         <nav className="flex-1 px-6 space-y-2 overflow-y-auto py-8 relative z-10 scrollbar-hide">
-          <p className="px-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-8 italic">Navigation Centrale</p>
+          <p className="px-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-8">Navigation Centrale</p>
           {MENU_ITEMS.filter(item => {
             if (userRole === 'SUPER_ADMIN') return true
             if (!userPermissions) return true 
@@ -122,7 +122,7 @@ export function Sidebar() {
                   "h-5 w-5 transition-all duration-500",
                   isActive ? "text-primary scale-110" : "text-muted-foreground/40 group-hover:text-white group-hover:scale-110"
                 )} />
-                <span className="text-xs font-black tracking-[0.1em] uppercase italic">{item.label}</span>
+                <span className="text-xs font-black tracking-[0.1em] uppercase">{item.label}</span>
               </Link>
             )
           })}
@@ -135,7 +135,7 @@ export function Sidebar() {
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] italic">Terminer Session</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Terminer Session</span>
           </Button>
         </div>
       </aside>

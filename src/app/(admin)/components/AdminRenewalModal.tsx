@@ -67,9 +67,9 @@ export function AdminRenewalModal({ establishment, isOpen, onClose, onSuccess }:
               <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/10 shadow-xl group-hover:rotate-6 transition-all duration-500">
                 <CreditCard className="h-7 w-7" />
               </div>
-              <DialogTitle className="text-2xl font-black italic uppercase tracking-tighter">Renouvellement <span className="gold-gradient-text">Elite</span></DialogTitle>
+              <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Renouvellement <span className="gold-gradient-text">Elite</span></DialogTitle>
             </div>
-            <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-widest text-[10px] italic">
+            <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-widest text-[10px]">
               Prolongez l'accès de l'unité <span className="text-primary font-black">{establishment.name}</span> via protocole manuel.
             </DialogDescription>
           </DialogHeader>
@@ -78,42 +78,42 @@ export function AdminRenewalModal({ establishment, isOpen, onClose, onSuccess }:
         <div className="p-10 space-y-8">
           <div className="grid gap-8">
             <div className="space-y-3">
-              <Label className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] pl-1 italic">Durée de l'Abonnement</Label>
+              <Label className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] pl-1">Durée de l'Abonnement</Label>
               <Select value={months} onValueChange={(val) => setMonths(val as string)}>
-                <SelectTrigger className="h-16 bg-white/5 border-white/5 rounded-2xl font-black text-white italic uppercase tracking-tight focus:ring-primary/20">
+                <SelectTrigger className="h-16 bg-white/5 border-white/5 rounded-2xl font-black text-white uppercase tracking-tight focus:ring-primary/20">
                   <SelectValue placeholder="Choisir la durée" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border border-white/10 rounded-2xl shadow-2xl">
-                  <SelectItem value="1" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">1 Mois Standard</SelectItem>
-                  <SelectItem value="3" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">3 Mois Business</SelectItem>
-                  <SelectItem value="6" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">6 Mois Premium</SelectItem>
-                  <SelectItem value="12" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">1 An Elite (Promotion)</SelectItem>
+                  <SelectItem value="1" className="font-black text-[10px] uppercase tracking-widest py-4 focus:bg-primary/20">1 Mois Standard</SelectItem>
+                  <SelectItem value="3" className="font-black text-[10px] uppercase tracking-widest py-4 focus:bg-primary/20">3 Mois Business</SelectItem>
+                  <SelectItem value="6" className="font-black text-[10px] uppercase tracking-widest py-4 focus:bg-primary/20">6 Mois Premium</SelectItem>
+                  <SelectItem value="12" className="font-black text-[10px] uppercase tracking-widest py-4 focus:bg-primary/20">1 An Elite (Promotion)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-3">
-              <Label className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] pl-1 italic">Type de Forfait</Label>
+              <Label className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] pl-1">Type de Forfait</Label>
               <Select value={plan} onValueChange={(val) => setPlan(val as any)}>
-                <SelectTrigger className="h-16 bg-white/5 border-white/5 rounded-2xl font-black text-white italic uppercase tracking-tight focus:ring-primary/20">
+                <SelectTrigger className="h-16 bg-white/5 border-white/5 rounded-2xl font-black text-white uppercase tracking-tight focus:ring-primary/20">
                   <SelectValue placeholder="Choisir le plan" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border border-white/10 rounded-2xl shadow-2xl">
-                  <SelectItem value="Starter" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">Starter Pack</SelectItem>
-                  <SelectItem value="Business" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">Business Pro</SelectItem>
-                  <SelectItem value="VIP" className="font-black text-[10px] uppercase tracking-widest italic py-4 focus:bg-primary/20">VIP Enterprise</SelectItem>
+                  <SelectItem value="Starter" className="font-black text-[10px] uppercase tracking-widest py-4 focus:bg-primary/20">Starter Pack</SelectItem>
+                  <SelectItem value="Business" className="font-black text-[10px] uppercase tracking-widest py-4 focus:bg-primary/20">Business Pro</SelectItem>
+                  <SelectItem value="VIP" className="font-black text-[10px] uppercase tracking-widest py-4 focus:bg-primary/20">VIP Enterprise</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-3">
-              <Label className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] pl-1 italic">Contribution (XOF)</Label>
+              <Label className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] pl-1">Contribution (XOF)</Label>
               <div className="relative">
                 <Input 
                   type="number" 
                   value={amount} 
                   onChange={(e) => setAmount(e.target.value)}
-                  className="h-16 bg-white/5 border-white/5 rounded-2xl px-6 font-black text-white italic text-lg focus:ring-primary/20"
+                  className="h-16 bg-white/5 border-white/5 rounded-2xl px-6 font-black text-white text-lg focus:ring-primary/20"
                 />
                 <span className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-primary uppercase tracking-widest">FCFA</span>
               </div>
@@ -125,7 +125,7 @@ export function AdminRenewalModal({ establishment, isOpen, onClose, onSuccess }:
           <Button 
             variant="ghost" 
             onClick={onClose} 
-            className="h-14 px-8 rounded-2xl font-black text-muted-foreground/30 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest text-[10px] italic"
+            className="h-14 px-8 rounded-2xl font-black text-muted-foreground/30 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest text-[10px]"
           >
             ANNULER
           </Button>

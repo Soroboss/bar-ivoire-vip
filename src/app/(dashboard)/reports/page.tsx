@@ -125,7 +125,7 @@ export default function ReportsPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] mb-2">{stat.label}</p>
-                  <p className="text-2xl font-black text-white leading-none tracking-tight italic">{stat.value}</p>
+                  <p className="text-2xl font-black text-white leading-none tracking-tight">{stat.value}</p>
                 </div>
               </div>
             </CardContent>
@@ -138,7 +138,7 @@ export default function ReportsPage() {
           <CardHeader className="p-8 border-b border-white/5">
              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">Ventes Hebdomadaires</h2>
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter">Ventes Hebdomadaires</h2>
                   <p className="text-xs font-medium text-muted-foreground mt-1">Évolution de votre CA sur les 7 derniers jours.</p>
                 </div>
              </div>
@@ -172,7 +172,7 @@ export default function ReportsPage() {
           <CardHeader className="p-8 border-b border-white/5">
              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">Top Catégories</h2>
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter">Top Catégories</h2>
                   <p className="text-xs font-medium text-muted-foreground mt-1">Répartition de vos revenus par type de produit.</p>
                 </div>
              </div>

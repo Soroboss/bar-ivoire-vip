@@ -19,6 +19,7 @@ export default function SaaSUsersPage() {
   const [admins, setAdmins] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [promoteEmail, setPromoteEmail] = useState('')
+  const [promoteRole, setPromoteRole] = useState('Gérant')
   const [isPromoting, setIsPromoting] = useState(false)
   const [search, setSearch] = useState('')
   const [isMounted, setIsMounted] = useState(false)
@@ -31,7 +32,7 @@ export default function SaaSUsersPage() {
   const fetchAdmins = async () => {
     try {
       setLoading(true)
-      const data = await insforgeService.getAdminUsers()
+      const data = await insforgeService.getTeamMembers()
       setAdmins(data)
     } catch (e) {
       toast.error("Échec de la récupération des membres")
@@ -42,13 +43,14 @@ export default function SaaSUsersPage() {
 
   const handlePromote = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!promoteEmail) return
+    if (!promoteEmail || !promoteRole) return
     
     setIsPromoting(true)
     try {
-      await insforgeService.promoteUserToAdmin(promoteEmail)
-      toast.success(`${promoteEmail} a été promu`)
+      await insforgeService.assignRoleByEmail(promoteEmail, promoteRole)
+      toast.success(`${promoteEmail} a été promu ${promoteRole}`)
       setPromoteEmail('')
+      setPromoteRole('Gérant')
       fetchAdmins()
     } catch (e: any) {
       toast.error(e.message || "Erreur de promotion")
@@ -60,7 +62,7 @@ export default function SaaSUsersPage() {
   const handleRevoke = async (userId: string) => {
     if (!window.confirm("Voulez-vous vraiment révoquer les accès de cet administrateur ?")) return
     try {
-      await insforgeService.revokeAdminAccess(userId)
+      await insforgeService.revokeAccess(userId)
       toast.success("Accès retiré avec succès")
       fetchAdmins()
     } catch (e) {
@@ -108,34 +110,46 @@ export default function SaaSUsersPage() {
             <div className="h-2 w-8 bg-primary rounded-full shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
             <p className="subheading text-primary font-black uppercase tracking-widest text-[10px]">Équipe & Gouvernance</p>
           </div>
-          <h1 className="heading-xl italic tracking-tighter uppercase font-black">Gestion des Accès</h1>
-          <p className="text-muted-foreground font-medium leading-relaxed max-w-2xl italic">
+          <h1 className="heading-xl tracking-tighter uppercase font-black">Gestion des Accès</h1>
+          <p className="text-muted-foreground font-medium leading-relaxed max-w-2xl">
             Gérez les privilèges de vos collaborateurs et administrateurs. Attribuez des rôles précis pour sécuriser vos données.
           </p>
         </div>
         
-        <form onSubmit={handlePromote} className="relative w-full lg:max-w-md group">
+        <form onSubmit={handlePromote} className="relative w-full lg:max-w-xl group flex gap-2">
           <Input 
-            placeholder="Email pour promotion admin..." 
+            placeholder="Email de l'utilisateur..." 
             type="email"
             value={promoteEmail}
             onChange={(e) => setPromoteEmail(e.target.value)}
-            className="h-16 pl-6 pr-40 rounded-2xl border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl font-black text-white italic placeholder:text-muted-foreground/30 focus:ring-primary/20 transition-all" 
+            className="h-16 pl-6 rounded-2xl border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl font-black text-white placeholder:text-muted-foreground/30 focus:ring-primary/20 transition-all flex-1" 
           />
+          <select
+            value={promoteRole}
+            onChange={(e) => setPromoteRole(e.target.value)}
+            className="h-16 px-4 rounded-2xl border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl font-black text-white focus:ring-primary/20 transition-all"
+          >
+            <option value="Admin" className="text-black">Admin</option>
+            <option value="Gérant" className="text-black">Gérant</option>
+            <option value="Gestionnaire" className="text-black">Gestionnaire</option>
+            <option value="Analyste" className="text-black">Analyste</option>
+            <option value="Financier" className="text-black">Financier</option>
+            <option value="Agent d'encaissement" className="text-black">Agent d'encaissement</option>
+          </select>
           <Button 
             type="submit"
             disabled={isPromoting}
-            className="absolute right-2 top-2 h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+            className="h-16 px-8 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
           >
-            {isPromoting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Promouvoir'}
+            {isPromoting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Assigner'}
           </Button>
         </form>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         {[
-          { label: 'Super Admins', count: admins.filter(a => a.role === 'SUPER_ADMIN').length, icon: Star, color: "text-primary", bg: "bg-primary/10" },
-          { label: 'Administrateurs', count: admins.filter(a => a.role === 'ADMIN').length, icon: ShieldCheck, color: "text-white", bg: "bg-white/10" },
+          { label: 'Admins', count: admins.filter(a => a.role === 'Admin').length, icon: Star, color: "text-primary", bg: "bg-primary/10" },
+          { label: 'Gérants', count: admins.filter(a => a.role === 'Gérant').length, icon: ShieldCheck, color: "text-white", bg: "bg-white/10" },
           { label: 'Total Membres', count: admins.length, icon: Users, color: "text-muted-foreground", bg: "bg-white/5" },
         ].map((stat, i) => (
           <Card key={i} className="premium-card rounded-2xl overflow-hidden group border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl">
@@ -149,7 +163,7 @@ export default function SaaSUsersPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
-                  <p className="text-2xl font-black text-white leading-none tracking-tight italic">{stat.count}</p>
+                  <p className="text-2xl font-black text-white leading-none tracking-tight">{stat.count}</p>
                 </div>
               </div>
             </CardContent>
@@ -161,14 +175,14 @@ export default function SaaSUsersPage() {
         <CardHeader className="p-10 border-b border-white/5 bg-white/[0.02]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <CardTitle className="text-xl font-black text-white italic uppercase tracking-tighter">Registre Collaborateurs</CardTitle>
+              <CardTitle className="text-xl font-black text-white uppercase tracking-tighter">Registre Collaborateurs</CardTitle>
               <CardDescription className="text-xs font-medium text-muted-foreground mt-1">Audit complet des accès administratifs et SaaS</CardDescription>
             </div>
             <div className="relative w-full md:w-96 group">
                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
                <Input 
                 placeholder="Rechercher un membre..." 
-                className="pl-12 h-14 rounded-2xl border-white/5 bg-white/[0.03] text-sm font-black text-white italic placeholder:text-muted-foreground/20 focus:ring-primary/20 transition-all" 
+                className="pl-12 h-14 rounded-2xl border-white/5 bg-white/[0.03] text-sm font-black text-white placeholder:text-muted-foreground/20 focus:ring-primary/20 transition-all" 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -179,10 +193,10 @@ export default function SaaSUsersPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="py-6 pl-8 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 italic">Utilisateur</TableHead>
-                <TableHead className="py-6 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 italic">Rôle Elite</TableHead>
-                <TableHead className="py-6 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 italic">Privilèges Actifs</TableHead>
-                <TableHead className="text-right py-6 pr-8 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 italic">Actions</TableHead>
+                <TableHead className="py-6 pl-8 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40">Utilisateur</TableHead>
+                <TableHead className="py-6 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40">Rôle Elite</TableHead>
+                <TableHead className="py-6 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40">Privilèges Actifs</TableHead>
+                <TableHead className="text-right py-6 pr-8 font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -204,11 +218,11 @@ export default function SaaSUsersPage() {
                 <TableRow key={admin.id} className="border-white/5 hover:bg-white/[0.02] transition-all group">
                   <TableCell className="pl-8 py-8">
                     <div className="flex items-center gap-6">
-                      <div className="h-14 w-14 rounded-[1.2rem] bg-white/5 flex items-center justify-center text-primary font-black border border-white/10 shadow-2xl group-hover:rotate-6 transition-all duration-500 text-xl italic">
+                      <div className="h-14 w-14 rounded-[1.2rem] bg-white/5 flex items-center justify-center text-primary font-black border border-white/10 shadow-2xl group-hover:rotate-6 transition-all duration-500 text-xl">
                         {admin.email?.[0].toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-black text-white text-lg leading-none mb-2 uppercase tracking-tighter italic">{admin.full_name || 'Collaborateur'}</p>
+                        <p className="font-black text-white text-lg leading-none mb-2 uppercase tracking-tighter">{admin.full_name || 'Collaborateur'}</p>
                         <p className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-widest">{admin.email}</p>
                       </div>
                     </div>
@@ -216,7 +230,7 @@ export default function SaaSUsersPage() {
                   <TableCell>
                     <Badge className={cn(
                       "px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border-white/10 shadow-2xl",
-                      admin.role === 'SUPER_ADMIN' ? "bg-primary text-primary-foreground" : "bg-white/5 text-muted-foreground border-white/5"
+                      admin.role === 'Admin' ? "bg-primary text-primary-foreground" : "bg-white/5 text-muted-foreground border-white/5"
                     )}>
                       {admin.role}
                     </Badge>
@@ -233,7 +247,7 @@ export default function SaaSUsersPage() {
                             key={key}
                             onClick={() => togglePermission(admin.id, admin.permissions, key)}
                             className={cn(
-                                "px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all duration-500 italic",
+                                "px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all duration-500",
                                 isActive 
                                   ? 'bg-primary/10 text-primary border border-primary/20 shadow-xl' 
                                   : 'bg-white/5 text-muted-foreground/20 border border-white/5 opacity-40 hover:opacity-100 hover:border-white/20'

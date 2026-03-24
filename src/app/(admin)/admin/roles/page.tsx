@@ -88,8 +88,8 @@ export default function RolesManagementPage() {
             <div className="h-2 w-8 bg-primary rounded-full shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
             <p className="subheading text-primary font-black uppercase tracking-widest text-[10px]">Sécurité Globale</p>
           </div>
-          <h1 className="heading-xl italic tracking-tighter uppercase font-black">Rôles & Accès</h1>
-          <p className="text-muted-foreground font-medium leading-relaxed max-w-2xl italic">
+          <h1 className="heading-xl tracking-tighter uppercase font-black">Rôles & Accès</h1>
+          <p className="text-muted-foreground font-medium leading-relaxed max-w-2xl">
             Définissez les privilèges (RBAC) granulaires. Ces rôles sont appliqués à l'ensemble du système et régissent l'accès aux différents modules.
           </p>
         </div>
@@ -99,13 +99,13 @@ export default function RolesManagementPage() {
             placeholder="Nom du rôle (ex: auditeur)" 
             value={newRoleName}
             onChange={(e) => setNewRoleName(e.target.value)}
-            className="h-16 border-white/5 bg-card/40 backdrop-blur-3xl font-black text-white italic placeholder:text-muted-foreground/30 focus:ring-primary/20 rounded-2xl transition-all uppercase tracking-tight" 
+            className="h-16 border-white/5 bg-card/40 backdrop-blur-3xl font-black text-white placeholder:text-muted-foreground/30 focus:ring-primary/20 rounded-2xl transition-all uppercase tracking-tight" 
           />
           <Input 
             placeholder="Description (optionnel)" 
             value={newRoleDesc}
             onChange={(e) => setNewRoleDesc(e.target.value)}
-            className="h-16 border-white/5 bg-card/40 backdrop-blur-3xl font-black text-white italic placeholder:text-muted-foreground/30 focus:ring-primary/20 rounded-2xl transition-all" 
+            className="h-16 border-white/5 bg-card/40 backdrop-blur-3xl font-black text-white placeholder:text-muted-foreground/30 focus:ring-primary/20 rounded-2xl transition-all" 
           />
           <Button 
             type="submit"
@@ -127,7 +127,7 @@ export default function RolesManagementPage() {
                   <ShieldCheck className="h-8 w-8" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-black text-white capitalize tracking-tighter italic">{role.name.replace(/_/g, ' ')}</CardTitle>
+                  <CardTitle className="text-2xl font-black text-white capitalize tracking-tighter">{role.name.replace(/_/g, ' ')}</CardTitle>
                   <CardDescription className="text-xs font-medium text-muted-foreground mt-1">Status: {role.name === 'super_admin' ? 'Clé Maîtresse' : 'Accès Restreint'}</CardDescription>
                 </div>
               </div>
@@ -146,9 +146,7 @@ export default function RolesManagementPage() {
                       key={perm.id}
                       disabled={isLocked}
                       onClick={() => togglePermission(role.id, perm.id, role.role_permissions || [])}
-                      className={`text-left flex items-start gap-4 p-6 rounded-[1.8rem] border transition-all duration-500 hover:shadow-2xl italic ${
-                        hasPerm 
-                          ? 'bg-primary/10 border-primary/30 shadow-[inset_0_0_30px_rgba(212,175,55,0.1)]' 
+                      className={`text-left flex items-start gap-4 p-6 rounded-[1.8rem] border transition-all duration-500 hover:shadow-2xl ${ hasPerm ?'bg-primary/10 border-primary/30 shadow-[inset_0_0_30px_rgba(212,175,55,0.1)]' 
                           : 'bg-white/5 border-white/5 hover:border-white/20 opacity-40 hover:opacity-100'
                       } ${isLocked ? 'cursor-not-allowed grayscale' : ''}`}
                     >
@@ -169,7 +167,7 @@ export default function RolesManagementPage() {
         {roles.length === 0 && !loading && (
            <div className="py-24 text-center bg-white/[0.02] border-2 border-dashed border-white/5 rounded-[3rem]">
              <ShieldCheck className="h-16 w-16 text-muted-foreground/10 mx-auto mb-6" />
-             <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/20 italic">Initialisation RBAC requise</p>
+             <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/20">Initialisation RBAC requise</p>
            </div>
         )}
       </div>

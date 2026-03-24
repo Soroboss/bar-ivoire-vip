@@ -27,22 +27,63 @@ import { Badge } from "@/components/ui/badge"
 import { useAppContext } from "@/context/AppContext"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { useState, useEffect } from "react"
+import { DashboardFilters } from "@/components/dashboard/DashboardFilters"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from 'framer-motion'
 
 export default function DashboardPage() {
-  const { orders, products, clients, expenses } = useAppContext()
+  const { orders, products, clients, expenses, staff, userRole } = useAppContext()
   const [isMounted, setIsMounted] = useState(false)
+  const [dateRange, setDateRange] = useState('today')
+  const [selectedStaff, setSelectedStaff] = useState('all')
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  const totalSales = orders.reduce((acc, o) => acc + o.total, 0)
+  // Filter Orders based on selected date range (client side for immediate UI response)
+  const filteredOrders = useMemo(() => {
+    const now = new Date()
+    return orders.filter(o => {
+      const orderDate = new Date(o.createdAt)
+      const oStaffId = o.staffId || o.staff_id
+      if (selectedStaff !== 'all' && oStaffId !== selectedStaff && selectedStaff !== 'active') return false
+      
+      if (dateRange === 'today') {
+        return orderDate.toDateString() === now.toDateString()
+      } else if (dateRange === 'week') {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        return orderDate >= weekAgo
+      } else if (dateRange === 'month') {
+        return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()
+      }
+      return true
+    })
+  }, [orders, dateRange, selectedStaff])
+
+  const totalSales = filteredOrders.reduce((acc, o) => acc + o.total, 0)
   const totalExpenses = (expenses || []).reduce((acc: number, e: any) => acc + (Number(e.amount) || 0), 0)
   const netProfit = totalSales - totalExpenses
   
-  const recentOrders = orders.slice(0, 5)
+  const recentOrders = filteredOrders.slice(0, 5)
+
+  // Top Staff calculation
+  const staffSales = filteredOrders.reduce((acc: any, o) => {
+    const sId = o.staffId || o.staff_id
+    if (!sId) return acc
+    acc[sId] = (acc[sId] || 0) + o.total
+    return acc
+  }, {})
+  
+  let bestStaffName = "Non assigné"
+  let bestStaffSales = 0
+  Object.entries(staffSales).forEach(([sId, total]: [string, any]) => {
+     if (total > bestStaffSales) {
+       bestStaffSales = total
+       const s = staff?.find(x => x.id === sId)
+       bestStaffName = s ? s.name : `Staff #${sId.slice(-4)}`
+     }
+  })
   
   const salesByHour = orders.reduce((acc: any, o) => {
     const hour = format(new Date(o.createdAt), 'HH') + 'h'
@@ -65,24 +106,31 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3">
           <div className="h-1.5 w-12 bg-primary rounded-full shadow-[0_0_15px_rgba(212,175,55,0.8)]" />
-          <p className="text-[10px] text-primary font-black uppercase tracking-[0.4em] italic leading-none">Intelligence Opérationnelle</p>
+          <p className="text-[10px] text-primary font-black uppercase tracking-[0.4em] leading-none">Intelligence Opérationnelle</p>
         </div>
-        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter italic uppercase leading-none">
+        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-none">
           Dashboard <span className="gold-gradient-text">Elite</span>
         </h1>
-        <p className="text-muted-foreground/60 text-base font-black italic leading-relaxed max-w-2xl border-l-2 border-primary pl-6 uppercase tracking-tight">
+        <p className="text-muted-foreground/60 text-base font-black leading-relaxed max-w-2xl border-l-2 border-primary pl-6 uppercase tracking-tight">
           Supervision temps réel du noyau <span className="text-white">Ivoire Bar VIP</span>. Flux de données synchronisés et analyses prédictives.
         </p>
       </div>
 
+      <DashboardFilters 
+        onDateChange={setDateRange}
+        onStaffChange={setSelectedStaff}
+      />
+
       {/* Stats Cards */}
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Chiffre d'Affaires", value: `${totalSales.toLocaleString()} F`, sub: `${trend} vs hier`, icon: TrendingUp, color: "text-primary", bg: "bg-white/5" },
-          { label: "Bénéfice Net", value: `${netProfit.toLocaleString()} F`, sub: `Après charges`, icon: CreditCard, color: "text-emerald-500", bg: "bg-white/5" },
-          { label: "Clients VIP", value: clients.length, sub: "Total actifs", icon: Users, color: "text-indigo-400", bg: "bg-white/5" },
+          { label: "Chiffre d'Affaires", value: `${totalSales.toLocaleString()} F`, sub: `${dateRange === 'today' ? "Aujourd'hui" : "Période"}`, icon: TrendingUp, color: "text-primary", bg: "bg-white/5", restrictedTo: ['Admin', 'Financier', 'Gérant'] },
+          { label: "Bénéfice Net", value: `${netProfit.toLocaleString()} F`, sub: `Après charges`, icon: CreditCard, color: "text-emerald-500", bg: "bg-white/5", restrictedTo: ['Admin', 'Financier'] },
+          { label: "Top Serveur", value: bestStaffName, sub: `${bestStaffSales.toLocaleString()} F générés`, icon: Users, color: "text-indigo-400", bg: "bg-white/5" },
           { label: "Stock Critique", value: products.filter(p => p.stock <= 5).length, sub: "Action requise", icon: Package, color: "text-red-500", bg: "bg-white/5" },
-        ].map((stat, i) => (
+        ]
+        .filter(stat => !stat.restrictedTo || (userRole && stat.restrictedTo.includes(userRole)))
+        .map((stat, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 20 }}
@@ -91,16 +139,16 @@ export default function DashboardPage() {
           >
             <Card className="premium-card bg-card/40 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-primary/30 transition-all duration-500 shadow-2xl">
               <CardHeader className="flex flex-row items-center justify-between p-8 pb-4">
-                <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] italic">{stat.label}</p>
+                <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">{stat.label}</p>
                 <div className={`h-14 w-14 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center border border-white/10 group-hover:scale-110 transition-all duration-500 shadow-xl`}>
                   <stat.icon className="h-7 w-7" />
                 </div>
               </CardHeader>
               <CardContent className="px-8 pb-8">
-                <div className="text-3xl font-black text-white tracking-tighter italic">{stat.value}</div>
+                <div className="text-3xl font-black text-white tracking-tighter">{stat.value}</div>
                 <div className="flex items-center gap-2 mt-2">
                    <div className="h-1 w-1 rounded-full bg-primary" />
-                   <p className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest italic">{stat.sub}</p>
+                   <p className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest">{stat.sub}</p>
                 </div>
               </CardContent>
             </Card>
@@ -113,8 +161,8 @@ export default function DashboardPage() {
           <CardHeader className="p-10 border-b border-white/5 bg-white/[0.02]">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl font-black italic uppercase gold-gradient-text leading-none mb-2">Performance <span className="text-white">Flux</span></CardTitle>
-                <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] italic text-muted-foreground/40">Volume des ventes sur les dernières 24 heures</CardDescription>
+                <CardTitle className="text-2xl font-black uppercase gold-gradient-text leading-none mb-2">Performance <span className="text-white">Flux</span></CardTitle>
+                <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Volume des ventes sur les dernières 24 heures</CardDescription>
               </div>
               <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shadow-xl group-hover:rotate-12 transition-all duration-500">
                  <Activity className="h-8 w-8 text-primary shadow-[0_0_15px_rgba(212,175,55,0.5)]" />
@@ -140,7 +188,7 @@ export default function DashboardPage() {
                   fontWeight={900} 
                   axisLine={false} 
                   tickLine={false}
-                  tick={{ fill: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}
+                  tick={{ fill: 'rgba(255,255,255,0.2)', fontStyle: '' }}
                 />
                 <YAxis hide />
                 <Tooltip 
@@ -158,7 +206,7 @@ export default function DashboardPage() {
                     fontWeight: '900',
                     fontSize: '12px',
                     textTransform: 'uppercase',
-                    fontStyle: 'italic'
+                    fontStyle: ''
                   }}
                   labelStyle={{
                     color: 'rgba(255,255,255,0.4)',
@@ -180,8 +228,8 @@ export default function DashboardPage() {
           <CardHeader className="p-10 border-b border-white/5 bg-white/[0.02]">
              <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl font-black italic uppercase gold-gradient-text leading-none mb-2">Ventes <span className="text-white">Registre</span></CardTitle>
-                  <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] italic text-muted-foreground/40">Dernières transactions sécurisées</CardDescription>
+                  <CardTitle className="text-2xl font-black uppercase gold-gradient-text leading-none mb-2">Ventes <span className="text-white">Registre</span></CardTitle>
+                  <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Dernières transactions sécurisées</CardDescription>
                 </div>
                 <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shadow-xl">
                    <ShoppingCart className="h-8 w-8 text-emerald-500" />
@@ -195,7 +243,7 @@ export default function DashboardPage() {
                    <div className="h-20 w-20 rounded-full bg-white/5 flex items-center justify-center border border-white/5">
                       <Wine className="h-10 w-10 text-white/10" />
                    </div>
-                   <p className="text-[10px] text-muted-foreground/20 font-black uppercase tracking-[0.4em] italic">Archive vide</p>
+                   <p className="text-[10px] text-muted-foreground/20 font-black uppercase tracking-[0.4em]">Archive vide</p>
                 </div>
               ) : (
                 recentOrders.map((order, idx) => (
@@ -211,13 +259,13 @@ export default function DashboardPage() {
                           <Wine className="h-6 w-6 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                        </div>
                        <div>
-                         <p className="text-sm font-black text-white italic uppercase tracking-tighter">Table {order.tableId}</p>
-                         <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-widest mt-1 italic">{format(new Date(order.createdAt), 'HH:mm', { locale: fr })} — TRx_{order.id.slice(-4).toUpperCase()}</p>
+                         <p className="text-sm font-black text-white uppercase tracking-tighter">Table {order.tableId}</p>
+                         <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-widest mt-1">{format(new Date(order.createdAt), 'HH:mm', { locale: fr })} — TRx_{order.id.slice(-4).toUpperCase()}</p>
                        </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-black text-primary italic tracking-tighter">{order.total.toLocaleString()} F</p>
-                      <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] font-black italic uppercase tracking-widest px-3 py-1 mt-1 rounded-lg">SÉCURISÉ</Badge>
+                      <p className="text-lg font-black text-primary tracking-tighter">{order.total.toLocaleString()} F</p>
+                      <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 mt-1 rounded-lg">SÉCURISÉ</Badge>
                     </div>
                   </motion.div>
                 ))

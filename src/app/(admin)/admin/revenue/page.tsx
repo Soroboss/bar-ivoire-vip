@@ -73,7 +73,7 @@ export default function SaaSRevenuePage() {
              <Loader2 className="h-20 w-20 animate-spin text-primary opacity-20" />
            </div>
         </div>
-        <p className="text-primary text-xs font-black uppercase tracking-[0.3em] italic">Analyse des Flux Financiers...</p>
+        <p className="text-primary text-xs font-black uppercase tracking-[0.3em]">Analyse des Flux Financiers...</p>
       </div>
     </div>
   )
@@ -113,13 +113,13 @@ export default function SaaSRevenuePage() {
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                <BarChart3 className="h-4 w-4 text-primary" />
             </div>
-            <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest italic">Terminal de Contrôle Financier</span>
+            <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Terminal de Contrôle Financier</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter italic uppercase leading-none">
+          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter uppercase leading-none">
             Flux <span className="gold-gradient-text">Monétaire</span>
           </h1>
           <p className="text-muted-foreground text-base border-l-2 border-primary pl-4 max-w-xl font-medium">
-             Analyse orbitale des revenus SaaS. Monitoring des abonnements et flux de trésorerie du réseau <span className="text-foreground italic">Ivoire Bar VIP</span>.
+             Analyse orbitale des revenus SaaS. Monitoring des abonnements et flux de trésorerie du réseau <span className="text-foreground">Ivoire Bar VIP</span>.
           </p>
         </div>
         
@@ -150,14 +150,14 @@ export default function SaaSRevenuePage() {
                 <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:scale-110 group-hover:rotate-6 duration-500 shadow-xl" style={{ color: kpi.color }}>
                    <kpi.icon className="h-7 w-7" />
                 </div>
-                <Badge className="border-white/10 text-muted-foreground/40 text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 bg-white/5 italic">Live Monitor</Badge>
+                <Badge className="border-white/10 text-muted-foreground/40 text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 bg-white/5">Live Monitor</Badge>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground/40 uppercase font-black tracking-[0.3em] mb-2 italic">{kpi.label}</p>
+                <p className="text-[10px] text-muted-foreground/40 uppercase font-black tracking-[0.3em] mb-2">{kpi.label}</p>
                 <div className="flex items-end justify-between">
-                  <h3 className="text-4xl font-black text-white tracking-tighter leading-none italic">{kpi.value}</h3>
+                  <h3 className="text-4xl font-black text-white tracking-tighter leading-none">{kpi.value}</h3>
                   <div className="flex flex-col items-end">
-                    <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1 mb-2 italic" style={{ color: kpi.color }}>
+                    <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1 mb-2" style={{ color: kpi.color }}>
                        <ArrowUpRight className="h-3 w-3" /> {kpi.trend}
                     </span>
                     {kpi.pulse && <div className="h-1.5 w-16 bg-gradient-to-r from-transparent via-primary/60 to-transparent rounded-full animate-pulse shadow-[0_0_10px_rgba(212,175,55,0.4)]" />}
@@ -180,14 +180,14 @@ export default function SaaSRevenuePage() {
                      <TrendingUp className="h-7 w-7 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-white text-2xl font-black uppercase italic tracking-tighter leading-none">Performance <span className="gold-gradient-text">Réseau</span></CardTitle>
-                    <CardDescription className="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em] italic mt-2">Vitesse de croissance quotidienne</CardDescription>
+                    <CardTitle className="text-white text-2xl font-black uppercase tracking-tighter leading-none">Performance <span className="gold-gradient-text">Réseau</span></CardTitle>
+                    <CardDescription className="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Vitesse de croissance quotidienne</CardDescription>
                   </div>
                 </div>
                 <div className="group relative">
                    <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 group-hover:border-primary/30 transition-all cursor-pointer">
                       <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 italic">Optimisé</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Optimisé</span>
                    </div>
                 </div>
               </div>
@@ -210,7 +210,7 @@ export default function SaaSRevenuePage() {
                       tickLine={false} 
                       axisLine={false} 
                       dy={20} 
-                      fontStyle="italic"
+                      fontStyle=""
                       fontWeight="900" 
                     />
                     <YAxis hide />
@@ -222,8 +222,8 @@ export default function SaaSRevenuePage() {
                         boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
                         backdropFilter: 'blur(16px)'
                       }}
-                      itemStyle={{ color: 'var(--primary)', fontWeight: '900', fontSize: '14px', fontStyle: 'italic' }}
-                      labelStyle={{ color: 'rgba(255,255,255,0.4)', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.2em', fontStyle: 'italic' }}
+                      itemStyle={{ color: 'var(--primary)', fontWeight: '900', fontSize: '14px', fontStyle: '' }}
+                      labelStyle={{ color: 'rgba(255,255,255,0.4)', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.2em', fontStyle: '' }}
                       cursor={{ stroke: 'rgba(212, 175, 55, 0.15)', strokeWidth: 2 }}
                     />
                     <Area 
@@ -248,8 +248,8 @@ export default function SaaSRevenuePage() {
             <CardHeader className="p-10 border-b border-white/5 bg-white/[0.02]">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
-                  <CardTitle className="text-white text-xl font-black uppercase italic tracking-tighter">Flux <span className="gold-gradient-text">Temps Réel</span></CardTitle>
-                  <CardDescription className="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em] italic">Données Interceptées</CardDescription>
+                  <CardTitle className="text-white text-xl font-black uppercase tracking-tighter">Flux <span className="gold-gradient-text">Temps Réel</span></CardTitle>
+                  <CardDescription className="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em]">Données Interceptées</CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <div className="h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.6)] animate-pulse" />
@@ -260,8 +260,8 @@ export default function SaaSRevenuePage() {
               <Table>
                 <TableHeader className="bg-white/[0.03] border-b border-white/5">
                   <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="text-primary uppercase text-[9px] font-black tracking-widest pl-10 py-8 italic">Unité / Date</TableHead>
-                    <TableHead className="text-right text-primary uppercase text-[9px] font-black tracking-widest pr-10 py-8 italic">Volume XOF</TableHead>
+                    <TableHead className="text-primary uppercase text-[9px] font-black tracking-widest pl-10 py-8">Unité / Date</TableHead>
+                    <TableHead className="text-right text-primary uppercase text-[9px] font-black tracking-widest pr-10 py-8">Volume XOF</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -273,7 +273,7 @@ export default function SaaSRevenuePage() {
                             <div className="h-20 w-20 rounded-[1.8rem] bg-white/5 flex items-center justify-center">
                               <Sparkles className="h-10 w-10 text-primary" />
                             </div>
-                            <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.4em] italic text-center px-12 leading-relaxed">Aucune transaction interceptée sur le réseau actuel</p>
+                            <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.4em] text-center px-12 leading-relaxed">Aucune transaction interceptée sur le réseau actuel</p>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -291,22 +291,20 @@ export default function SaaSRevenuePage() {
                                <Building2 className="h-7 w-7" />
                             </div>
                             <div>
-                              <p className="font-black text-white text-base group-hover:text-primary transition-colors uppercase italic tracking-tighter leading-none mb-2">{trx.establishments?.name || 'UNITÉ INCONNUE'}</p>
+                              <p className="font-black text-white text-base group-hover:text-primary transition-colors uppercase tracking-tighter leading-none mb-2">{trx.establishments?.name || 'UNITÉ INCONNUE'}</p>
                               <div className="flex items-center gap-3">
-                                <Badge className={`
-                                  text-[8px] px-3 py-1 rounded-lg border font-black uppercase tracking-widest italic
-                                  ${trx.plan === 'VIP' ? 'text-primary border-primary/20 bg-primary/10 shadow-[0_0_10px_rgba(212,175,55,0.2)]' : 'text-muted-foreground/30 border-white/5 bg-white/5'}
+                                <Badge className={`text-[8px] px-3 py-1 rounded-lg border font-black uppercase tracking-widest ${trx.plan ==='VIP' ? 'text-primary border-primary/20 bg-primary/10 shadow-[0_0_10px_rgba(212,175,55,0.2)]' : 'text-muted-foreground/30 border-white/5 bg-white/5'}
                                 `}>
                                    {trx.plan}
                                 </Badge>
-                                <span className="text-[9px] text-muted-foreground/20 font-black uppercase italic tracking-tighter">{format(new Date(trx.created_at), 'dd MMM • HH:mm')}</span>
+                                <span className="text-[9px] text-muted-foreground/20 font-black uppercase tracking-tighter">{format(new Date(trx.created_at), 'dd MMM • HH:mm')}</span>
                               </div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-right pr-10 py-7">
-                           <p className="text-2xl font-black text-white tracking-tighter italic group-hover:text-primary transition-all duration-500">+{Number(trx.amount).toLocaleString()} F</p>
-                           <p className="text-[9px] text-emerald-500/50 font-black uppercase tracking-[0.2em] flex items-center justify-end gap-2 italic mt-1">
+                           <p className="text-2xl font-black text-white tracking-tighter group-hover:text-primary transition-all duration-500">+{Number(trx.amount).toLocaleString()} F</p>
+                           <p className="text-[9px] text-emerald-500/50 font-black uppercase tracking-[0.2em] flex items-center justify-end gap-2 mt-1">
                              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /> SÉCURISÉ
                            </p>
                         </TableCell>
@@ -317,7 +315,7 @@ export default function SaaSRevenuePage() {
               </Table>
             </CardContent>
             <div className="p-8 border-t border-white/5 bg-white/[0.02]">
-               <Button variant="ghost" className="w-full text-muted-foreground/30 hover:text-primary flex items-center justify-center gap-4 font-black text-[10px] uppercase tracking-[0.3em] h-14 rounded-2xl border border-white/5 hover:border-primary/30 transition-all duration-500 italic">
+               <Button variant="ghost" className="w-full text-muted-foreground/30 hover:text-primary flex items-center justify-center gap-4 font-black text-[10px] uppercase tracking-[0.3em] h-14 rounded-2xl border border-white/5 hover:border-primary/30 transition-all duration-500">
                   Grand Registre des Flux <ChevronRight className="h-4 w-4" />
                </Button>
             </div>

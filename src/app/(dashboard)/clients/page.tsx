@@ -138,12 +138,12 @@ export default function ClientsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16 rounded-2xl border-2 border-white/5 shadow-2xl ring-4 ring-primary/5">
-                        <AvatarFallback className="bg-primary text-primary-foreground font-black text-xl uppercase italic">
+                        <AvatarFallback className="bg-primary text-primary-foreground font-black text-xl uppercase">
                           {client.name[0]}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="text-xl font-black text-white group-hover:text-primary transition-colors leading-none mb-2 uppercase tracking-tighter italic">{client.name}</h3>
+                        <h3 className="text-xl font-black text-white group-hover:text-primary transition-colors leading-none mb-2 uppercase tracking-tighter">{client.name}</h3>
                         <div className="flex items-center gap-2 text-muted-foreground/60">
                            <Phone className="h-3 w-3 text-primary/50" />
                            <p className="text-[10px] font-black tracking-widest">{client.phone}</p>
@@ -158,13 +158,13 @@ export default function ClientsPage() {
                   <div className="mt-8 grid grid-cols-2 gap-4">
                     <div className="p-5 rounded-2xl bg-white/5 border border-white/5 group-hover:bg-primary/5 group-hover:border-primary/20 transition-all duration-500">
                       <p className="text-[9px] font-black text-muted-foreground/40 uppercase mb-2 tracking-widest">Points Fidélité</p>
-                      <p className="text-3xl font-black text-primary tracking-tighter italic">{client.points}</p>
+                      <p className="text-3xl font-black text-primary tracking-tighter">{client.points}</p>
                     </div>
                     <div className="p-5 rounded-2xl bg-white/5 border border-white/5">
                       <p className="text-[9px] font-black text-muted-foreground/40 uppercase mb-2 tracking-widest">Espace</p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <div className="h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest italic">Actif VIP</span>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Actif VIP</span>
                       </div>
                     </div>
                   </div>

@@ -50,7 +50,7 @@ export default function EstablishmentsContent() {
                <Loader2 className="h-20 w-20 animate-spin text-primary opacity-20" />
              </div>
           </div>
-          <p className="text-primary text-xs font-black uppercase tracking-[0.3em] italic">Initialisation du Registre Réseau...</p>
+          <p className="text-primary text-xs font-black uppercase tracking-[0.3em]">Initialisation du Registre Réseau...</p>
         </div>
       </div>
     )
@@ -138,11 +138,11 @@ export default function EstablishmentsContent() {
             </div>
             <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Registre Militaire des Unités</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter italic uppercase leading-none">
+          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter uppercase leading-none">
             Gestion <span className="gold-gradient-text">Stratégique</span>
           </h1>
           <p className="text-muted-foreground text-base border-l-2 border-primary pl-4 max-w-xl font-medium">
-            Surveillance et déploiement logiciel sur l'ensemble du réseau <span className="text-foreground italic">Ivoire Bar VIP</span>.
+            Surveillance et déploiement logiciel sur l'ensemble du réseau <span className="text-foreground">Ivoire Bar VIP</span>.
           </p>
         </div>
         
@@ -190,11 +190,11 @@ export default function EstablishmentsContent() {
             <Table>
               <TableHeader className="bg-white/[0.02] border-b border-white/5">
                 <TableRow className="hover:bg-transparent border-none">
-                  <TableHead className="text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10 pl-10 italic">Désignation Unité / ID</TableHead>
-                  <TableHead className="text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10 italic">Statut Réseau</TableHead>
-                  <TableHead className="text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10 italic">Plan & Échéance</TableHead>
-                  <TableHead className="text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10 italic">Liaison Commandant</TableHead>
-                  <TableHead className="text-right text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10 pr-10 italic">Commandes Tactiques</TableHead>
+                  <TableHead className="text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10 pl-10">Désignation Unité / ID</TableHead>
+                  <TableHead className="text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10">Statut Réseau</TableHead>
+                  <TableHead className="text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10">Plan & Échéance</TableHead>
+                  <TableHead className="text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10">Liaison Commandant</TableHead>
+                  <TableHead className="text-right text-primary uppercase text-[10px] font-black tracking-[0.2em] py-10 pr-10">Commandes Tactiques</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -221,8 +221,8 @@ export default function EstablishmentsContent() {
                                <div className={`absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-background ${isExpired ? 'bg-red-500 animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
                             </div>
                             <div>
-                               <p className="font-black text-white text-lg group-hover:text-primary transition-colors uppercase italic tracking-tighter leading-none mb-2">{est.name || 'UNITÉ INCONNUE'}</p>
-                               <p className="text-[10px] text-muted-foreground/30 uppercase font-black tracking-widest flex items-center gap-2 italic opacity-60 group-hover:opacity-100 transition-opacity">
+                               <p className="font-black text-white text-lg group-hover:text-primary transition-colors uppercase tracking-tighter leading-none mb-2">{est.name || 'UNITÉ INCONNUE'}</p>
+                               <p className="text-[10px] text-muted-foreground/30 uppercase font-black tracking-widest flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                                  <Zap className="h-2.5 w-2.5 text-primary heartbeat-glow" /> {est.type || 'BAR'} <span className="text-muted-foreground/10">•</span> <MapPin className="h-2.5 w-2.5" /> {est.location || 'ZONE INCONNUE'}
                                </p>
                             </div>
@@ -230,8 +230,7 @@ export default function EstablishmentsContent() {
                         </TableCell>
                         <TableCell className="py-8">
                           <div className="flex flex-col gap-2">
-                            <div className={`w-fit px-5 py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest italic shadow-2xl transition-all ${
-                              est.status === 'Active' && !isExpired ? 'border-emerald-500/20 text-emerald-500 bg-emerald-500/5' :
+                            <div className={`w-fit px-5 py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest shadow-2xl transition-all ${ est.status ==='Active' && !isExpired ? 'border-emerald-500/20 text-emerald-500 bg-emerald-500/5' :
                               est.status === 'Active' && isExpired ? 'border-red-500/20 text-white bg-red-600 shadow-red-500/20 animate-pulse' :
                               est.status === 'Pending' ? 'border-primary/20 text-primary bg-primary/5' : 'border-red-500/20 text-red-500 bg-red-500/5'
                             }`}>
@@ -239,7 +238,7 @@ export default function EstablishmentsContent() {
                             </div>
                             <div className="flex items-center gap-2 ml-1">
                               <div className={`h-1.5 w-1.5 rounded-full ${isExpired ? 'bg-red-500 animate-ping' : 'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]'}`} />
-                              <span className="text-[9px] text-muted-foreground/20 uppercase font-black italic tracking-tighter">Liaison Sécurisée</span>
+                              <span className="text-[9px] text-muted-foreground/20 uppercase font-black tracking-tighter">Liaison Sécurisée</span>
                             </div>
                           </div>
                         </TableCell>
@@ -248,7 +247,7 @@ export default function EstablishmentsContent() {
                             <select 
                               value={est.plan} 
                               onChange={(e) => updatePlan(est.id, e.target.value)}
-                              className="bg-white/5 border border-white/5 text-[10px] font-black text-primary rounded-xl px-4 py-2 outline-none cursor-pointer hover:border-primary/50 transition-all uppercase italic tracking-widest focus:ring-1 focus:ring-primary/30"
+                              className="bg-white/5 border border-white/5 text-[10px] font-black text-primary rounded-xl px-4 py-2 outline-none cursor-pointer hover:border-primary/50 transition-all uppercase tracking-widest focus:ring-1 focus:ring-primary/30"
                             >
                               <option value="Trial">PROT. ESSAI</option>
                               <option value="Business">CORP. BUSINESS</option>
@@ -256,7 +255,7 @@ export default function EstablishmentsContent() {
                             </select>
                             <div className="flex items-center gap-2 pl-2">
                               <Clock className={`h-3.5 w-3.5 ${isExpired ? 'text-red-500 heartbeat-glow' : 'text-primary'}`} />
-                              <span className={`text-[10px] font-black uppercase tracking-widest italic ${isExpired ? 'text-red-500' : 'text-white'}`}>
+                              <span className={`text-[10px] font-black uppercase tracking-widest ${isExpired ?'text-red-500' : 'text-white'}`}>
                                 {isExpired ? 'ÉCHÉANCE DÉPASSÉE' : `${daysLeft} JOURS RESTANTS`}
                               </span>
                             </div>
@@ -264,10 +263,10 @@ export default function EstablishmentsContent() {
                         </TableCell>
                         <TableCell className="py-8">
                           <div className="space-y-2">
-                            <p className="text-base text-white font-black uppercase italic tracking-tighter">{est.owner || 'COMMANDANT N/A'}</p>
+                            <p className="text-base text-white font-black uppercase tracking-tighter">{est.owner || 'COMMANDANT N/A'}</p>
                             <div className="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 w-fit group-hover:border-primary/40 transition-all cursor-pointer">
                               <Mail className="h-3 w-3 text-primary" />
-                              <span className="text-[10px] text-muted-foreground font-black tracking-tighter italic uppercase">{est.phone || 'LIAISON INDISPONIBLE'}</span>
+                              <span className="text-[10px] text-muted-foreground font-black tracking-tighter uppercase">{est.phone || 'LIAISON INDISPONIBLE'}</span>
                             </div>
                           </div>
                         </TableCell>
@@ -292,7 +291,7 @@ export default function EstablishmentsContent() {
                                 setSelectedEst(est)
                                 setIsRenewalOpen(true)
                               }}
-                              className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 px-8 font-black text-[10px] uppercase shadow-2xl shadow-primary/20 rounded-2xl transition-all hover:scale-105 active:scale-95 italic tracking-widest"
+                              className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 px-8 font-black text-[10px] uppercase shadow-2xl shadow-primary/20 rounded-2xl transition-all hover:scale-105 active:scale-95 tracking-widest"
                             >
                               RENOUVELER
                             </button>

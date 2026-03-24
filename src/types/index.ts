@@ -11,6 +11,8 @@ export type Product = {
 export type Order = {
   id: string
   tableId: string
+  staffId?: string
+  staff_id?: string
   items: { productId: string; name: string; quantity: number; price: number }[]
   total: number
   status: 'pending' | 'completed' | 'cancelled'
@@ -84,7 +86,7 @@ export type Profile = {
   id: string
   email: string
   full_name: string
-  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN'
+  role: 'Admin' | 'Gérant' | 'Gestionnaire' | 'Analyste' | 'Financier' | "Agent d'encaissement"
   role_id?: string
   permissions?: Record<string, boolean>
   avatar_url?: string

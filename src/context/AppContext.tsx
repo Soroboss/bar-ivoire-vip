@@ -61,13 +61,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null)
   const [userPermissions, setUserPermissions] = useState<any | null>(null)
   const [fallbackUser, setFallbackUser] = useState<any | null>(null)
-
+  
+  const hasLoadedRef = React.useRef(false)
   const activeUser = hookUser || fallbackUser
 
   useEffect(() => {
     const checkInitialSession = async () => {
+      if (hasLoadedRef.current) return
+
       // 1. If SDK hooks are ready and have a user, use them
       if (userLoaded && authLoaded && isSignedIn && activeUser) {
+        hasLoadedRef.current = true
         loadUserData(activeUser)
         return
       }
@@ -122,7 +126,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         })
       ])
       
-      const currentRole = profileRes.data?.role ? profileRes.data.role.toString().toUpperCase() : null
+      // Map legacy SUPER_ADMIN to Admin for backwards compatibility
+      let currentRole = profileRes.data?.role ? profileRes.data.role.toString() : null
+      if (currentRole === 'SUPER_ADMIN' || currentRole === 'ADMIN') currentRole = 'Admin'
+
       setUserRole(currentRole)
       
       console.log('[AppContext] Role detected and normalized:', currentRole)
@@ -142,45 +149,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       console.log('[AppContext] Establishments loaded:', ests.length)
 
       // 2. Identify and Load User Establishment Data
-      const userEst = ests.find(e => e.userId === userId) || (currentRole === 'SUPER_ADMIN' ? ests[0] : null)
+      const userEst = ests.find(e => e.userId === userId) || (currentRole === 'Admin' ? ests[0] : null)
       
       if (userEst) {
         setEstablishment(userEst)
         console.log('[AppContext] Target Establishment active:', userEst.name)
         
-        const [prods, stff, clnts, ords, tbls, exps] = await Promise.all([
+        // --- CRITICAL PHASE END: Unblock the UI ---
+        setLoading(false)
+
+        // --- BACKGROUND PHASE: Load heavy data ---
+        Promise.all([
           insforgeService.getProducts(userEst.id).catch(() => []),
           insforgeService.getStaff(userEst.id).catch(() => []),
           insforgeService.getClients(userEst.id).catch(() => []),
           insforgeService.getOrders(userEst.id).catch(() => []),
           insforgeService.getTables(userEst.id).catch(() => []),
           insforgeService.getExpenses(userEst.id).catch(() => [])
-        ])
-        
-        setProducts(prods)
-        setStaff(stff)
-        setClients(clnts)
-        setOrders(ords)
-        setTables(tbls as Table[])
-        setExpenses(exps as Expense[])
+        ]).then(([prods, stff, clnts, ords, tbls, exps]) => {
+          setProducts(prods)
+          setStaff(stff)
+          setClients(clnts)
+          setOrders(ords)
+          setTables(tbls as Table[])
+          setExpenses(exps as Expense[])
+          console.log('[AppContext] Heavy background data loaded.')
+        })
       } else {
         console.log('[AppContext] No establishment found for user.')
+        setLoading(false)
       }
 
       // 3. Load SaaS Transactions if Admin
-      if (currentRole === 'SUPER_ADMIN') {
-        const saasData = await insforgeService.getAdminUsers().catch(err => {
-          console.error('[AppContext] SaaS Transactions error:', err)
+      if (currentRole === 'Admin') {
+        insforgeService.getTeamMembers().catch(err => {
+          console.error('[AppContext] Team fetch error:', err)
           return []
         })
-        // Note: adjust if SaasTransactions specifically needed instead of AdminUsers
       }
 
     } catch (error: any) {
       console.error('[AppContext] Unexpected global load error:', error)
       toast.error('Erreur lors de la synchronisation des données.')
-    } finally {
       setLoading(false)
+    } finally {
       console.log('[AppContext] Data load finished.')
     }
   }

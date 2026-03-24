@@ -86,7 +86,7 @@ export default function StaffPage() {
                   <div className="flex items-start justify-between">
                     <div className="relative">
                       <Avatar className="h-24 w-24 rounded-[2rem] border-2 border-white/5 shadow-2xl ring-4 ring-primary/5">
-                        <AvatarFallback className="bg-primary text-primary-foreground font-black text-3xl uppercase italic">
+                        <AvatarFallback className="bg-primary text-primary-foreground font-black text-3xl uppercase">
                           {member.name[0]}
                         </AvatarFallback>
                       </Avatar>
@@ -100,23 +100,23 @@ export default function StaffPage() {
                     </Button>
                   </div>
                   <div className="mt-8 space-y-3">
-                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic">{member.name}</h2>
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{member.name}</h2>
                     <div className="flex items-center gap-3">
                       <Badge className="bg-primary/10 text-primary text-[10px] font-black px-4 py-1.5 rounded-xl border border-primary/20 uppercase tracking-widest">
                         {member.role}
                       </Badge>
-                      <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] italic ml-1">Statut: Actif</p>
+                      <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] ml-1">Statut: Actif</p>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="p-8 pt-4 space-y-8 italic">
+                <CardContent className="p-8 pt-4 space-y-8">
                   <div className="space-y-4 bg-white/[0.03] p-6 rounded-[1.5rem] border border-white/5 group-hover:bg-primary/5 transition-all duration-700">
                     <div className="flex justify-between items-center text-muted-foreground/40 font-black text-[9px] uppercase tracking-widest">
                       <div className="flex items-center gap-2">
                         <Clock className="h-3.5 w-3.5 text-primary" />
                         <span>Arrivée</span>
                       </div>
-                      <span className="text-sm font-black text-white not-italic tracking-tighter">{member.checkIn || '--:--'}</span>
+                      <span className="text-sm font-black text-white not- tracking-tighter">{member.checkIn || '--:--'}</span>
                     </div>
                     <div className="flex justify-between items-center text-muted-foreground/40 font-black text-[9px] uppercase tracking-widest">
                       <div className="flex items-center gap-2">

@@ -126,7 +126,7 @@ export default function POSPage() {
              <div className="h-3 w-3 bg-primary rounded-full animate-pulse shadow-[0_0_15px_rgba(212,175,55,0.5)]" />
              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Terminal Actif — Mode VIP</p>
            </div>
-           <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-white uppercase">Interface de <span className="text-primary italic">Service</span></h1>
+           <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-white uppercase">Interface de <span className="text-primary">Service</span></h1>
         </div>
 
         {/* Table Selection */}

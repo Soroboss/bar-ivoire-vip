@@ -87,7 +87,7 @@ export default function ExpensesPage() {
            <div className="h-24 w-24 rounded-[2rem] bg-white/5 flex items-center justify-center mx-auto border border-white/10 shadow-2xl">
              <Wallet className="h-10 w-10 text-primary" />
            </div>
-           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 italic">Audit de la trésorerie cloud...</p>
+           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40">Audit de la trésorerie cloud...</p>
         </div>
       </div>
     )
@@ -101,8 +101,8 @@ export default function ExpensesPage() {
             <div className="h-2 w-8 bg-primary rounded-full shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
             <p className="subheading text-primary font-black uppercase tracking-widest text-[10px]">Flux financiers</p>
           </div>
-          <h1 className="heading-xl italic tracking-tighter uppercase font-black">Trésorerie & Dépenses</h1>
-          <p className="text-muted-foreground font-medium leading-relaxed max-w-2xl italic">
+          <h1 className="heading-xl tracking-tighter uppercase font-black">Trésorerie & Dépenses</h1>
+          <p className="text-muted-foreground font-medium leading-relaxed max-w-2xl">
             Suivez vos dépenses opérationnelles et gardez un œil sur votre rentabilité nette après charges.
           </p>
         </div>
@@ -115,51 +115,51 @@ export default function ExpensesPage() {
           </DialogTrigger>
           <DialogContent className="bg-card/90 border border-white/10 rounded-[2.5rem] p-10 max-w-md shadow-2xl backdrop-blur-3xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-white italic uppercase tracking-tighter">Nouvelle Sortie</DialogTitle>
+              <DialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">Nouvelle Sortie</DialogTitle>
               <CardDescription className="text-xs font-medium text-muted-foreground mt-1">Enregistrez une charge stratégique dans le système.</CardDescription>
             </DialogHeader>
             <div className="space-y-6 mt-8">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1 italic">Catégorie</Label>
+                <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Catégorie</Label>
                 <Select value={category} onValueChange={(val) => setCategory(val || '')}>
-                  <SelectTrigger className="bg-white/5 border-white/5 h-14 rounded-xl px-4 focus:ring-primary/20 transition-all font-black text-white italic uppercase tracking-tight">
+                  <SelectTrigger className="bg-white/5 border-white/5 h-14 rounded-xl px-4 focus:ring-primary/20 transition-all font-black text-white uppercase tracking-tight">
                     <SelectValue placeholder="Choisir une catégorie" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border border-white/10 rounded-2xl shadow-2xl">
-                    <SelectItem value="Loyer" className="font-black text-[10px] uppercase tracking-widest italic py-3 focus:bg-primary/20">Loyer & Charges</SelectItem>
-                    <SelectItem value="Electricité" className="font-black text-[10px] uppercase tracking-widest italic py-3 focus:bg-primary/20">Électricité / Eau</SelectItem>
-                    <SelectItem value="Stock" className="font-black text-[10px] uppercase tracking-widest italic py-3 focus:bg-primary/20">Achat de Stock</SelectItem>
-                    <SelectItem value="Marketing" className="font-black text-[10px] uppercase tracking-widest italic py-3 focus:bg-primary/20">Marketing</SelectItem>
-                    <SelectItem value="Maintenance" className="font-black text-[10px] uppercase tracking-widest italic py-3 focus:bg-primary/20">Maintenance</SelectItem>
-                    <SelectItem value="Autre" className="font-black text-[10px] uppercase tracking-widest italic py-3 focus:bg-primary/20">Autre</SelectItem>
+                    <SelectItem value="Loyer" className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">Loyer & Charges</SelectItem>
+                    <SelectItem value="Electricité" className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">Électricité / Eau</SelectItem>
+                    <SelectItem value="Stock" className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">Achat de Stock</SelectItem>
+                    <SelectItem value="Marketing" className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">Marketing</SelectItem>
+                    <SelectItem value="Maintenance" className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">Maintenance</SelectItem>
+                    <SelectItem value="Autre" className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">Autre</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1 italic">Description</Label>
+                <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Description</Label>
                 <Input 
                   placeholder="Ex: Facture CIE Mars" 
-                  className="bg-white/5 border-white/5 h-14 rounded-xl px-4 focus:ring-primary/20 transition-all font-black text-white italic"
+                  className="bg-white/5 border-white/5 h-14 rounded-xl px-4 focus:ring-primary/20 transition-all font-black text-white"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1 italic">Montant (F)</Label>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Montant (F)</Label>
                   <Input 
                     type="number" 
                     placeholder="25000" 
-                    className="bg-white/5 border-white/5 h-14 rounded-xl px-4 font-black text-white italic"
+                    className="bg-white/5 border-white/5 h-14 rounded-xl px-4 font-black text-white"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1 italic">Date</Label>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Date</Label>
                   <Input 
                     type="date" 
-                    className="bg-white/5 border-white/5 h-14 rounded-xl px-4 font-black text-white italic"
+                    className="bg-white/5 border-white/5 h-14 rounded-xl px-4 font-black text-white"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                   />
@@ -196,7 +196,7 @@ export default function ExpensesPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] mb-2">{stat.label}</p>
-                  <p className="text-2xl font-black text-white leading-none tracking-tight italic">{stat.value}</p>
+                  <p className="text-2xl font-black text-white leading-none tracking-tight">{stat.value}</p>
                 </div>
               </div>
             </CardContent>
@@ -208,7 +208,7 @@ export default function ExpensesPage() {
         <CardHeader className="p-10 border-b border-white/5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">Journal Financier</h2>
+              <h2 className="text-xl font-black text-white uppercase tracking-tighter">Journal Financier</h2>
               <p className="text-xs font-medium text-muted-foreground mt-1">Audit complet de vos flux de trésorerie.</p>
             </div>
           </div>
@@ -236,14 +236,14 @@ export default function ExpensesPage() {
                       <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 shadow-xl group-hover:shadow-primary/40 group-hover:-rotate-6">
                         <Zap className="h-7 w-7" />
                       </div>
-                      <div className="italic">
+                      <div className="">
                         <p className="font-black text-white text-lg leading-none mb-2 uppercase tracking-tighter">{exp.category}</p>
                         <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">{exp.description || 'Charge Standard'}</p>
                       </div>
                     </div>
                     <div className="text-right flex items-center gap-8">
                       <div>
-                        <p className="text-xl font-black text-red-500 leading-none mb-2 tracking-tighter italic">-{Number(exp.amount).toLocaleString()} F</p>
+                        <p className="text-xl font-black text-red-500 leading-none mb-2 tracking-tighter">-{Number(exp.amount).toLocaleString()} F</p>
                         <p className="text-[10px] font-black text-muted-foreground/30 uppercase tracking-[0.2em]">{format(new Date(exp.date), 'dd MMM yyyy', { locale: fr })}</p>
                       </div>
                       <Button variant="ghost" size="icon" className="h-12 w-12 text-muted-foreground/20 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100">

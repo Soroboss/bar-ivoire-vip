@@ -120,22 +120,22 @@ export default function AdminDashboardContent() {
                 <div className="h-1.5 w-1.5 rounded-full bg-primary heartbeat-glow" />
                 Network Live
               </div>
-              <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase italic underline decoration-primary/30">v2.0.26 Stratégie</span>
+              <span className="text-muted-foreground text-[10px] font-bold tracking-tight uppercase underline decoration-primary/30">v2.0.26 Stratégie</span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-white uppercase italic leading-none">
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-white uppercase leading-none">
               Super <span className="gold-gradient-text">Régie</span>
             </h1>
-            <p className="max-w-xl text-muted-foreground text-lg leading-relaxed font-semibold italic">
+            <p className="max-w-xl text-muted-foreground text-lg leading-relaxed font-semibold">
               Système de contrôle orbital pour l'écosystème <span className="text-white">Ivoire Bar VIP</span>. Monitoring en temps réel des actifs stratégiques et flux transactionnels.
             </p>
           </div>
           
           <div className="flex items-center gap-6 p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl">
             <div className="flex flex-col items-end">
-              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-2 italic">Status Système</p>
+              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-2">Status Système</p>
               <div className="flex items-center gap-3">
-                <span className="text-sm font-black text-white uppercase tracking-tighter italic">Opérationnel</span>
+                <span className="text-sm font-black text-white uppercase tracking-tighter">Opérationnel</span>
                 <div className="relative flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
@@ -165,15 +165,15 @@ export default function AdminDashboardContent() {
                   <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-xl">
                     <kpi.icon className="h-7 w-7" style={{ color: kpi.color }} />
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest italic">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                     Live <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                   </div>
                 </div>
-                <CardDescription className="text-muted-foreground/40 font-black uppercase text-[10px] tracking-[0.3em] italic">{kpi.title}</CardDescription>
-                <CardTitle className="text-4xl font-black text-white mt-1 tracking-tighter italic lowercase"><span className="uppercase">{kpi.value.toString().split(' ')[0]}</span> {kpi.value.toString().split(' ')[1] || ''}</CardTitle>
+                <CardDescription className="text-muted-foreground/40 font-black uppercase text-[10px] tracking-[0.3em]">{kpi.title}</CardDescription>
+                <CardTitle className="text-4xl font-black text-white mt-1 tracking-tighter lowercase"><span className="uppercase">{kpi.value.toString().split(' ')[0]}</span> {kpi.value.toString().split(' ')[1] || ''}</CardTitle>
               </CardHeader>
               <CardContent className="relative z-10 pt-4 p-8">
-                <p className="text-[10px] font-black uppercase tracking-widest italic" style={{ color: kpi.color }}>{kpi.trend}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: kpi.color }}>{kpi.trend}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -187,7 +187,7 @@ export default function AdminDashboardContent() {
             <CardHeader className="flex flex-row items-center justify-between p-10 border-b border-white/5 bg-white/[0.02]">
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
-                  <CardTitle className="text-white text-2xl font-black italic uppercase italic tracking-tighter">Flux <span className="gold-gradient-text">D'Adhésion</span></CardTitle>
+                  <CardTitle className="text-white text-2xl font-black uppercase tracking-tighter">Flux <span className="gold-gradient-text">D'Adhésion</span></CardTitle>
                   <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[8px] font-black uppercase heartbeat-glow">Urgent</div>
                 </div>
                 <CardDescription className="text-muted-foreground/60 text-xs font-semibold uppercase tracking-widest">Validation stratégique des nouvelles unités de la régie.</CardDescription>
@@ -201,10 +201,10 @@ export default function AdminDashboardContent() {
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-white/5">
-                      <TableHead className="text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest pl-10 py-8 italic">Plateforme / ID</TableHead>
-                      <TableHead className="text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest py-8 italic">Commandant</TableHead>
-                      <TableHead className="text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest py-8 italic">Statut Initial</TableHead>
-                      <TableHead className="text-right text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest pr-10 py-8 italic">Protocole</TableHead>
+                      <TableHead className="text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest pl-10 py-8">Plateforme / ID</TableHead>
+                      <TableHead className="text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest py-8">Commandant</TableHead>
+                      <TableHead className="text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest py-8">Statut Initial</TableHead>
+                      <TableHead className="text-right text-muted-foreground/40 uppercase text-[10px] font-black tracking-widest pr-10 py-8">Protocole</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -220,7 +220,7 @@ export default function AdminDashboardContent() {
                               <div className="h-20 w-20 rounded-[1.8rem] bg-white/5 flex items-center justify-center">
                                 <Activity className="h-10 w-10 text-muted-foreground/20" />
                               </div>
-                              <p className="text-[10px] font-black uppercase tracking-[0.6em] text-muted-foreground/20 italic">Aucun protocole en attente</p>
+                              <p className="text-[10px] font-black uppercase tracking-[0.6em] text-muted-foreground/20">Aucun protocole en attente</p>
                             </motion.div>
                           </TableCell>
                         </TableRow>
@@ -232,18 +232,18 @@ export default function AdminDashboardContent() {
                                 <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 shadow-xl group-hover:rotate-6">
                                   <Building2 className="h-7 w-7" />
                                 </div>
-                                <div className="italic">
+                                <div className="">
                                   <p className="font-black text-white text-base group-hover:text-primary transition-colors uppercase tracking-tight">{est.name}</p>
                                   <p className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-widest mt-1">{est.location} • {est.type}</p>
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="py-8 italic">
+                            <TableCell className="py-8">
                               <p className="text-sm font-black text-white tracking-tight uppercase">{est.owner}</p>
                               <p className="text-[10px] text-muted-foreground/40 font-black tracking-widest mt-1">{est.phone}</p>
                             </TableCell>
                             <TableCell className="py-8">
-                              <Badge className="border-primary/20 text-primary bg-primary/10 text-[9px] font-black uppercase italic tracking-[0.2em] px-4 py-1.5 rounded-lg border">7 JOURS TRIAL</Badge>
+                              <Badge className="border-primary/20 text-primary bg-primary/10 text-[9px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-lg border">7 JOURS TRIAL</Badge>
                             </TableCell>
                             <TableCell className="text-right pr-10 py-8">
                               <div className="flex justify-end gap-3">
@@ -282,8 +282,8 @@ export default function AdminDashboardContent() {
                   <BarChart3 className="h-6 w-6" />
                 </div>
                 <div>
-                  <CardTitle className="text-white text-xl font-black uppercase italic tracking-tighter">Flux <span className="gold-gradient-text">SaaS</span></CardTitle>
-                  <CardDescription className="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em] italic">Performance orbitale</CardDescription>
+                  <CardTitle className="text-white text-xl font-black uppercase tracking-tighter">Flux <span className="gold-gradient-text">SaaS</span></CardTitle>
+                  <CardDescription className="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.3em]">Performance orbitale</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -305,7 +305,7 @@ export default function AdminDashboardContent() {
                       tickLine={false} 
                       axisLine={false} 
                       dy={15} 
-                      fontStyle="italic" 
+                      fontStyle="" 
                     />
                     <YAxis hide domain={['auto', 'auto']} />
                     <Tooltip 
@@ -317,7 +317,7 @@ export default function AdminDashboardContent() {
                         backdropFilter: 'blur(16px)'
                       }}
                       itemStyle={{ color: 'var(--primary)', fontWeight: '900', fontSize: '14px' }}
-                      labelStyle={{ color: 'rgba(255,255,255,0.6)', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', fontStyle: 'italic', fontWeight: '900', letterSpacing: '0.1em' }}
+                      labelStyle={{ color: 'rgba(255,255,255,0.6)', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', fontStyle: '', fontWeight: '900', letterSpacing: '0.1em' }}
                       cursor={{ stroke: 'rgba(212, 175, 55, 0.2)', strokeWidth: 2 }}
                     />
                     <Area 
@@ -335,21 +335,21 @@ export default function AdminDashboardContent() {
 
               <div className="mt-12 grid grid-cols-2 gap-6">
                 <div className="p-7 rounded-[1.8rem] bg-white/[0.02] border border-white/5 group hover:border-primary/40 transition-all duration-500">
-                  <p className="text-[9px] text-muted-foreground/30 uppercase font-black tracking-widest mb-3 flex items-center gap-2 italic">
+                  <p className="text-[9px] text-muted-foreground/30 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
                     Dernière <Sparkles className="h-2.5 w-2.5 text-primary heartbeat-glow" />
                   </p>
                   {saasTransactions.length > 0 ? (
                     <div className="space-y-1">
-                      <p className="text-xs font-black text-white truncate italic uppercase tracking-tighter">{(saasTransactions[0] as any).establishments?.name || 'Unité'}</p>
-                      <p className="text-2xl font-black text-primary italic">{(saasTransactions[0] as any).amount.toLocaleString()} F</p>
+                      <p className="text-xs font-black text-white truncate uppercase tracking-tighter">{(saasTransactions[0] as any).establishments?.name || 'Unité'}</p>
+                      <p className="text-2xl font-black text-primary">{(saasTransactions[0] as any).amount.toLocaleString()} F</p>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground/20 font-black italic uppercase mt-2 tracking-widest">Néant</p>
+                    <p className="text-xs text-muted-foreground/20 font-black uppercase mt-2 tracking-widest">Néant</p>
                   )}
                 </div>
                 <div className="p-7 rounded-[1.8rem] bg-white/[0.02] border border-white/5 flex flex-col justify-center items-center gap-3 group hover:bg-primary/5 transition-all duration-500">
-                   <p className="text-[9px] text-muted-foreground/30 uppercase font-black tracking-[0.2em] leading-none italic">Status Global</p>
-                   <Badge className="w-fit bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-black text-[9px] px-5 py-2 rounded-xl italic tracking-widest border">OPTIMAL</Badge>
+                   <p className="text-[9px] text-muted-foreground/30 uppercase font-black tracking-[0.2em] leading-none">Status Global</p>
+                   <Badge className="w-fit bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-black text-[9px] px-5 py-2 rounded-xl tracking-widest border">OPTIMAL</Badge>
                 </div>
               </div>
             </CardContent>

@@ -16,8 +16,8 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!loading) {
-      // Les SUPER_ADMIN peuvent tout voir sans établissement rattaché
-      if (userRole === 'SUPER_ADMIN') return
+      // Les Admin peuvent tout voir sans établissement rattaché
+      if (userRole === 'Admin') return
 
       if (!establishment) {
         // Aucun établissement : rediriger vers l'inscription

@@ -27,7 +27,7 @@ export default function AdminLayout({
 
     const hasUser = !!user
     const roleChecked = userRole !== null
-    const hasAccess = userRole === 'SUPER_ADMIN'
+    const hasAccess = userRole === 'Admin'
 
     // If no user found, redirect to login
     if (!hasUser) {
@@ -37,8 +37,8 @@ export default function AdminLayout({
     }
 
     // if user is present but role check finished and failed, redirect
-    // Be very careful: only redirect if userRole is explicitly not null AND not SUPER_ADMIN
-    if (user && userRole !== null && userRole !== 'SUPER_ADMIN') {
+    // Be very careful: only redirect if userRole is explicitly not null AND not Admin
+    if (user && userRole !== null && userRole !== 'Admin') {
       console.log('[AdminLayout] Access Denied. Role is:', userRole)
       router.push('/admin/login?error=unauthorized')
     }
@@ -78,7 +78,7 @@ export default function AdminLayout({
     return <>{children}</>
   }
 
-  if (user && userRole !== 'SUPER_ADMIN' && userRole !== null) {
+  if (user && userRole !== 'Admin' && userRole !== null) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <div className="h-20 w-20 rounded-2xl bg-card shadow-xl shadow-red-500/5 border border-red-500/20 flex items-center justify-center mb-8">

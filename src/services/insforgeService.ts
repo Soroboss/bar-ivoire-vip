@@ -318,12 +318,12 @@ export const insforgeService = {
     return data as Expense
   },
 
-  // Admin Management
-  async getAdminUsers(): Promise<Profile[]> {
+  // Team & Role Management
+  async getTeamMembers(): Promise<Profile[]> {
     const { data, error } = await insforge.database
       .from('profiles')
       .select('*, roles(name)')
-      .in('role', ['SUPER_ADMIN', 'ADMIN'])
+      .in('role', ['Admin', 'Gérant', 'Gestionnaire', 'Analyste', 'Financier', "Agent d'encaissement"])
       .order('created_at', { ascending: false })
     if (error) throw error
     return (data as any[] || []).map(p => ({
@@ -342,13 +342,7 @@ export const insforgeService = {
     return data as Profile
   },
 
-  async promoteUserToAdmin(email: string): Promise<boolean> {
-    const { data: role } = await insforge.database
-      .from('roles')
-      .select('id')
-      .eq('name', 'super_admin')
-      .single()
-
+  async assignRoleByEmail(email: string, role: string): Promise<boolean> {
     const { data: profile, error: findError } = await insforge.database
       .from('profiles')
       .select('id')
@@ -359,22 +353,30 @@ export const insforgeService = {
 
     const { error: updateError } = await insforge.database
       .from('profiles')
-      .update({ 
-        role: 'SUPER_ADMIN',
-        role_id: role?.id 
-      })
+      .update({ role })
       .eq('id', profile.id)
     
     if (updateError) throw updateError
     return true
   },
 
-  async revokeAdminAccess(userId: string) {
+  async updateUserRole(id: string, role: string): Promise<boolean> {
+    const { error: updateError } = await insforge.database
+      .from('profiles')
+      .update({ 
+        role: role
+      })
+      .eq('id', id)
+    
+    if (updateError) throw updateError
+    return true
+  },
+
+  async revokeAccess(userId: string) {
     const { error } = await insforge.database
       .from('profiles')
       .update({ 
-        role: 'USER',
-        role_id: null 
+        role: null,
       })
       .eq('id', userId)
     

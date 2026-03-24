@@ -51,15 +51,15 @@ export function AdminSidebar() {
             <ShieldCheck className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="font-black text-white text-lg leading-none uppercase tracking-tighter italic">Régie <span className="gold-gradient-text">Elite</span></h1>
-            <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-[0.3em] mt-1 italic">Infrastructure Orbitale</p>
+            <h1 className="font-black text-white text-lg leading-none uppercase tracking-tighter">Régie <span className="gold-gradient-text">Elite</span></h1>
+            <p className="text-[9px] text-muted-foreground/40 font-black uppercase tracking-[0.3em] mt-1">Infrastructure Orbitale</p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-6 py-10 space-y-2">
-        <p className="text-[10px] text-muted-foreground/20 font-black uppercase tracking-[0.6em] mb-6 pl-4 italic">Menu Stratégique</p>
+        <p className="text-[10px] text-muted-foreground/20 font-black uppercase tracking-[0.6em] mb-6 pl-4">Menu Stratégique</p>
         {menuItems.map((item) => {
           const isActive = pathname === item.path
           return (
@@ -77,7 +77,7 @@ export function AdminSidebar() {
                 "h-5 w-5 transition-all duration-500",
                 isActive ? "text-primary scale-110" : "text-muted-foreground group-hover:text-white group-hover:scale-110 group-hover:rotate-12"
               )} />
-              <span className="font-black text-[11px] uppercase tracking-widest italic">{item.name}</span>
+              <span className="font-black text-[11px] uppercase tracking-widest">{item.name}</span>
               {isActive && (
                 <div className="ml-auto animate-pulse flex h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(212,175,55,0.8)]" />
               )}
@@ -94,13 +94,13 @@ export function AdminSidebar() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
             </div>
-            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] italic">Statut Optimal</p>
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em]">Statut Optimal</p>
           </div>
         </div>
 
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-5 w-full px-6 py-4 rounded-2xl text-muted-foreground/40 hover:text-red-500 hover:bg-red-500/5 transition-all duration-500 font-black text-[10px] uppercase tracking-widest italic"
+          className="flex items-center gap-5 w-full px-6 py-4 rounded-2xl text-muted-foreground/40 hover:text-red-500 hover:bg-red-500/5 transition-all duration-500 font-black text-[10px] uppercase tracking-widest"
         >
           <LogOut className="h-5 w-5 translate-y-[-1px]" />
           Déconnexion Sécurisée
