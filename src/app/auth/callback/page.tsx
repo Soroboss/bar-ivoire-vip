@@ -3,53 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Wine } from 'lucide-react'
-import { useAuth, useUser } from '@insforge/nextjs'
 import { insforgeService } from '@/services/insforgeService'
 import { insforge } from '@/lib/insforge'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
   const [status, setStatus] = useState('Authentification en cours...')
-  const { isSignedIn, isLoaded: authLoaded } = useAuth()
-  const { user, isLoaded: userLoaded } = useUser()
 
   useEffect(() => {
-    if (!authLoaded || !userLoaded) return
-
-    const handleAuth = async () => {
-      // 1. Check if we already have a session through the hook
-      if (isSignedIn && user) {
-        await checkProfile(user)
-        return
-      }
-
-      // 2. Try manual recovery (fallback for hydration lag)
-      try {
-        const { data, error } = await (insforge.auth as any).getCurrentSession()
-        if (data?.session?.user) {
-          await checkProfile(data.session.user)
-          return
-        }
-      } catch (err) {
-        console.error('Manual session recovery failed:', err)
-      }
-
-      // 3. Wait for SDK if we haven't given up yet
-      const source = localStorage.getItem('authSource')
-      const timer = setTimeout(() => {
-        if (!isSignedIn) {
-          setStatus('Session non trouvée. Réorientation...')
-          const fallback = source === 'admin' ? '/admin/login?error=no_session' : '/login?error=no_session'
-          setTimeout(() => {
-             window.location.href = fallback
-          }, 1500)
-        }
-      }, 8000)
-
-      return () => clearTimeout(timer)
-    }
-
+    let mounted = true;
     const checkProfile = async (u: any) => {
+      if (!mounted) return
       setStatus('Vérification des protocoles VIP...')
       try {
         const profile = await insforgeService.getProfileByUserId(u.id)
@@ -60,7 +24,7 @@ export default function AuthCallbackPage() {
           localStorage.removeItem('authSource')
           setStatus('Accès Administratif Validé. Liaison...')
           setTimeout(() => {
-            window.location.href = '/admin/dashboard'
+            if (mounted) window.location.href = '/admin/dashboard'
           }, 1200)
           return
         }
@@ -83,7 +47,7 @@ export default function AuthCallbackPage() {
              localStorage.removeItem('authSource')
              setStatus('Privilèges activés. Liaison...')
              setTimeout(() => {
-               window.location.href = '/admin/dashboard'
+               if (mounted) window.location.href = '/admin/dashboard'
              }, 800)
              return
            } else {
@@ -92,7 +56,7 @@ export default function AuthCallbackPage() {
              await insforge.auth.signOut()
              localStorage.removeItem('authSource')
              setTimeout(() => {
-               window.location.href = '/admin/login?error=unauthorized'
+               if (mounted) window.location.href = '/admin/login?error=unauthorized'
              }, 1000)
              return
            }
@@ -109,22 +73,61 @@ export default function AuthCallbackPage() {
         
         if (est) {
           setStatus('Accès Partenaire Détecté. Liaison...')
-          setTimeout(() => window.location.href = '/dashboard', 800)
+          setTimeout(() => {
+            if (mounted) window.location.href = '/dashboard'
+          }, 800)
         } else {
           setStatus('Nouveau Partenaire détecté. Initialisation...')
-          setTimeout(() => window.location.href = '/onboarding', 800)
+          setTimeout(() => {
+            if (mounted) window.location.href = '/onboarding'
+          }, 800)
         }
       } catch (e) {
         console.error('Profile check error:', e)
         setStatus('Erreur de protocole. Réinitialisation...')
         const source = localStorage.getItem('authSource')
         const fallback = source === 'admin' ? '/admin/login' : '/onboarding'
-        setTimeout(() => window.location.href = fallback, 1500)
+        setTimeout(() => {
+          if (mounted) window.location.href = fallback
+        }, 1500)
+      }
+    }
+
+    const handleAuth = async () => {
+      try {
+        const { data, error } = await (insforge.auth as any).getSession()
+        if (data?.session?.user) {
+          await checkProfile(data.session.user)
+          return
+        }
+
+        if (error) throw error
+
+        // Wait a bit for slow network/hydration
+        const timer = setTimeout(async () => {
+          if (!mounted) return
+          const { data: retry } = await (insforge.auth as any).getSession()
+          if (retry?.session?.user) {
+            await checkProfile(retry.session.user)
+          } else {
+            setStatus('Session non trouvée. Réorientation...')
+            const source = localStorage.getItem('authSource')
+            const fallback = source === 'admin' ? '/admin/login?error=no_session' : '/login?error=no_session'
+            window.location.href = fallback
+          }
+        }, 3000)
+        return () => clearTimeout(timer)
+
+      } catch (err) {
+        console.error('Session recovery failed:', err)
+        if (mounted) window.location.href = '/login?error=auth_failed'
       }
     }
 
     handleAuth()
-  }, [authLoaded, userLoaded, isSignedIn, user])
+
+    return () => { mounted = false }
+  }, [router])
 
   return (
     <div className="min-h-screen bg-[#0F0F1A] flex flex-col items-center justify-center">
