@@ -55,12 +55,13 @@ export default function AuthCallbackPage() {
         const profile = await insforgeService.getProfileByUserId(u.id)
         
         // If we found a SUPER_ADMIN, proceed normally
-        if (profile?.role === 'SUPER_ADMIN') {
+        const actualRole = profile?.role?.toString().toUpperCase() || null
+        if (actualRole === 'SUPER_ADMIN') {
           localStorage.removeItem('authSource')
           setStatus('Accès Administratif Validé. Liaison...')
           setTimeout(() => {
             window.location.href = '/admin/dashboard'
-          }, 800)
+          }, 1200)
           return
         }
 

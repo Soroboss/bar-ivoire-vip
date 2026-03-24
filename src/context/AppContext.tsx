@@ -62,20 +62,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [userPermissions, setUserPermissions] = useState<any | null>(null)
 
   useEffect(() => {
-    // 1. If SDK is still initializing, don't change anything
-    if (!userLoaded || !authLoaded) {
-      return
+    const checkInitialSession = async () => {
+      // 1. If SDK hooks are ready and have a user, use them
+      if (userLoaded && authLoaded && isSignedIn && user) {
+        loadUserData(user)
+        return
+      }
+
+      // 2. Fallback: Check session manually via SDK client
+      if (userLoaded && authLoaded && !user) {
+        try {
+          const { data, error } = await (insforge.auth as any).getCurrentUser()
+          if (data?.user) {
+             console.log('[AppContext] Manual session recovery success:', data.user.id)
+             loadUserData(data.user)
+             return
+          }
+        } catch (e) {
+          console.error('[AppContext] Manual session check failed:', e)
+        }
+        
+        // If we really are not signed in
+        setLoading(false)
+        resetState()
+      }
     }
 
-    // 2. If we are signed in, load user data (this will set loading: true internally)
-    if (isSignedIn && user) {
-      loadUserData(user)
-    } 
-    // 3. If we are definitely NOT signed in, stop loading
-    else if (!isSignedIn) {
-      setLoading(false)
-      resetState()
-    }
+    checkInitialSession()
   }, [user, isSignedIn, userLoaded, authLoaded])
 
   // Safety timer to prevent stuck loading screen

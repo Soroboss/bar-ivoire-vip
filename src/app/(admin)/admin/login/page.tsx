@@ -35,8 +35,20 @@ export default function AdminLoginPage() {
       const user = data?.user
       
       if (user) {
-        toast.success('Accès autorisé. Bienvenue Admin Ivoire Bar.')
-        router.push('/admin/dashboard')
+        toast.success('Accès autorisé. Bienvenue Admin Ivoire Bar.', {
+          style: { background: '#0F0F1A', color: '#D4AF37', border: '1px solid #D4AF37/20' }
+        })
+        
+        // Ensure session is fully written to cookie/storage before redirect
+        try {
+          await (insforge.auth as any).refreshSession()
+        } catch (e) {
+          console.warn('Session refresh failed but proceeding...', e)
+        }
+
+        setTimeout(() => {
+          router.push('/admin/dashboard')
+        }, 1200)
       }
     } catch (error: any) {
       toast.error(error.message || 'Accès refusé')
