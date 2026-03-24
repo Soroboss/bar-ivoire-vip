@@ -20,7 +20,8 @@ import {
   Package,
   Table as TableIcon,
   Zap,
-  LayoutDashboard
+  LayoutDashboard,
+  Wine
 } from 'lucide-react'
 import { useAppContext } from '@/context/AppContext'
 import { toast } from 'sonner'
@@ -43,12 +44,12 @@ export default function POSPage() {
 
   if (loading || !establishment) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
-        <div className="space-y-6 animate-pulse">
-           <div className="h-20 w-20 rounded-3xl bg-primary/5 border border-primary/20 flex items-center justify-center mx-auto shadow-sm">
-             <ShoppingCart className="h-10 w-10 text-primary" />
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-center">
+        <div className="space-y-4 animate-pulse">
+           <div className="h-16 w-16 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(37,99,235,0.3)]">
+             <ShoppingCart className="h-8 w-8 text-blue-500" />
            </div>
-           <p className="subheading">Initialisation du Terminal POS Orbitale...</p>
+           <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Initialisation Terminal...</p>
         </div>
       </div>
     )
@@ -114,52 +115,50 @@ export default function POSPage() {
   }
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex flex-col lg:flex-row h-[calc(100vh-64px)] bg-background overflow-hidden"
-    >
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] xl:h-screen immersive-dark overflow-hidden bg-[#020617] font-montserrat relative">
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/10 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-600/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+
       {/* Left Menu - Tables & Products */}
-      <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-12 scrollbar-hide pb-32 lg:pb-10">
-        <div className="flex flex-col gap-3">
-           <div className="flex items-center gap-2">
-             <div className="h-8 w-8 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                <LayoutDashboard className="h-4 w-4 text-emerald-600" />
-             </div>
-             <p className="subheading">Terminal de Vente Haute Performance</p>
+      <div className="flex-1 overflow-y-auto p-6 lg:p-10 space-y-10 pb-32 lg:pb-10 relative z-10 scrollbar-hide">
+        <div className="flex flex-col gap-4">
+           <div className="flex items-center gap-3">
+             <div className="h-3 w-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+             <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400">Terminal Actif</p>
            </div>
-           <h1 className="heading-xl">Session <span className="gold-gradient-text">POS VIP</span></h1>
+           <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-white">Interface de <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Service</span></h1>
         </div>
 
         {/* Table Selection */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                 <TableIcon className="h-5 w-5 text-primary" />
-              </div>
-              <h2 className="heading-lg text-lg">Affectation <span className="text-foreground">Unité</span></h2>
+        <section className="space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 backdrop-blur-md">
+               <TableIcon className="h-5 w-5 text-blue-400" />
             </div>
+            <h2 className="text-xl font-bold text-white tracking-tight">Sélection Zone</h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-8 gap-4">
             {tables.length === 0 ? (
-              <p className="col-span-full subheading opacity-30">Aucune unité détectée</p>
+              <p className="col-span-full text-xs font-bold uppercase text-slate-500 tracking-widest">Aucun secteur configuré</p>
             ) : (
               tables.map(table => (
                 <button
                   key={table.id}
                   onClick={() => setSelectedTable(table.id)}
                   className={cn(
-                    "p-4 rounded-3xl border transition-all duration-500 text-[10px] font-black uppercase tracking-widest italic group",
+                    "p-4 rounded-xl border transition-all duration-300 text-sm font-bold uppercase tracking-wider relative overflow-hidden group",
                     selectedTable === table.id 
-                      ? 'bg-primary border-primary text-white shadow-xl shadow-primary/30 scale-105' 
+                      ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
                       : table.status === 'Occupée'
-                        ? 'bg-red-50 border-red-100 text-red-500 opacity-60'
-                        : 'bg-white border-border text-muted-foreground hover:border-primary/40 hover:bg-primary/5 hover:text-primary'
+                        ? 'bg-white/5 border-red-500/20 text-slate-500 cursor-not-allowed'
+                        : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/30 hover:bg-white/10'
                   )}
+                  disabled={table.status === 'Occupée'}
                 >
-                  <span className={cn("block mb-1 opacity-40 group-hover:opacity-100 transition-opacity", selectedTable === table.id && "opacity-100")}>Table</span>
-                  <span className="text-sm tracking-tighter transition-transform group-hover:scale-110 block">{table.name}</span>
+                  <span className="relative z-10">{table.name}</span>
+                  {selectedTable === table.id && (
+                    <div className="absolute inset-0 bg-blue-500/10 backdrop-blur-sm z-0" />
+                  )}
                 </button>
               ))
             )}
@@ -167,111 +166,107 @@ export default function POSPage() {
         </section>
 
         {/* Product Grid */}
-        <section className="space-y-8">
-          <div className="relative group max-w-2xl">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/30 group-focus-within:text-primary transition-all" />
+        <section className="space-y-6">
+          <div className="relative max-w-xl group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-400 transition-colors" />
             <Input 
-              placeholder="Intercepter une référence (Nom ou Catégorie)..."
-              className="pl-16 bg-white border-none ring-1 ring-border text-foreground h-16 rounded-[2rem] text-sm focus:ring-primary/20 transition-all shadow-sm"
+              placeholder="Rechercher une référence..."
+              className="pl-14 bg-white/5 border-white/10 h-14 rounded-2xl text-base font-medium text-white placeholder:text-slate-500 focus:bg-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all backdrop-blur-xl"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8 pb-10">
-            {filteredProducts.map((product, idx) => (
-              <motion.div
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pb-10">
+            {filteredProducts.map((product) => (
+              <Card 
                 key={product.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: idx * 0.03 }}
+                className={cn(
+                  "cursor-pointer group rounded-2xl p-0 overflow-hidden relative border-white/10 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-all duration-500 hover:-translate-y-1",
+                  product.stock <= 0 ? 'opacity-40 grayscale pointer-events-none' : 'hover:shadow-[0_8px_30px_rgba(37,99,235,0.15)] hover:border-blue-500/30'
+                )}
+                onClick={() => addToCart(product)}
               >
-                <Card 
-                  className={cn(
-                    "premium-card border-none ring-1 ring-border cursor-pointer group rounded-[2.5rem] overflow-hidden shadow-sm",
-                    product.stock <= 0 ? 'opacity-40 pointer-events-none' : ''
-                  )}
-                  onClick={() => addToCart(product)}
-                >
-                  <CardContent className="p-6 space-y-6">
-                    <div className="flex justify-between items-start">
-                      <div className="h-10 w-10 rounded-2xl bg-muted group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                         <Wine className="h-5 w-5 text-muted-foreground/50 group-hover:text-primary" />
-                      </div>
-                      <div className="text-right">
-                        <Badge variant="outline" className="text-[8px] border-primary/20 bg-primary/5 text-primary font-black uppercase px-2 py-0.5 tracking-widest block mb-1">
-                          {product.category}
-                        </Badge>
-                        <span className={cn(
-                          "text-[8px] font-black uppercase tracking-widest italic leading-none",
-                          product.stock <= 5 ? "text-red-500 animate-pulse" : "text-muted-foreground/40"
-                        )}>Stock: {product.stock}</span>
-                      </div>
+                <div className="p-6 flex flex-col h-full gap-6">
+                  <div className="flex justify-between items-start">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center border border-white/5 group-hover:scale-110 transition-transform duration-500">
+                       {product.image ? (
+                         <img src={product.image} alt={product.name} className="h-8 w-8 object-contain drop-shadow-lg" />
+                       ) : (
+                         <Wine className="h-6 w-6 text-slate-300 group-hover:text-blue-400 transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] group-hover:drop-shadow-[0_0_12px_rgba(96,165,250,0.8)]" />
+                       )}
                     </div>
-                    <div>
-                      <h3 className="text-lg font-black text-foreground group-hover:text-primary transition-colors uppercase italic tracking-tighter leading-none mb-1">{product.name}</h3>
-                      <p className="text-[9px] font-black uppercase text-muted-foreground tracking-[0.2em] italic opacity-50">Référence Arcturus-{product.id.slice(0,4).toUpperCase()}</p>
+                    <Badge className="text-[9px] bg-white/10 hover:bg-white/20 text-slate-300 border-none font-bold uppercase tracking-widest px-3 py-1 backdrop-blur-md">
+                      {product.category}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-1 flex-1">
+                    <h3 className="font-bold text-lg text-white line-clamp-2 leading-tight group-hover:text-blue-100 transition-colors">{product.name}</h3>
+                    <p className="text-[10px] text-emerald-400 uppercase font-bold tracking-widest">Dispo: {product.stock}</p>
+                  </div>
+
+                  <div className="flex justify-between items-end border-t border-white/5 pt-4">
+                    <p className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors drop-shadow-md">{product.price.toLocaleString()} F</p>
+                    <div className="h-10 w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+                      <Plus className="h-5 w-5" />
                     </div>
-                    <div className="flex justify-between items-center group-hover:translate-y-[-2px] transition-transform">
-                      <p className="text-2xl font-black text-primary italic tracking-tight leading-none">{product.price.toLocaleString()} F</p>
-                      <div className="h-10 w-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100">
-                        <Plus className="h-5 w-5" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                  </div>
+                </div>
+              </Card>
             ))}
           </div>
         </section>
       </div>
 
-      {/* Right Sidebar - Cart */}
-      <div className="w-full lg:w-[480px] border-l border-border bg-muted/5 flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.02)] z-10 backdrop-blur-xl">
-        <div className="p-10 border-b border-border bg-white flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm">
-               <ShoppingCart className="h-6 w-6 text-primary" />
+      {/* Right Sidebar - Immerse Cart */}
+      <div className="w-full lg:w-[420px] bg-black/40 backdrop-blur-3xl border-l border-white/10 flex flex-col z-20 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] relative">
+        <div className="p-8 border-b border-white/5 flex items-center justify-between relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-50" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="h-12 w-12 rounded-xl bg-blue-600/20 flex items-center justify-center text-blue-400 border border-blue-500/30 shadow-[0_0_20px_rgba(37,99,235,0.2)]">
+               <Receipt className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="heading-lg">Capture <span className="gold-gradient-text">Vente</span></h2>
-              <p className="subheading mt-1">Flux Transactionnel Actif</p>
+              <h2 className="text-xl font-bold text-white tracking-tight">Commande</h2>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Ticket en cours</p>
             </div>
           </div>
           {selectedTable && (
-            <Badge className="bg-primary text-white font-black uppercase italic text-[10px] px-5 py-2 rounded-2xl shadow-xl shadow-primary/20 animate-pulse-slow">
-              Table {tables.find(t => t.id === selectedTable)?.name}
+            <Badge className="bg-blue-600 text-white font-bold text-xs px-4 py-1.5 rounded-full border-none shadow-[0_0_15px_rgba(37,99,235,0.4)] relative z-10">
+              TB-{tables.find(t => t.id === selectedTable)?.name}
             </Badge>
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-10 space-y-8 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
           <AnimatePresence mode="popLayout">
             {cart.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center gap-6 text-muted-foreground opacity-10 py-32">
-                 <ShoppingCart className="h-24 w-24" />
-                 <p className="font-black uppercase tracking-[0.5em] italic text-[10px]">Session Vide</p>
+              <div className="h-full flex flex-col items-center justify-center gap-6 py-20">
+                 <div className="h-24 w-24 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center">
+                   <Package className="h-10 w-10 text-white/20" />
+                 </div>
+                 <p className="font-bold text-xs uppercase tracking-[0.2em] text-slate-500">Ajouter des articles</p>
               </div>
             ) : (
-              cart.map((item, idx) => (
+              cart.map((item) => (
                 <motion.div 
                   key={item.productId}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="flex gap-6 justify-between items-center bg-white p-6 rounded-[2rem] border border-border group hover:shadow-xl hover:shadow-primary/5 transition-all duration-500"
+                  exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+                  className="flex gap-4 justify-between items-center bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 hover:border-white/20 transition-all group"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-black uppercase text-primary tracking-widest italic leading-none mb-2">Article</p>
-                    <p className="font-black text-foreground uppercase italic tracking-tighter text-md leading-none mb-2 truncate">{item.name}</p>
-                    <p className="text-xl font-black text-foreground/40 italic tracking-tight">{item.price.toLocaleString()} F</p>
+                  <div className="flex-1 min-w-0 pr-2">
+                    <p className="text-sm font-bold text-white truncate">{item.name}</p>
+                    <p className="text-xs font-bold text-blue-400 mt-1">{item.price.toLocaleString()} F</p>
                   </div>
-                  <div className="flex items-center gap-4 bg-muted/40 p-2 rounded-[1.25rem] border border-border/50">
-                    <button onClick={() => updateQuantity(item.productId, -1)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-white text-muted-foreground hover:text-primary hover:shadow-md transition-all"><Minus className="h-4 w-4" /></button>
-                    <span className="min-w-8 text-center text-foreground font-black text-lg italic tracking-tighter leading-none">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.productId, 1)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-white text-muted-foreground hover:text-primary hover:shadow-md transition-all"><Plus className="h-4 w-4" /></button>
+                  <div className="flex items-center gap-3 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                    <button onClick={() => updateQuantity(item.productId, -1)} className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 text-slate-300 hover:text-white hover:bg-white/20 transition-all"><Minus className="h-4 w-4" /></button>
+                    <span className="min-w-6 text-center text-white font-bold text-sm">{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item.productId, 1)} className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 text-slate-300 hover:text-white hover:bg-blue-600 transition-all"><Plus className="h-4 w-4" /></button>
                   </div>
-                  <button onClick={() => removeFromCart(item.productId)} className="h-12 w-12 flex items-center justify-center rounded-xl text-muted-foreground/20 hover:text-red-500 hover:bg-red-50 transition-all">
+                  <button onClick={() => removeFromCart(item.productId)} className="h-10 w-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100">
                     <Trash2 className="h-5 w-5" />
                   </button>
                 </motion.div>
@@ -280,116 +275,106 @@ export default function POSPage() {
           </AnimatePresence>
         </div>
 
-        <div className="p-10 bg-white border-t border-border space-y-8">
+        <div className="p-8 bg-black/60 backdrop-blur-xl border-t border-white/10 space-y-6">
           <div className="space-y-4">
-            <div className="flex justify-between items-center px-2">
-              <span className="subheading">Sous-Somme</span>
-              <span className="font-black text-foreground italic tracking-tight">{subtotal.toLocaleString()} F</span>
+            <div className="flex justify-between items-center text-sm font-bold text-slate-400 uppercase tracking-widest">
+              <span>Sous-total</span>
+              <span className="text-white normal-case tracking-normal">{subtotal.toLocaleString()} F</span>
             </div>
-            <div className="flex justify-between items-center px-2">
-              <span className="subheading">Gravité Fiscale ({establishment.taxRate}%)</span>
-              <span className="font-black text-foreground italic tracking-tight">{tax.toLocaleString()} F</span>
+            <div className="flex justify-between items-center text-sm font-bold text-slate-400 uppercase tracking-widest">
+              <span>TVA ({establishment.taxRate}%)</span>
+              <span className="text-white normal-case tracking-normal">{tax.toLocaleString()} F</span>
             </div>
-            <div className="h-px bg-border/40" />
-            <div className="flex justify-between items-end px-2 py-2">
-              <span className="subheading text-primary bg-primary/5 px-4 py-2 rounded-full ring-1 ring-primary/20">Total à Percevoir</span>
-              <span className="text-5xl font-black text-primary italic tracking-tight leading-none">{total.toLocaleString()} <span className="text-base not-italic opacity-30 ml-2">{establishment.currency}</span></span>
+            <div className="pt-4 border-t border-white/10 flex justify-between items-end">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-blue-400">Total</span>
+              <span className="text-4xl font-bold text-white tracking-tight drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{total.toLocaleString()} <span className="text-sm font-bold text-slate-500 ml-1">{establishment.currency}</span></span>
             </div>
           </div>
           
           <Button 
-            className="w-full bg-primary text-white font-black uppercase italic text-sm h-20 rounded-[2rem] shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4"
+            className={cn(
+              "w-full font-bold h-16 rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 uppercase tracking-widest text-xs",
+              cart.length > 0 
+                ? "bg-blue-600 text-white shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:bg-blue-500 hover:shadow-[0_0_40px_rgba(37,99,235,0.6)]" 
+                : "bg-white/5 text-slate-500 cursor-not-allowed border border-white/5"
+            )}
             onClick={handleValidate}
             disabled={cart.length === 0}
           >
-            <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-               <Zap className="h-4 w-4" />
-            </div>
-            EXPÉDIER LA TRANSACTION
+            <Zap className="h-5 w-5" />
+            Vérifier & Encaisser
           </Button>
         </div>
       </div>
 
-      {/* RECEIPT DIALOG (SIMULATED TICKET) */}
+      {/* RECEIPT DIALOG - Nightlife adapted */}
       <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
-        <DialogContent className="bg-white text-slate-800 max-w-[450px] p-0 font-montserrat rounded-[3rem] overflow-hidden border-none shadow-[0_50px_100px_rgba(0,0,0,0.15)] ring-1 ring-black/5">
-          <div className="p-12 space-y-10">
-            <div className="text-center space-y-6">
+        <DialogContent className="bg-[#0f172a] border-slate-800 text-white max-w-[420px] p-0 rounded-3xl overflow-hidden shadow-2xl">
+          <div className="p-10 space-y-8 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-blue-600/20 to-transparent pointer-events-none" />
+            
+            <div className="text-center space-y-4 relative z-10">
               {establishment.logo ? (
-                <img src={establishment.logo} alt="Logo" className="h-20 mx-auto rounded-2xl" />
+                <img src={establishment.logo} alt="Logo" className="h-20 mx-auto rounded-2xl shadow-xl border border-white/10" />
               ) : (
-                <div className="h-24 w-24 rounded-[2rem] bg-primary/5 border border-primary/20 flex items-center justify-center mx-auto">
-                   <Building2 className="h-10 w-10 text-primary" />
+                <div className="h-20 w-20 rounded-3xl bg-white/5 flex items-center justify-center mx-auto border border-white/10 backdrop-blur-md shadow-xl">
+                   <Building2 className="h-10 w-10 text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.5)]" />
                 </div>
               )}
-              <div className="space-y-2">
-                <h2 className="text-3xl font-black uppercase italic tracking-tighter gold-gradient-text leading-none">{establishment.name}</h2>
-                <div className="flex flex-col gap-1 opacity-60">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em]">{establishment.location}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em]">Tél: {establishment.phone}</p>
-                </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">{establishment.name}</h2>
+                <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em] mt-2">{establishment.location}</p>
               </div>
-              <div className="h-px bg-slate-100 relative">
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 bg-white border border-slate-100 rounded-full flex items-center justify-center">
-                    <div className="h-1 w-1 bg-primary rounded-full" />
+            </div>
+
+            <div className="space-y-5 relative z-10">
+              <div className="flex justify-between items-center bg-white/5 rounded-xl p-4 border border-white/5">
+                 <div className="space-y-1">
+                   <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Réf Transaction</p>
+                   <p className="text-sm font-bold text-white">{lastOrder?.id.slice(-8)}</p>
+                 </div>
+                 <div className="space-y-1 text-right">
+                   <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Zone</p>
+                   <Badge className="bg-blue-600/20 text-blue-400 border-none font-bold text-xs">TAB-{lastOrder?.tableId}</Badge>
                  </div>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-               <div className="space-y-1">
-                 <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Référence</p>
-                 <p className="text-xs font-black uppercase italic tracking-tighter">{lastOrder?.id}</p>
-               </div>
-               <div className="space-y-1 text-right">
-                 <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">Table</p>
-                 <p className="text-xs font-black uppercase italic tracking-tighter">Unité {lastOrder?.tableId}</p>
-               </div>
-            </div>
-
-            <div className="space-y-6">
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 text-center">Inventaire de Session</p>
-              <div className="space-y-6">
+              
+              <div className="divide-y divide-white/5 px-2">
                 {lastOrder?.items.map((item: any, i: number) => (
-                  <div key={i} className="flex justify-between items-center group">
-                    <div className="space-y-1">
-                      <p className="text-sm font-black uppercase italic tracking-tighter">{item.name}</p>
-                      <Badge variant="outline" className="text-[7px] border-slate-100 text-slate-400 font-black uppercase tracking-widest">{item.quantity} x {item.price.toLocaleString()} F</Badge>
+                  <div key={i} className="py-4 flex justify-between items-center group">
+                    <div>
+                      <p className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">{item.name}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase mt-1 tracking-widest">{item.quantity} x {item.price.toLocaleString()} F</p>
                     </div>
-                    <span className="text-lg font-black italic tracking-tighter">{(item.price * item.quantity).toLocaleString()} F</span>
+                    <span className="text-sm font-bold text-white">{(item.price * item.quantity).toLocaleString()} F</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-slate-50 p-8 rounded-[2rem] space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-1">Total Consolidé</span>
-                <span className="text-4xl font-black tracking-tighter italic text-primary">{(lastOrder?.total || 0).toLocaleString()} <span className="text-sm not-italic opacity-30 ml-2">{establishment.currency}</span></span>
-              </div>
+            <div className="bg-blue-600/10 border border-blue-500/20 p-6 rounded-2xl flex justify-between items-end relative z-10">
+              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.15em] mb-1">Montant validé</span>
+              <span className="text-4xl font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">
+                {(lastOrder?.total || 0).toLocaleString()} <span className="text-sm font-bold text-blue-400 ml-1">{establishment.currency}</span>
+              </span>
             </div>
 
-            <div className="text-center space-y-6">
-              <p className="text-[10px] font-black italic text-slate-400 leading-relaxed px-6 opacity-60">"{establishment.invoiceNote}"</p>
-              <div className="flex items-center justify-center gap-3">
-                 <div className="h-px flex-1 bg-slate-100" />
-                 <p className="text-[8px] font-black uppercase tracking-[0.5em] text-slate-300">Orbitale v2.0</p>
-                 <div className="h-px flex-1 bg-slate-100" />
-              </div>
-            </div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center leading-relaxed px-4 relative z-10">
+              {establishment.invoiceNote}
+            </p>
           </div>
 
-          <div className="p-10 bg-slate-50 flex gap-6">
-            <Button onClick={() => setShowReceipt(false)} className="flex-1 bg-primary text-white hover:scale-[1.02] active:scale-[0.98] transition-all font-black uppercase italic text-xs h-16 rounded-3xl shadow-2xl shadow-primary/20">
-              <Receipt className="mr-3 h-5 w-5" /> IMPRIMER LE TICKET
+          <div className="p-6 bg-slate-900 border-t border-white/5 flex gap-4">
+            <Button onClick={() => setShowReceipt(false)} className="flex-1 bg-white text-black hover:bg-slate-200 font-bold h-14 rounded-xl uppercase tracking-widest text-xs">
+              <Receipt className="mr-2 h-4 w-4" /> IMPRESSION
             </Button>
-            <Button onClick={() => setShowReceipt(false)} variant="outline" className="h-16 w-16 rounded-3xl border-slate-200 bg-white hover:bg-white hover:shadow-lg transition-all text-slate-300 hover:text-emerald-500">
+            <Button onClick={() => setShowReceipt(false)} className="h-14 w-14 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)] border-none">
                <CheckCircle2 className="h-6 w-6" />
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-    </motion.div>
+    </div>
   )
 }
 

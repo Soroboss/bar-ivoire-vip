@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Loader2, XCircle } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { Button } from "@/components/ui/button"
 
 export default function AdminLayout({
   children,
@@ -25,74 +26,73 @@ export default function AdminLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#05050A] flex flex-col items-center justify-center p-6 text-center">
-        <div className="relative mb-10">
-          <div className="h-24 w-24 rounded-[2rem] bg-[#D4AF37]/5 border border-[#D4AF37]/20 flex items-center justify-center animate-pulse-slow">
-            <Loader2 className="h-10 w-10 animate-spin text-[#D4AF37]" />
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="relative mb-8">
+          <div className="h-20 w-20 rounded-2xl bg-white shadow-xl shadow-slate-200 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
-          <div className="absolute inset-0 h-24 w-24 rounded-[2rem] border border-[#D4AF37]/50 animate-ping opacity-20" />
         </div>
         
-        <h2 className="text-2xl font-black text-white mb-2 uppercase italic tracking-tighter italic">Noyau <span className="gold-gradient-text">Stratégique</span></h2>
-        <p className="text-[#A0A0B8] text-sm max-w-xs mb-10 font-medium italic opacity-60">
-          Initialisation des protocoles orbitaux Ivoire Bar VIP...
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Centre de Contrôle</h2>
+        <p className="text-slate-500 text-sm max-w-xs mb-8 font-medium">
+          Initialisation de votre environnement sécurisé...
         </p>
         
-        <div className="pt-8 border-t border-white/5 w-full max-w-xs">
-          <p className="text-[10px] text-white/20 uppercase font-bold tracking-[0.3em] mb-4">LIAISON EN COURS</p>
-          <button 
+        <div className="pt-8 border-t border-slate-200 w-full max-w-xs">
+          <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-4">LIAISON SÉCURISÉE</p>
+          <Button 
+            variant="outline"
             onClick={() => window.location.reload()}
-            className="text-[10px] font-black text-[#D4AF37] hover:bg-[#D4AF37]/10 px-4 py-2 rounded-lg border border-[#D4AF37]/20 transition-all uppercase tracking-widest"
+            className="h-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-white transition-all"
           >
-            Réinitialiser Flux
-          </button>
+            RÉESSAYER
+          </Button>
         </div>
       </div>
     )
   }
 
-  // Allow login page to render even if not admin
   if (isLoginPage) {
     return <>{children}</>
   }
 
   if (userRole !== 'SUPER_ADMIN') {
     return (
-      <div className="min-h-screen bg-[#05050A] flex flex-col items-center justify-center p-6 text-center">
-        <div className="h-24 w-24 rounded-3xl bg-red-500/5 flex items-center justify-center text-red-500 mb-8 border border-red-500/20 shadow-2xl shadow-red-500/5">
-          <XCircle className="h-12 w-12" />
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="h-20 w-20 rounded-2xl bg-white shadow-xl shadow-slate-200 flex items-center justify-center mb-8">
+          <XCircle className="h-10 w-10 text-red-500" />
         </div>
-        <h2 className="text-4xl font-black text-white mb-3 uppercase italic tracking-tighter">Accès Restreint</h2>
-        <p className="text-[#A0A0B8] text-base max-w-sm mb-10 font-medium leading-relaxed">
-          Votre signature biométrique ne dispose pas des privilèges requis pour le centre de contrôle.
+        <h2 className="text-3xl font-bold text-slate-900 mb-3">Accès Restreint</h2>
+        <p className="text-slate-500 text-sm max-w-sm mb-10 font-medium leading-relaxed px-4">
+          Votre compte ne dispose pas des privilèges nécessaires pour accéder à l'interface d'administration centrale.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
-          <button 
+          <Button 
+            variant="outline"
             onClick={() => router.push('/dashboard')}
-            className="px-8 py-4 bg-white/5 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest border border-white/10 hover:bg-white/10 transition-all"
+            className="h-12 px-8 rounded-xl font-bold"
           >
-            Dashboard Client
-          </button>
-          <button 
+            RETOUR AU DASHBOARD
+          </Button>
+          <Button 
             onClick={async () => {
               await supabase.auth.signOut()
               router.push('/admin/login')
             }}
-            className="px-8 py-4 bg-[#D4AF37] text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-[#B6962E] shadow-xl shadow-[#D4AF37]/10 transition-all"
+            className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-bold transition-all shadow-xl shadow-slate-200"
           >
-            Changer Unité
-          </button>
+            CHANGER DE COMPTE
+          </Button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen bg-[#05050A]">
+    <div className="flex min-h-screen bg-white">
       <AdminSidebar />
-      <main className="flex-1 lg:ml-64 bg-[#05050A] relative">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D4AF37]/10 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-20" />
-        <div className="relative z-10">
+      <main className="flex-1 lg:ml-64 bg-white relative">
+        <div className="max-w-7xl mx-auto p-8 lg:p-12 relative z-10">
           {children}
         </div>
       </main>

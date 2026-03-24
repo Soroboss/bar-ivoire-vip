@@ -40,12 +40,12 @@ export default function ClientsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
-        <div className="space-y-6 animate-pulse">
-           <div className="h-20 w-20 rounded-3xl bg-primary/5 border border-primary/20 flex items-center justify-center mx-auto shadow-sm">
-             <UserCircle className="h-10 w-10 text-primary" />
+      <div className="min-h-screen bg-white flex items-center justify-center p-6 text-center">
+        <div className="space-y-4 animate-pulse">
+           <div className="h-16 w-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto">
+             <UserCircle className="h-8 w-8 text-blue-600" />
            </div>
-           <p className="subheading">Analyse du Registre de Fidélité...</p>
+           <p className="text-sm font-medium text-slate-500">Chargement de la clientèle...</p>
         </div>
       </div>
     )
@@ -64,119 +64,113 @@ export default function ClientsPage() {
   }
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-12 pb-20"
-    >
+    <div className="space-y-10 pb-20">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-4">
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-               <UserCircle className="h-4 w-4 text-primary" />
-            </div>
-            <p className="subheading">Cohorte des Privilégiés</p>
+            <div className="h-2 w-8 bg-blue-600 rounded-full" />
+            <p className="subheading text-blue-600">Relation Client</p>
           </div>
-          <h1 className="heading-xl">Clients <span className="gold-gradient-text">& VIP</span></h1>
-          <p className="text-muted-foreground font-semibold italic border-l-2 border-primary pl-4 py-1 leading-relaxed max-w-2xl">
-            Gestion de la fidélité orbitale. Synchronisation des profils et points de privilège via <span className="text-foreground font-black italic">Supabase CRM Mesh</span>.
+          <h1 className="heading-xl">Fidélité & Clients</h1>
+          <p className="text-slate-500 font-medium leading-relaxed max-w-2xl">
+            Gérez votre base de clients, suivez leurs points de fidélité et communiquez avec eux pour booster votre récurrence.
           </p>
         </div>
         
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-primary text-white font-black uppercase italic text-[10px] h-12 px-8 hover:bg-primary/90 shadow-xl shadow-primary/20 rounded-2xl flex items-center gap-2 transition-all hover:scale-105">
-              <UserPlus className="h-4 w-4" /> Nouveau Profil
+          <DialogTrigger>
+            <Button className="bg-blue-600 text-white font-bold h-12 px-8 hover:bg-blue-700 shadow-lg shadow-blue-100 rounded-xl flex items-center gap-2 transition-all">
+              <UserPlus className="h-4 w-4" /> Nouveau client
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-white border-none ring-1 ring-border rounded-[2.5rem] p-10 max-w-md shadow-2xl">
+          <DialogContent className="bg-white border-none rounded-2xl p-8 max-w-md shadow-2xl">
             <DialogHeader>
-              <DialogTitle className="heading-lg">Adhésion <span className="gold-gradient-text">VIP</span></DialogTitle>
-              <CardDescription className="font-semibold italic">Enregistrer un nouveau profil dans le registre de fidélité.</CardDescription>
+              <DialogTitle className="text-2xl font-bold">Nouveau Profil</DialogTitle>
+              <CardDescription>Remplissez les informations du client.</CardDescription>
             </DialogHeader>
-            <form onSubmit={handleAdd} className="space-y-6 mt-6">
+            <form onSubmit={handleAdd} className="space-y-5 mt-4">
               <div className="space-y-2">
-                <Label className="subheading">Nom Complet</Label>
-                <Input value={newClient.name} onChange={e => setNewClient({...newClient, name: e.target.value})} className="bg-muted border-none ring-1 ring-border text-foreground h-14 rounded-2xl px-6 focus:ring-primary/40 transition-all font-bold" placeholder="Inza Ouattara" required />
+                <Label className="text-xs font-bold uppercase text-slate-400">Nom complet</Label>
+                <Input value={newClient.name} onChange={e => setNewClient({...newClient, name: e.target.value})} className="bg-slate-50 border-slate-100 h-12 rounded-xl px-4 focus:ring-blue-100 transition-all" placeholder="Ex: Inza Ouattara" required />
               </div>
               <div className="space-y-2">
-                <Label className="subheading">Numéro de Liaison</Label>
-                <Input value={newClient.phone} onChange={e => setNewClient({...newClient, phone: e.target.value})} className="bg-muted border-none ring-1 ring-border text-foreground h-14 rounded-2xl px-6 focus:ring-primary/40 transition-all font-bold" placeholder="0700000000" required />
+                <Label className="text-xs font-bold uppercase text-slate-400">Téléphone</Label>
+                <Input value={newClient.phone} onChange={e => setNewClient({...newClient, phone: e.target.value})} className="bg-slate-50 border-slate-100 h-12 rounded-xl px-4 focus:ring-blue-100 transition-all" placeholder="0700000000" required />
               </div>
-              <DialogFooter className="pt-6">
-                <Button type="submit" className="w-full bg-primary text-white font-black uppercase italic h-16 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all">VALIDER L'ADMISSION</Button>
+              <DialogFooter className="pt-4">
+                <Button type="submit" className="w-full bg-blue-600 text-white font-bold h-12 rounded-xl">Enregistrer</Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="relative group max-w-2xl">
-        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/30 group-focus-within:text-primary transition-all" />
+      <div className="relative max-w-xl">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
         <Input 
-          placeholder="Intercepter un profil (Nom ou Numéro)..." 
-          className="pl-16 bg-white border-none ring-1 ring-border text-foreground h-16 rounded-[2rem] text-sm focus:ring-primary/20 transition-all shadow-sm" 
+          placeholder="Rechercher par nom ou numéro..." 
+          className="pl-12 bg-white border-slate-200 h-12 rounded-xl text-sm focus:ring-blue-100 transition-all shadow-sm" 
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
       </div>
 
-      <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filtered.length === 0 ? (
-           <div className="col-span-full h-80 flex flex-col items-center justify-center gap-6 bg-muted/20 border-2 border-dashed border-border rounded-[3rem]">
-              <UserCircle className="h-16 w-16 text-muted-foreground opacity-20" />
-              <p className="subheading">Aucun profil détecté dans ce secteur</p>
+           <div className="col-span-full h-64 flex flex-col items-center justify-center gap-4 bg-slate-50 border-2 border-dashed border-slate-100 rounded-2xl">
+              <UserCircle className="h-12 w-12 text-slate-300" />
+              <p className="text-sm font-bold uppercase tracking-widest text-slate-400">Aucun client trouvé</p>
            </div>
         ) : (
           filtered.map((client, idx) => (
             <motion.div
               key={client.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
             >
-              <Card className="premium-card border-none ring-1 ring-border rounded-[3rem] overflow-hidden shadow-sm group">
-                <CardContent className="p-10">
+              <Card className="premium-card rounded-2xl overflow-hidden group">
+                <CardContent className="p-8">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-6">
-                      <Avatar className="h-16 w-16 rounded-[1.25rem] border-2 border-background shadow-xl group-hover:scale-110 transition-transform duration-700">
-                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-black uppercase italic">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-14 w-14 rounded-xl border-2 border-white shadow-sm">
+                        <AvatarFallback className="bg-blue-50 text-blue-600 font-bold uppercase">
                           {client.name[0]}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="text-xl font-black text-foreground group-hover:text-primary transition-colors italic uppercase tracking-tighter leading-none mb-2">{client.name}</h3>
-                        <div className="flex items-center gap-3 opacity-60">
-                           <Phone className="h-3 w-3 text-primary" />
-                           <p className="text-[10px] font-black uppercase tracking-widest">{client.phone}</p>
+                        <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-none mb-1">{client.name}</h3>
+                        <div className="flex items-center gap-2 text-slate-400">
+                           <Phone className="h-3 w-3" />
+                           <p className="text-[10px] font-bold">{client.phone}</p>
                         </div>
                       </div>
                     </div>
-                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[8px] px-3 py-1 font-black uppercase tracking-widest rounded-full shadow-sm">
-                      {client.tier}
+                    <Badge className="bg-blue-50 text-blue-600 border-none text-[8px] px-2 py-0.5 font-bold uppercase tracking-wider rounded-full">
+                      {client.tier || 'STANDARD'}
                     </Badge>
                   </div>
 
-                  <div className="mt-10 grid grid-cols-2 gap-6">
-                    <div className="p-6 rounded-[1.5rem] bg-primary/[0.03] border border-primary/10 group-hover:bg-primary/10 transition-colors shadow-inner">
-                      <p className="subheading text-primary/60 mb-2">Points Privilège</p>
-                      <p className="text-3xl font-black text-primary italic tracking-tight">{client.points}</p>
+                  <div className="mt-8 grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-100/50">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Points</p>
+                      <p className="text-2xl font-bold text-blue-600 leading-none">{client.points}</p>
                     </div>
-                    <div className="p-6 rounded-[1.5rem] bg-muted/30 border border-border group-hover:border-primary/10 transition-colors shadow-inner">
-                      <p className="subheading mb-2">État Signal</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[9px] font-black text-foreground uppercase tracking-widest italic">Synchronisé</span>
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-100/50">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Status</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-bold text-slate-900 uppercase">Actif</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-10 flex gap-4">
-                    <Button variant="ghost" className="flex-1 h-14 bg-white border-none ring-1 ring-border text-muted-foreground hover:text-emerald-600 hover:ring-emerald-500/20 hover:bg-emerald-50 transition-all font-black uppercase italic text-[10px] tracking-widest rounded-2xl shadow-sm">
-                      <MessageCircle className="h-4 w-4 mr-3" /> WhatsApp
+                  <div className="mt-8 flex gap-3">
+                    <Button variant="outline" className="flex-1 h-12 bg-white border-slate-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-100 transition-all rounded-xl font-bold text-[10px] uppercase">
+                      <MessageCircle className="h-4 w-4 mr-2" /> WhatsApp
                     </Button>
-                    <Button variant="ghost" className="h-14 w-14 p-0 bg-white border-none ring-1 ring-border text-muted-foreground hover:text-primary hover:ring-primary/20 hover:bg-primary/5 transition-all rounded-2xl shadow-sm">
-                      <Star className="h-5 w-5 fill-current opacity-10" />
+                    <Button variant="outline" className="h-12 w-12 p-0 bg-white border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all rounded-xl">
+                      <Star className="h-4 w-4" />
                     </Button>
                   </div>
                 </CardContent>
@@ -185,7 +179,7 @@ export default function ClientsPage() {
           ))
         )}
       </div>
-    </motion.div>
+    </div>
   )
 }
 

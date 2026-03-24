@@ -453,14 +453,23 @@ export const supabaseService = {
   async getAdminUsers(): Promise<Profile[]> {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*, roles(name)')
       .in('role', ['SUPER_ADMIN', 'ADMIN'])
       .order('created_at', { ascending: false })
     if (error) throw error
-    return (data as Profile[]) || []
+    return (data as any[] || []).map(p => ({
+      ...p,
+      role_name: p.roles?.name
+    })) as Profile[]
   },
 
   async promoteUserToAdmin(email: string): Promise<boolean> {
+    const { data: role } = await supabase
+      .from('roles')
+      .select('id')
+      .eq('name', 'super_admin')
+      .single()
+
     const { data: profile, error: findError } = await supabase
       .from('profiles')
       .select('id')
@@ -471,7 +480,10 @@ export const supabaseService = {
 
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ role: 'SUPER_ADMIN' })
+      .update({ 
+        role: 'SUPER_ADMIN',
+        role_id: role?.id 
+      })
       .eq('id', profile.id)
     
     if (updateError) throw updateError

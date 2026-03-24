@@ -85,6 +85,8 @@ export type Profile = {
   email: string
   full_name: string
   role: 'USER' | 'ADMIN' | 'SUPER_ADMIN'
+  role_id?: string
+  permissions?: Record<string, boolean>
   avatar_url?: string
   created_at: string
 }

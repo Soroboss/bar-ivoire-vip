@@ -36,19 +36,19 @@ import { fr } from "date-fns/locale"
 import { useState, useEffect } from "react"
 import { motion } from 'framer-motion'
 
-const COLORS = ['#C5A059', '#64748b', '#94a3b8', '#cbd5e1', '#f1f5f9']
+const COLORS = ['#2563eb', '#64748b', '#94a3b8', '#cbd5e1', '#f1f5f9']
 
 export default function ReportsPage() {
   const { orders, products, loading } = useAppContext()
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
-        <div className="space-y-6 animate-pulse">
-           <div className="h-20 w-20 rounded-3xl bg-primary/5 border border-primary/20 flex items-center justify-center mx-auto shadow-sm">
-             <Activity className="h-10 w-10 text-primary" />
+      <div className="min-h-screen bg-white flex items-center justify-center p-6 text-center">
+        <div className="space-y-4 animate-pulse">
+           <div className="h-16 w-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto">
+             <Activity className="h-8 w-8 text-blue-600" />
            </div>
-           <p className="subheading">Compilation des Métriques Cloud...</p>
+           <p className="text-sm font-medium text-slate-500">Analyse des données...</p>
         </div>
       </div>
     )
@@ -85,53 +85,47 @@ export default function ReportsPage() {
   })
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-12 pb-20"
-    >
+    <div className="space-y-10 pb-20">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-4">
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-               <Activity className="h-4 w-4 text-primary" />
-            </div>
-            <p className="subheading">Centre d'Intelligence Orbitale</p>
+            <div className="h-2 w-8 bg-blue-600 rounded-full" />
+            <p className="subheading text-blue-600">Analytique</p>
           </div>
-          <h1 className="heading-xl">Rapports <span className="gold-gradient-text">& Analyses</span></h1>
-          <p className="text-muted-foreground font-semibold italic border-l-2 border-primary pl-4 py-1 leading-relaxed max-w-2xl">
-            Surveillance en temps réel des performances financières. Interrogation granulaire des métriques via <span className="text-foreground font-black italic">Supabase Cloud Analytics</span>.
+          <h1 className="heading-xl">Rapports & Analyses</h1>
+          <p className="text-slate-500 font-medium leading-relaxed max-w-2xl">
+            Visualisez vos performances de vente, suivez vos produits phares et optimisez votre stratégie commerciale basée sur les données.
           </p>
         </div>
         
-        <div className="flex gap-4">
-          <Button variant="outline" className="h-12 border-border text-foreground hover:bg-muted font-bold px-6 rounded-2xl transition-all shadow-sm">
-            <Calendar className="mr-3 h-4 w-4" /> {format(new Date(), 'MMM yyyy', { locale: fr })}
+        <div className="flex gap-3">
+          <Button variant="outline" className="h-12 border-slate-200 text-slate-600 hover:bg-slate-50 font-bold px-6 rounded-xl transition-all shadow-sm">
+            <Calendar className="mr-2 h-4 w-4" /> {format(new Date(), 'MMM yyyy', { locale: fr })}
           </Button>
-          <Button className="bg-primary text-white font-black uppercase italic text-[10px] h-12 px-8 hover:bg-primary/90 shadow-xl shadow-primary/20 rounded-2xl flex items-center gap-2 transition-all hover:scale-105">
-            <Download className="mr-3 h-4 w-4" /> EXPORT Z-REPORT
+          <Button className="bg-blue-600 text-white font-bold h-12 px-8 hover:bg-blue-700 shadow-lg shadow-blue-100 rounded-xl flex items-center gap-2 transition-all">
+            <Download className="mr-2 h-4 w-4" /> Export Z-Report
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-10 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3">
         {[
-          { label: 'Indice de Revenu Total', value: `${totalRevenue.toLocaleString()} F`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/5", ring: "ring-primary/10" },
-          { label: 'Delta de Croissance', value: '+14.2%', icon: ArrowUpRight, color: "text-emerald-500", bg: "bg-emerald-500/5", ring: "ring-emerald-500/10" },
-          { label: 'Force Transactionnelle', value: orders.length, icon: ShoppingCart, color: "text-slate-500", bg: "bg-muted/10", ring: "ring-muted/20" },
+          { label: 'Chiffre d\'affaires', value: `${totalRevenue.toLocaleString()} F`, icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: 'Croissance moyenne', value: '+14.2%', icon: ArrowUpRight, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: 'Volume commandes', value: orders.length, icon: ShoppingCart, color: "text-slate-600", bg: "bg-slate-50" },
         ].map((stat, i) => (
-          <Card key={i} className="premium-card border-none ring-1 ring-border rounded-[2.5rem] overflow-hidden shadow-sm hover:ring-primary/40 transition-all duration-700 group">
-            <CardContent className="p-10">
-              <div className="flex items-center gap-8">
+          <Card key={i} className="premium-card rounded-2xl overflow-hidden group">
+            <CardContent className="p-8">
+              <div className="flex items-center gap-6">
                 <div className={cn(
-                    "h-16 w-16 rounded-[1.5rem] flex items-center justify-center border transition-all duration-700 group-hover:scale-110 group-hover:bg-white group-hover:shadow-2xl",
-                    stat.bg, stat.color, stat.ring
+                    "h-14 w-14 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-white group-hover:shadow-sm",
+                    stat.bg, stat.color
                 )}>
-                  <stat.icon className="h-8 w-8" />
+                  <stat.icon className="h-7 w-7" />
                 </div>
-                <div className="space-y-1">
-                  <p className="subheading text-muted-foreground/60">{stat.label}</p>
-                  <p className="text-3xl font-black text-foreground italic tracking-tighter leading-none">{stat.value}</p>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{stat.label}</p>
+                  <p className="text-2xl font-bold text-slate-900 leading-none">{stat.value}</p>
                 </div>
               </div>
             </CardContent>
@@ -139,28 +133,25 @@ export default function ReportsPage() {
         ))}
       </div>
 
-      <div className="grid gap-10 lg:grid-cols-2">
-        <Card className="premium-card border-none ring-1 ring-border rounded-[3rem] overflow-hidden shadow-sm">
-          <CardHeader className="p-10 border-b border-border/50 bg-muted/10">
+      <div className="grid gap-8 lg:grid-cols-2">
+        <Card className="premium-card rounded-2xl overflow-hidden border-none shadow-sm">
+          <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/20">
              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="heading-lg">Perspective <span className="gold-gradient-text">Temporelle</span></h2>
-                  <p className="subheading mt-2">Projection des flux sur le cycle hebdomadaire.</p>
-                </div>
-                <div className="h-12 w-12 bg-white ring-1 ring-border rounded-2xl flex items-center justify-center text-primary shadow-sm">
-                  <Activity className="h-5 w-5" />
+                  <h2 className="text-lg font-bold text-slate-900">Ventes Hebdomadaires</h2>
+                  <p className="text-xs font-medium text-slate-500 mt-1">Évolution de votre CA sur les 7 derniers jours.</p>
                 </div>
              </div>
           </CardHeader>
-          <CardContent className="p-12 h-[450px]">
+          <CardContent className="p-8 h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.03)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                 <XAxis 
                   dataKey="day" 
                   stroke="#94a3b8" 
                   fontSize={10} 
-                  fontWeight={900} 
+                  fontWeight={700} 
                   axisLine={false} 
                   tickLine={false}
                   tickFormatter={(val) => val.toUpperCase()}
@@ -168,63 +159,54 @@ export default function ReportsPage() {
                 />
                 <YAxis hide />
                 <Tooltip 
-                  cursor={{ fill: 'rgba(0,0,0,0.01)' }}
-                  contentStyle={{ backgroundColor: '#fff', border: 'none', ring: '1px solid #e2e8f0', borderRadius: '20px', fontWeight: 900, textTransform: 'uppercase', fontSize: '10px', boxShadow: '0 20px 50px rgba(0,0,0,0.05)' }} 
+                  cursor={{ fill: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', fontWeight: 700, fontSize: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} 
                 />
-                <Bar dataKey="sales" fill="url(#reportGradient)" radius={[12, 12, 4, 4]} barSize={45} />
-                <defs>
-                  <linearGradient id="reportGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#C5A059" stopOpacity={1}/>
-                    <stop offset="95%" stopColor="#C5A059" stopOpacity={0.2}/>
-                  </linearGradient>
-                </defs>
+                <Bar dataKey="sales" fill="#2563eb" radius={[6, 6, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="premium-card border-none ring-1 ring-border rounded-[3rem] overflow-hidden shadow-sm">
-          <CardHeader className="p-10 border-b border-border/50 bg-muted/10">
+        <Card className="premium-card rounded-2xl overflow-hidden border-none shadow-sm">
+          <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/20">
              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="heading-lg">Répartition <span className="gold-gradient-text">Stratégique</span></h2>
-                  <p className="subheading mt-2">Dominance des catégories par volume financier.</p>
-                </div>
-                <div className="h-12 w-12 bg-white ring-1 ring-border rounded-2xl flex items-center justify-center text-primary shadow-sm">
-                  <PieChartIcon className="h-5 w-5" />
+                  <h2 className="text-lg font-bold text-slate-900">Top Catégories</h2>
+                  <p className="text-xs font-medium text-slate-500 mt-1">Répartition de vos revenus par type de produit.</p>
                 </div>
              </div>
           </CardHeader>
-          <CardContent className="p-12 h-[450px] flex flex-col items-center justify-center">
+          <CardContent className="p-8 h-[400px] flex flex-col items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie 
                   data={categoryData} 
-                  innerRadius={100} 
-                  outerRadius={140} 
-                  paddingAngle={10} 
+                  innerRadius={80} 
+                  outerRadius={120} 
+                  paddingAngle={5} 
                   dataKey="value"
                   stroke="none"
                 >
                   {categoryData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#fff', border: 'none', ring: '1px solid #e2e8f0', borderRadius: '20px', fontWeight: 900, textTransform: 'uppercase', fontSize: '10px', boxShadow: '0 20px 50px rgba(0,0,0,0.05)' }} 
+                  contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', fontWeight: 700, fontSize: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} 
                 />
               </PieChart>
             </ResponsiveContainer>
-            <div className="flex flex-wrap gap-6 mt-10 justify-center">
+            <div className="flex flex-wrap gap-4 mt-8 justify-center">
               {categoryData.map((item, i) => (
-                <div key={item.name} className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl ring-1 ring-border shadow-sm hover:ring-primary/20 transition-all cursor-default">
-                  <div className="h-3 w-3 rounded-full shadow-inner" style={{ backgroundColor: COLORS[i] }} />
-                  <span className="text-[10px] font-black uppercase text-foreground italic tracking-widest">{item.name}</span>
+                <div key={item.name} className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 transition-all">
+                  <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[i] }} />
+                  <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{item.name}</span>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
