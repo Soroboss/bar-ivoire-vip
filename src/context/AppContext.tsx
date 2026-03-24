@@ -45,7 +45,7 @@ type AppContextType = {
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const { user, isLoaded: userLoaded } = useUser()
+  const { user: hookUser, isLoaded: userLoaded } = useUser()
   const { isSignedIn, isLoaded: authLoaded, signOut: insforgeSignOut } = useAuth()
   
   const [products, setProducts] = useState<Product[]>([])
@@ -60,21 +60,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [userRole, setUserRole] = useState<string | null>(null)
   const [userPermissions, setUserPermissions] = useState<any | null>(null)
+  const [fallbackUser, setFallbackUser] = useState<any | null>(null)
+
+  const activeUser = hookUser || fallbackUser
 
   useEffect(() => {
     const checkInitialSession = async () => {
       // 1. If SDK hooks are ready and have a user, use them
-      if (userLoaded && authLoaded && isSignedIn && user) {
-        loadUserData(user)
+      if (userLoaded && authLoaded && isSignedIn && activeUser) {
+        loadUserData(activeUser)
         return
       }
 
       // 2. Fallback: Check session manually via SDK client
-      if (userLoaded && authLoaded && !user) {
+      if (userLoaded && authLoaded && !activeUser) {
         try {
           const { data, error } = await (insforge.auth as any).getCurrentUser()
           if (data?.user) {
              console.log('[AppContext] Manual session recovery success:', data.user.id)
+             setFallbackUser(data.user)
              loadUserData(data.user)
              return
           }
@@ -89,7 +93,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
 
     checkInitialSession()
-  }, [user, isSignedIn, userLoaded, authLoaded])
+  }, [hookUser, fallbackUser, activeUser, isSignedIn, userLoaded, authLoaded])
 
   // Safety timer to prevent stuck loading screen
   useEffect(() => {
@@ -193,6 +197,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTables([])
     setUserRole(null)
     setUserPermissions(null)
+    setFallbackUser(null)
   }
 
   const signOut = async () => {
@@ -292,12 +297,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   const registerEstablishment = async (est: Omit<Establishment, 'id' | 'status' | 'trialEndsAt' | 'plan' | 'createdAt'>) => {
-    if (!user) {
+    if (!activeUser) {
       toast.error('Vous devez être connecté')
       return
     }
     try {
-      const newEst = await insforgeService.createEstablishment({ ...est, user_id: user.id })
+      const newEst = await insforgeService.createEstablishment({ ...est, user_id: activeUser.id })
       setAllEstablishments(prev => [...prev, newEst])
       setEstablishment(newEst)
       toast.success('Établissement enregistré avec succès')
@@ -373,8 +378,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{ 
-      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, tables, loading, user, 
-      isSignedIn: !!isSignedIn, 
+      products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, tables, loading, user: activeUser, 
+      isSignedIn: !!isSignedIn || !!fallbackUser, 
       userRole, userPermissions,
       addProduct, updateProduct, deleteProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
       switchEstablishment, addTable, signOut
