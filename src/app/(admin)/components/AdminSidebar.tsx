@@ -27,6 +27,7 @@ const menuItems = [
   { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
   { name: 'Établissements', icon: Building2, path: '/admin/establishments' },
   { name: 'Utilisateurs', icon: Users, path: '/admin/users' },
+  { name: 'Rôles & Accès', icon: ShieldCheck, path: '/admin/roles' },
   { name: 'Revenus SaaS', icon: BarChart3, path: '/admin/revenue' },
   { name: 'Configuration', icon: Settings, path: '/admin/settings' },
 ]

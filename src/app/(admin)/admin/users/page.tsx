@@ -58,6 +58,17 @@ export default function SaaSUsersPage() {
     }
   }
 
+  const handleRevoke = async (userId: string) => {
+    if (!window.confirm("Voulez-vous vraiment révoquer les accès de cet administrateur ?")) return
+    try {
+      await supabaseService.revokeAdminAccess(userId)
+      toast.success("Accès retiré avec succès")
+      fetchAdmins()
+    } catch (e) {
+      toast.error("Erreur lors de la révocation")
+    }
+  }
+
   const togglePermission = async (userId: string, currentPermissions: any, permissionKey: string) => {
     const defaultPerms = {
       "dashboard": true,
@@ -236,8 +247,14 @@ export default function SaaSUsersPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-right pr-8">
-                     <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-300 hover:text-blue-600 rounded-xl transition-all">
-                       <MoreVertical className="h-5 w-5" />
+                     <Button 
+                       variant="ghost" 
+                       size="icon" 
+                       onClick={() => handleRevoke(admin.id)}
+                       title="Révoquer l'accès"
+                       className="h-9 w-9 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                     >
+                       <ShieldAlert className="h-5 w-5" />
                      </Button>
                   </TableCell>
                 </TableRow>

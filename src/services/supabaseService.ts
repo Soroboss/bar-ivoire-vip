@@ -488,5 +488,59 @@ export const supabaseService = {
     
     if (updateError) throw updateError
     return true
+  },
+
+  async revokeAdminAccess(userId: string) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ 
+        role: 'USER',
+        role_id: null 
+      })
+      .eq('id', userId)
+    
+    if (error) throw error
+    return true
+  },
+
+  // RBAC Management
+  async getRoles() {
+    const { data, error } = await supabase
+      .from('roles')
+      .select('*, role_permissions(permissions(*))')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data || []
+  },
+
+  async getPermissions() {
+    const { data, error } = await supabase
+      .from('permissions')
+      .select('*')
+      .order('name', { ascending: true })
+    if (error) throw error
+    return data || []
+  },
+
+  async createRole(name: string, description: string) {
+    const { data, error } = await supabase
+      .from('roles')
+      .insert([{ name, description }])
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  },
+
+  async updateRolePermissions(roleId: string, permissionIds: string[]) {
+    // First, delete existing
+    await supabase.from('role_permissions').delete().eq('role_id', roleId)
+    
+    // Then insert new
+    if (permissionIds.length > 0) {
+      const inserts = permissionIds.map(pid => ({ role_id: roleId, permission_id: pid }))
+      const { error } = await supabase.from('role_permissions').insert(inserts)
+      if (error) throw error
+    }
   }
 }
