@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Users, Search, ShieldCheck, UserPlus, Loader2, Star, ShieldAlert, Pencil, Trash2 } from "lucide-react"
+import { Users, Search, ShieldCheck, UserPlus, Loader2, Star, ShieldAlert, Pencil, Trash2, Mail } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 
@@ -13,6 +13,7 @@ import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 import { CreateUserModal } from "./CreateUserModal"
 import { EditUserModal } from "./EditUserModal"
+import { useAppContext } from "@/context/AppContext"
 
 export default function SaaSUsersPage() {
   const [admins, setAdmins] = useState<any[]>([])
@@ -24,6 +25,8 @@ export default function SaaSUsersPage() {
   const [isMounted, setIsMounted] = useState(false)
   const [editingUser, setEditingUser] = useState<any>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const { user } = useAppContext()
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null)
 
   useEffect(() => {
     setIsMounted(true)
@@ -35,6 +38,14 @@ export default function SaaSUsersPage() {
       setLoading(true)
       const data = await insforgeService.getTeamMembers()
       setAdmins(data)
+      
+      // Get current user's role from the fetched list
+      if (user) {
+        const currentProfile = data.find((a: any) => a.id === user.id)
+        if (currentProfile) {
+          setCurrentUserRole(currentProfile.role)
+        }
+      }
     } catch (e) {
       toast.error("Échec de la récupération des membres")
     } finally {
@@ -86,6 +97,15 @@ export default function SaaSUsersPage() {
       toast.error(e.message || "Erreur lors de la suppression")
     } finally {
       setLoading(false)
+    }
+  }
+  const handleResetPassword = async (email: string) => {
+    if (!window.confirm(`Envoyer un email de réinitialisation de mot de passe à ${email} ?`)) return
+    try {
+      await insforgeService.sendResetPasswordEmail(email)
+      toast.success(`Email de réinitialisation envoyé à ${email}`)
+    } catch (e: any) {
+      toast.error(e.message || "Erreur lors de l'envoi de l'email")
     }
   }
 
@@ -163,6 +183,9 @@ export default function SaaSUsersPage() {
               className="h-16 px-4 rounded-2xl border-white/5 bg-card/40 backdrop-blur-3xl shadow-2xl font-black text-white focus:ring-primary/20 transition-all"
             >
               <option value="ADMIN" className="text-black">Administrateur</option>
+              {currentUserRole === 'SUPER_ADMIN' && (
+                <option value="SUPER_ADMIN" className="text-black">Super Admin</option>
+              )}
               <option value="CASHIER" className="text-black">Gérant (Caisse)</option>
               <option value="WAITER" className="text-black">Serveur</option>
               <option value="BARMAN" className="text-black">Barman</option>
@@ -301,9 +324,19 @@ export default function SaaSUsersPage() {
                            <Button 
                              variant="ghost" 
                              size="icon" 
+                             onClick={() => handleResetPassword(admin.email)}
+                             title="Réinitialiser le mot de passe"
+                             className="h-10 w-10 text-muted-foreground/10 hover:text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all"
+                           >
+                             <Mail className="h-4 w-4" />
+                           </Button>
+
+                           <Button 
+                             variant="ghost" 
+                             size="icon" 
                              onClick={() => {
-                               setEditingUser(admin)
-                               setIsEditModalOpen(true)
+                                setEditingUser(admin)
+                                setIsEditModalOpen(true)
                              }}
                              title="Modifier le profil"
                              className="h-10 w-10 text-muted-foreground/10 hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
@@ -346,6 +379,7 @@ export default function SaaSUsersPage() {
         open={isEditModalOpen} 
         onOpenChange={setIsEditModalOpen} 
         onSuccess={fetchAdmins} 
+        currentUserRole={currentUserRole}
       />
     </div>
   )

@@ -38,9 +38,10 @@ interface EditUserModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+  currentUserRole?: string | null
 }
 
-export function EditUserModal({ user, open, onOpenChange, onSuccess }: EditUserModalProps) {
+export function EditUserModal({ user, open, onOpenChange, onSuccess, currentUserRole }: EditUserModalProps) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     fullName: '',
@@ -127,9 +128,11 @@ export function EditUserModal({ user, open, onOpenChange, onSuccess }: EditUserM
                   <SelectValue placeholder="Sélectionnez un rôle" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-white/10 font-bold">
-                  {Object.entries(ROLE_PRESETS).map(([id, data]) => (
-                    <SelectItem key={id} value={id}>{data.label}</SelectItem>
-                  ))}
+                  {Object.entries(ROLE_PRESETS)
+                    .filter(([id]) => id !== 'SUPER_ADMIN' || currentUserRole === 'SUPER_ADMIN')
+                    .map(([id, data]) => (
+                      <SelectItem key={id} value={id}>{data.label}</SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

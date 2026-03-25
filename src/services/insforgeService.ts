@@ -463,5 +463,11 @@ export const insforgeService = {
       .eq('id', userId)
     if (error) throw error
     return true
+  },
+
+  async sendResetPasswordEmail(email: string) {
+    const { data, error } = await insforge.auth.sendResetPasswordEmail({ email })
+    if (error) throw error
+    return data
   }
 }
