@@ -67,48 +67,48 @@ export function Sidebar() {
       </Button>
 
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-72 bg-sidebar border-r border-white/5 transform transition-transform duration-500 ease-out lg:translate-x-0 flex flex-col font-montserrat shadow-[20px_0_50px_rgba(0,0,0,0.8)]",
+        "fixed inset-y-0 left-0 z-40 w-72 bg-[#0A0A15]/60 backdrop-blur-3xl border-r border-white/10 transform transition-transform duration-500 ease-out lg:translate-x-0 flex flex-col font-montserrat shadow-[30px_0_60px_rgba(0,0,0,0.9)]",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 blur-[80px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[150%] h-[150%] bg-gradient-to-b from-primary/10 via-transparent to-transparent blur-[80px] pointer-events-none" />
 
-        <div className="p-10 border-b border-white/5 bg-white/[0.02] relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-xl border border-primary/30 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+        <div className="p-8 border-b border-white/5 bg-gradient-to-br from-white/[0.05] to-transparent relative z-10 shadow-xl">
+          <div className="flex items-center gap-4 group">
+            <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-xl border border-primary/30 shadow-[0_0_30px_rgba(212,175,55,0.4)] group-hover:scale-110 transition-transform duration-500">
               I
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-tighter text-white uppercase leading-none">
-                Ivoire <span className="gold-gradient-text">VIP</span>
+              <h1 className="text-2xl font-black tracking-tighter text-white uppercase leading-none drop-shadow-md">
+                Ivoire <span className="gold-gradient-text drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]">VIP</span>
               </h1>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 mt-1">SaaS Opérationnel</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 mt-1">SaaS Opérationnel</p>
             </div>
           </div>
           
-          <div className="mt-6 flex flex-col gap-1 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
-            <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">
+          <div className="mt-8 flex flex-col gap-1 bg-black/40 p-4 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
+            <span className="text-primary/50 text-[10px] uppercase tracking-widest font-black">
               {getGreeting()},
             </span>
-            <span className="text-white font-black text-sm truncate">
+            <span className="text-white font-black text-sm truncate drop-shadow-sm">
               {displayName}
             </span>
-            <span className="text-primary text-[10px] font-black uppercase tracking-[0.2em] mt-1">
+            <span className="text-primary text-[10px] font-black uppercase tracking-[0.2em] mt-1 bg-primary/10 self-start px-2 py-0.5 rounded-md">
               {displayRole}
             </span>
           </div>
 
           {establishment && (
-            <div className="mt-8 flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 backdrop-blur-md shadow-xl group hover:border-primary/20 transition-all duration-500">
-              <Badge className="bg-primary text-primary-foreground text-[9px] font-black px-3 py-1 rounded-lg shadow-lg shadow-primary/20 tracking-widest uppercase">
+            <div className="mt-6 flex items-center gap-4 bg-gradient-to-r from-primary/10 to-transparent p-3 rounded-2xl border border-primary/20 backdrop-blur-md shadow-[0_0_20px_rgba(212,175,55,0.15)] group hover:border-primary/40 transition-all duration-500 cursor-default">
+              <Badge className="bg-primary text-primary-foreground text-[9px] font-black px-3 py-1 rounded-lg shadow-[0_4px_15px_rgba(212,175,55,0.4)] tracking-widest uppercase border-none">
                 {establishment.plan}
               </Badge>
-              <span className="text-[10px] text-white font-black uppercase tracking-[0.2em] truncate">{establishment.name}</span>
+              <span className="text-[10px] text-white font-black uppercase tracking-[0.2em] truncate drop-shadow-md">{establishment.name}</span>
             </div>
           )}
         </div>
 
-        <nav className="flex-1 px-6 space-y-2 overflow-y-auto py-8 relative z-10 scrollbar-hide">
-          <p className="px-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-8">Navigation Centrale</p>
+        <nav className="flex-1 px-5 space-y-2 overflow-y-auto py-8 relative z-10 scrollbar-hide">
+          <p className="px-5 text-[9px] font-black uppercase tracking-[0.5em] text-white/30 mb-6 drop-shadow-sm">Centre de Commande</p>
           {MENU_ITEMS.filter(item => {
             if (userRole === 'SUPER_ADMIN') return true
             if (!userPermissions) return true 
@@ -121,24 +121,26 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-5 px-5 py-4 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-1",
+                  "flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-2",
                   isActive 
-                    ? "bg-primary/10 border-primary/30 border shadow-[0_0_30px_rgba(212,175,55,0.2)] text-primary" 
-                    : "text-muted-foreground/40 border border-transparent hover:bg-white/5 hover:text-white"
+                    ? "bg-gradient-to-r from-primary/20 to-transparent border border-primary/30 shadow-[0_0_30px_rgba(212,175,55,0.15)] text-primary" 
+                    : "text-muted-foreground/60 border border-transparent hover:bg-white/5 hover:text-white hover:border-white/10"
                 )}
                 onClick={() => setIsOpen(false)}
               >
                 {isActive && (
                   <motion.div 
                     layoutId="active-indicator"
-                    className="absolute inset-y-0 left-0 w-1.5 bg-primary shadow-[0_0_15px_rgba(212,175,55,1)]" 
+                    className="absolute inset-y-0 left-0 w-1.5 bg-primary shadow-[0_0_20px_rgba(212,175,55,1)]" 
                   />
                 )}
-                <Icon className={cn(
-                  "h-5 w-5 transition-all duration-500",
-                  isActive ? "text-primary scale-110" : "text-muted-foreground/40 group-hover:text-white group-hover:scale-110"
-                )} />
-                <span className="text-xs font-black tracking-[0.1em] uppercase">{item.label}</span>
+                <div className={cn("p-2 rounded-xl transition-all duration-500", isActive ? "bg-primary/20" : "bg-transparent group-hover:bg-white/5")}>
+                   <Icon className={cn(
+                     "h-5 w-5 transition-all duration-500",
+                     isActive ? "text-primary scale-110 drop-shadow-[0_0_8px_rgba(212,175,55,0.8)]" : "text-muted-foreground/60 group-hover:text-white"
+                   )} />
+                </div>
+                <span className={cn("text-xs font-black tracking-[0.15em] uppercase transition-all duration-500", isActive ? "drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" : "")}>{item.label}</span>
               </Link>
             )
           })}

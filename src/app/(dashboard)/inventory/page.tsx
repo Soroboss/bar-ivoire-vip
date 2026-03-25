@@ -133,13 +133,13 @@ export default function InventoryPage() {
           <Button 
             onClick={loadHistory}
             variant="outline" 
-            className="h-12 border-white/10 text-muted-foreground hover:bg-white/5 font-bold px-6 rounded-xl transition-all"
+            className="h-12 border-white/10 text-white bg-white/[0.02] hover:bg-white/[0.08] hover:border-white/20 font-black uppercase tracking-widest text-[10px] px-6 rounded-2xl transition-all shadow-[0_0_20px_rgba(255,255,255,0.03)] backdrop-blur-md"
           >
             <History className="mr-2 h-4 w-4" /> Historique
           </Button>
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger>
-              <Button className="bg-primary text-primary-foreground font-bold h-12 px-8 hover:bg-primary/90 shadow-lg shadow-primary/10 rounded-xl flex items-center gap-2 transition-all">
+              <Button className="bg-gradient-to-r from-primary via-[#F4E4BC] to-[#A68226] text-[#0A0A15] font-black h-12 px-8 shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:shadow-[0_0_50px_rgba(212,175,55,0.6)] rounded-2xl flex items-center gap-3 transition-all duration-500 hover:scale-105 uppercase tracking-widest text-[10px] border border-primary/50">
                 <Plus className="h-4 w-4" /> Ajouter un produit
               </Button>
             </DialogTrigger>
@@ -194,11 +194,11 @@ export default function InventoryPage() {
       </div>
 
       <div className="relative max-w-xl group">
-        <div className="absolute inset-0 bg-primary/5 opacity-0 group-focus-within:opacity-100 blur-xl transition-opacity rounded-full" />
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-focus-within:opacity-100 blur-2xl transition-all duration-700 rounded-full" />
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 group-focus-within:text-primary transition-colors duration-500" />
         <Input 
-          placeholder="Rechercher une référence..." 
-          className="relative pl-12 bg-white/5 border-white/10 h-12 rounded-xl text-sm font-bold text-white focus:ring-primary/20 transition-all placeholder:text-muted-foreground/30" 
+          placeholder="Rechercher une référence ou une catégorie..." 
+          className="relative pl-14 bg-[#0A0A15]/60 backdrop-blur-2xl border-white/10 h-14 rounded-2xl text-sm font-black text-white focus:ring-primary/20 focus:border-primary/50 transition-all duration-500 placeholder:text-muted-foreground/30 placeholder:uppercase placeholder:tracking-widest placeholder:font-bold shadow-inner" 
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -219,13 +219,21 @@ export default function InventoryPage() {
               <AnimatePresence mode="popLayout">
                  {filteredProducts.length === 0 ? (
                   <TableRow className="hover:bg-transparent border-none">
-                    <TableCell colSpan={4} className="h-64 text-center py-20">
-                      <div className="flex flex-col items-center gap-4">
-                         <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center">
-                           <Package className="h-8 w-8 text-muted-foreground/20" />
+                    <TableCell colSpan={4} className="h-[400px] text-center">
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }} 
+                        animate={{ opacity: 1, scale: 1 }} 
+                        transition={{ duration: 0.5 }}
+                        className="flex flex-col items-center justify-center gap-6"
+                      >
+                         <div className="h-28 w-28 rounded-[2.5rem] bg-gradient-to-br from-white/5 to-transparent border border-white/10 flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.02)] backdrop-blur-xl group-hover:border-primary/20 transition-all duration-700">
+                           <Package className="h-10 w-10 text-white/20" />
                          </div>
-                         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40">Aucun produit trouvé</p>
-                      </div>
+                         <div className="space-y-2">
+                           <p className="text-2xl font-black text-white tracking-tighter drop-shadow-lg uppercase">Inventaire Vierge</p>
+                           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40">Aucun produit ne correspond à vos critères</p>
+                         </div>
+                      </motion.div>
                     </TableCell>
                   </TableRow>
                 ) : filteredProducts.map((product, idx) => (
