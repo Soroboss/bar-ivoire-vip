@@ -62,6 +62,7 @@ export type Expense = {
   category: string
   date: string
   status?: string
+  expense_type?: 'OPEX' | 'CAPEX'
 }
 
 export type SaasTransaction = {

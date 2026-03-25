@@ -42,6 +42,7 @@ type AppContextType = {
   signOut: () => Promise<void>
   login: (email: string, pass: string) => Promise<any>
   getAuthToken: () => string | null
+  addStaff: (member: { full_name: string; email: string; role: string }) => Promise<void>
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -342,6 +343,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const addStaff = async (member: { full_name: string; email: string; role: string }) => {
+    if (!establishment) return
+    try {
+      const newStaff = await insforgeService.addStaff({ ...member, establishment_id: establishment.id })
+      setStaff([...staff, newStaff as Staff])
+      toast.success('Nouveau collaborateur ajouté avec succès')
+    } catch (err) {
+      toast.error("Erreur lors de l'ajout du collaborateur")
+    }
+  }
+
   const toggleStaffStatus = async (id: string) => {
     const member = staff.find(s => s.id === id)
     if (!member) return
@@ -445,7 +457,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       isSignedIn: isSignedIn, 
       userRole, userFullName, userPermissions,
       addProduct, updateProduct, deleteProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
-      switchEstablishment, addTable, signOut, login, getAuthToken
+      switchEstablishment, addTable, signOut, login, getAuthToken, addStaff
     }}>
       {children}
     </AppContext.Provider>

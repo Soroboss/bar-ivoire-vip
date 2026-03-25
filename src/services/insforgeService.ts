@@ -346,6 +346,46 @@ export const insforgeService = {
     if (error) throw error
   },
 
+  async addStaff(staff: { full_name: string; email: string; role: string; establishment_id: string }) {
+    const { data, error } = await insforge.database
+      .from('profiles')
+      .insert([{
+        id: crypto.randomUUID(),
+        ...staff,
+        status: 'Present'
+      }])
+      .select()
+      .single()
+    if (error) throw error
+    return {
+      id: data.id,
+      name: data.full_name,
+      role: data.role,
+      status: data.status
+    }
+  },
+
+  // Shifts / Planning
+  async getShifts(establishmentId: string) {
+    const { data, error } = await insforge.database
+      .from('shifts')
+      .select('*, profiles(full_name)')
+      .eq('establishment_id', establishmentId)
+      .order('start_time', { ascending: false })
+    if (error) throw error
+    return data
+  },
+
+  async addShift(shift: { establishment_id: string; profile_id: string; start_time: string; end_time: string; role: string }) {
+    const { data, error } = await insforge.database
+      .from('shifts')
+      .insert([shift])
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  },
+
   // Expenses
   async getExpenses(establishmentId: string): Promise<Expense[]> {
     const { data, error } = await insforge.database

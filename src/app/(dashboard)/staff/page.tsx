@@ -20,9 +20,94 @@ import {
 import { useAppContext } from '@/context/AppContext'
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { insforgeService } from "@/services/insforgeService"
+import { toast } from "sonner"
+import { format } from "date-fns"
 
 export default function StaffPage() {
-  const { staff, toggleStaffStatus, loading } = useAppContext()
+  const { staff, toggleStaffStatus, loading, addStaff, userRole, establishment } = useAppContext()
+  
+  const [showAddDialog, setShowAddDialog] = useState(false)
+  const [showShiftsDialog, setShowShiftsDialog] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [newRole, setNewRole] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [shifts, setShifts] = useState<any[]>([])
+  const [loadingShifts, setLoadingShifts] = useState(false)
+  const [shiftStaff, setShiftStaff] = useState('')
+  const [shiftStart, setShiftStart] = useState('')
+  const [shiftEnd, setShiftEnd] = useState('')
+
+  const allowedRoles = (userRole === 'SUPER_ADMIN' || userRole === 'ADMIN')
+    ? ['ADMIN', 'MANAGER', 'CASHIER', 'WAITER', 'BARMAN']
+    : userRole === 'MANAGER' 
+      ? ['CASHIER', 'WAITER', 'BARMAN'] 
+      : []
+
+  const handleAddStaff = async () => {
+    if (!newName || !newEmail || !newRole) {
+      toast.error("Veuillez remplir tous les champs")
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await addStaff({ full_name: newName, email: newEmail, role: newRole })
+      setShowAddDialog(false)
+      setNewName('')
+      setNewEmail('')
+      setNewRole('')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const loadShifts = async () => {
+    if (!establishment) return
+    setLoadingShifts(true)
+    try {
+      const data = await insforgeService.getShifts(establishment.id)
+      setShifts(data || [])
+    } catch (e) {
+      toast.error("Erreur planning")
+    } finally {
+      setLoadingShifts(false)
+    }
+  }
+
+  const handleAddShift = async () => {
+    if (!shiftStaff || !shiftStart || !shiftEnd || !establishment) return
+    setIsSubmitting(true)
+    try {
+      const profile = staff.find((s: any) => s.id === shiftStaff)
+      await insforgeService.addShift({
+        establishment_id: establishment.id,
+        profile_id: shiftStaff,
+        start_time: shiftStart,
+        end_time: shiftEnd,
+        role: profile?.role || 'STAFF'
+      })
+      toast.success("Shift ajouté au planning")
+      setShiftStaff('')
+      setShiftStart('')
+      setShiftEnd('')
+      loadShifts()
+    } catch (e) {
+      toast.error("Erreur création shift")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  useEffect(() => {
+    if (showShiftsDialog) loadShifts()
+  }, [showShiftsDialog])
 
   if (loading) {
     return (
@@ -56,12 +141,105 @@ export default function StaffPage() {
         </div>
         
         <div className="flex gap-4">
-          <Button variant="outline" className="h-12 bg-white/5 border-white/10 text-white hover:bg-white/10 font-black px-6 rounded-xl transition-all uppercase text-[10px] tracking-widest shadow-lg shadow-white/5">
-            <Clock className="mr-2 h-4 w-4 text-primary" /> Planning
-          </Button>
-          <Button className="bg-primary text-primary-foreground font-black h-12 px-8 hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-xl flex items-center gap-2 transition-all uppercase text-[10px] tracking-widest">
-            <UserPlus className="h-4 w-4" /> Nouveau Membre
-          </Button>
+          {allowedRoles.length > 0 && (
+            <Dialog open={showShiftsDialog} onOpenChange={setShowShiftsDialog}>
+              <DialogTrigger>
+                <Button variant="outline" className="h-12 bg-white/5 border-white/10 text-white hover:bg-white/10 font-black px-6 rounded-xl transition-all uppercase text-[10px] tracking-widest shadow-lg shadow-white/5">
+                  <Clock className="mr-2 h-4 w-4 text-primary" /> Planning
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-card/95 backdrop-blur-3xl border-white/10 rounded-[2.5rem] p-0 overflow-hidden max-w-2xl max-h-[85vh] flex flex-col shadow-2xl">
+                <div className="p-8 border-b border-white/5 shrink-0 flex items-center gap-4">
+                   <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                     <Clock className="h-6 w-6 text-primary" />
+                   </div>
+                   <div>
+                     <DialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">Planning Équipe</DialogTitle>
+                     <CardDescription className="text-xs font-medium text-muted-foreground mt-1">Gérez les horaires (Shifts) de votre personnel.</CardDescription>
+                   </div>
+                </div>
+                <div className="p-8 overflow-y-auto space-y-8">
+                   <div className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                     <h3 className="text-sm font-black uppercase text-white tracking-widest">Nouveau Shift</h3>
+                     <div className="grid grid-cols-2 gap-4">
+                       <Select value={shiftStaff} onValueChange={(val) => setShiftStaff(val || '')}>
+                         <SelectTrigger className="bg-card/50 border-white/10 h-12 rounded-xl text-white font-bold">
+                           <SelectValue placeholder="Choisir un membre" />
+                         </SelectTrigger>
+                         <SelectContent className="bg-card/90 backdrop-blur-xl border-white/10 text-white">
+                           {staff.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name} ({s.role})</SelectItem>)}
+                         </SelectContent>
+                       </Select>
+                       <Input type="datetime-local" value={shiftStart} onChange={e => setShiftStart(e.target.value)} className="bg-card/50 border-white/10 h-12 rounded-xl text-white font-bold text-xs [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" />
+                       <Input type="datetime-local" value={shiftEnd} onChange={e => setShiftEnd(e.target.value)} className="bg-card/50 border-white/10 h-12 rounded-xl text-white font-bold text-xs [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" />
+                       <Button disabled={isSubmitting} onClick={handleAddShift} className="bg-primary text-black font-black uppercase h-12 rounded-xl">Assigner</Button>
+                     </div>
+                   </div>
+
+                   <div className="space-y-4">
+                     <h3 className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-[0.2em] ml-2">Shifts Récents</h3>
+                     {loadingShifts ? <div className="py-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div> : shifts.map((s: any) => (
+                       <div key={s.id} className="flex justify-between items-center bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+                         <div>
+                           <p className="font-bold text-white text-sm">{s.profiles?.full_name}</p>
+                           <p className="text-xs text-muted-foreground capitalize mt-1 text-[10px] font-black tracking-widest">{s.role}</p>
+                         </div>
+                         <div className="text-right">
+                           <Badge className="bg-white/5 text-white/60 mb-1 border-white/10">{format(new Date(s.start_time), 'HH:mm')} - {format(new Date(s.end_time), 'HH:mm')}</Badge>
+                           <p className="text-[9px] text-muted-foreground/40">{format(new Date(s.start_time), 'dd MMM yyyy')}</p>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {allowedRoles.length > 0 && (
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+              <DialogTrigger>
+                <Button className="bg-primary text-primary-foreground font-black h-12 px-8 hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-xl flex items-center gap-2 transition-all uppercase text-[10px] tracking-widest">
+                  <UserPlus className="h-4 w-4" /> Nouveau Membre
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-card/95 backdrop-blur-3xl border-white/10 rounded-[2.5rem] p-8 max-w-md shadow-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">Accréditation Staff</DialogTitle>
+                  <CardDescription className="text-xs font-medium text-muted-foreground mt-1">Délivrez un accès officiel à un nouveau collaborateur.</CardDescription>
+                </DialogHeader>
+                <div className="space-y-6 mt-6">
+                  <div className="space-y-3">
+                     <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest ml-1">Nom Complet</Label>
+                     <Input placeholder="Jean Dupont" value={newName} onChange={e => setNewName(e.target.value)} className="bg-white/5 border-white/5 h-14 rounded-xl px-4 text-white font-bold focus:ring-primary/20 transition-all" />
+                  </div>
+                  <div className="space-y-3">
+                     <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest ml-1">Email (Identifiant POS)</Label>
+                     <Input type="email" placeholder="jean.d@ivoire.bar" value={newEmail} onChange={e => setNewEmail(e.target.value)} className="bg-white/5 border-white/5 h-14 rounded-xl px-4 text-white font-bold focus:ring-primary/20 transition-all" />
+                     <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-2 ml-1">Un mot de passe aléatoire lui sera affecté.</p>
+                  </div>
+                  <div className="space-y-3">
+                     <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest ml-1">Rôle / Accréditation</Label>
+                     <Select value={newRole} onValueChange={(val) => setNewRole(val || '')}>
+                        <SelectTrigger className="bg-white/5 border-white/5 h-14 rounded-xl px-4 text-white font-black uppercase tracking-widest">
+                          <SelectValue placeholder="Sélectionnez un rôle" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card/90 backdrop-blur-xl border-white/10 text-white rounded-2xl">
+                          {allowedRoles.map(role => (
+                            <SelectItem key={role} value={role} className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">{role}</SelectItem>
+                          ))}
+                        </SelectContent>
+                     </Select>
+                  </div>
+                  <DialogFooter className="pt-4 mt-8 border-t border-white/5">
+                    <Button disabled={isSubmitting} onClick={handleAddStaff} className="w-full bg-primary text-primary-foreground font-black h-14 rounded-xl shadow-xl shadow-primary/20 uppercase tracking-tighter text-sm">
+                      {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <><ShieldCheck className="h-5 w-5 mr-2" /> DÉLIVRER L'ACCÈS</>}
+                    </Button>
+                  </DialogFooter>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 

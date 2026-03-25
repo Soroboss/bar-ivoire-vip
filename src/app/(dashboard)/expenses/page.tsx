@@ -21,8 +21,10 @@ import {
   TrendingUp,
   Receipt,
   Zap,
-  History
+  History,
+  Download
 } from "lucide-react"
+import * as XLSX from 'xlsx'
 import { 
   Dialog, 
   DialogContent, 
@@ -41,9 +43,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 export default function ExpensesPage() {
   const { establishment, loading: contextLoading, expenses, addExpense } = useAppContext()
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [activeTab, setActiveTab] = useState<'ALL' | 'OPEX' | 'CAPEX'>('ALL')
   
   // Form State
   const [category, setCategory] = useState<string>('')
+  const [expenseType, setExpenseType] = useState<'OPEX' | 'CAPEX'>('OPEX')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -62,7 +66,8 @@ export default function ExpensesPage() {
         description,
         amount: parseFloat(amount),
         date,
-        status: 'Payé'
+        status: 'Payé',
+        expense_type: expenseType
       })
       setShowAddDialog(false)
       setCategory('')
@@ -76,9 +81,28 @@ export default function ExpensesPage() {
     }
   }
 
-  const totalSpent = (expenses || []).reduce((sum, e) => sum + (Number(e.amount) || 0), 0)
+  const filteredExpenses = (expenses || []).filter((e: any) => activeTab === 'ALL' || e.expense_type === activeTab || (!e.expense_type && activeTab === 'OPEX'))
+  const totalSpent = filteredExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0)
   const budget = 1500000 
   const balance = budget - totalSpent
+
+  const handleExport = () => {
+    if (filteredExpenses.length === 0) {
+      toast.error("Aucune donnée à exporter")
+      return
+    }
+    const ws = XLSX.utils.json_to_sheet(filteredExpenses.map((e: any) => ({
+      Date: e.date,
+      Type: e.expense_type || 'OPEX',
+      Catégorie: e.category,
+      Description: e.description,
+      Montant: e.amount
+    })))
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, "Dépenses")
+    XLSX.writeFile(wb, `Tresorerie_${activeTab}_${new Date().toISOString().split('T')[0]}.xlsx`)
+    toast.success("Fichier Excel généré avec succès")
+  }
 
   if (contextLoading) {
     return (
@@ -107,18 +131,40 @@ export default function ExpensesPage() {
           </p>
         </div>
 
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger>
-            <Button className="bg-primary text-primary-foreground font-black h-16 px-10 rounded-2xl shadow-2xl shadow-primary/20 flex items-center gap-3 transition-all hover:scale-105 active:scale-95 uppercase tracking-widest text-[10px]">
-              <Plus className="h-5 w-5" /> Nouvelle dépense elite
-            </Button>
-          </DialogTrigger>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/5">
+            {['ALL', 'OPEX', 'CAPEX'].map(tab => (
+              <button 
+                key={tab} 
+                onClick={() => setActiveTab(tab as any)} 
+                className={cn(
+                  "px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", 
+                  activeTab === tab ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:bg-white/10"
+                )}
+              >
+                {tab === 'ALL' ? 'Vue Globale' : tab}
+              </button>
+            ))}
+          </div>
+          <Button onClick={handleExport} variant="outline" className="h-14 px-6 rounded-2xl border-white/10 bg-white/5 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 hover:text-white">
+            <Download className="h-4 w-4 mr-2" /> Excel
+          </Button>
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger>
+              <Button className="bg-primary text-primary-foreground font-black h-14 px-8 rounded-2xl shadow-2xl shadow-primary/20 flex items-center gap-3 transition-all hover:scale-105 active:scale-95 uppercase tracking-widest text-[10px]">
+                <Plus className="h-5 w-5" /> Ajouter
+              </Button>
+            </DialogTrigger>
           <DialogContent className="bg-card/40 backdrop-blur-2xl border-white/10 rounded-[2.5rem] p-6 md:p-10 max-w-md max-h-[85vh] overflow-y-auto scrollbar-hide shadow-2xl">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">Nouvelle Sortie</DialogTitle>
               <CardDescription className="text-xs font-medium text-muted-foreground mt-1">Enregistrez une charge stratégique dans le système.</CardDescription>
             </DialogHeader>
             <div className="space-y-6 mt-8">
+              <div className="grid grid-cols-2 gap-4 bg-white/5 p-1 rounded-2xl">
+                <button type="button" onClick={() => setExpenseType('OPEX')} className={cn("py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", expenseType === 'OPEX' ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:bg-white/10")}>OPEX (Charges)</button>
+                <button type="button" onClick={() => setExpenseType('CAPEX')} className={cn("py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", expenseType === 'CAPEX' ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:bg-white/10")}>CAPEX (Assets)</button>
+              </div>
               <div className="space-y-3">
                 <Label className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest ml-1">Catégorie</Label>
                 <Select value={category} onValueChange={(val) => setCategory(val || '')}>
@@ -178,6 +224,7 @@ export default function ExpensesPage() {
           </DialogContent>
         </Dialog>
       </div>
+    </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         {[
@@ -224,7 +271,7 @@ export default function ExpensesPage() {
               </div>
             ) : (
               <AnimatePresence mode="popLayout">
-                {expenses.map((exp: any, idx: number) => (
+                {filteredExpenses.map((exp: any, idx: number) => (
                   <motion.div 
                     key={exp.id} 
                     initial={{ opacity: 0, y: 10 }}
@@ -238,7 +285,10 @@ export default function ExpensesPage() {
                       </div>
                       <div className="">
                         <p className="font-black text-white text-lg leading-none mb-2 uppercase tracking-tighter">{exp.category}</p>
-                        <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">{exp.description || 'Charge Standard'}</p>
+                        <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                           <span className={cn("px-2 py-0.5 rounded mr-2", exp.expense_type === 'CAPEX' ? "bg-blue-500/20 text-blue-400" : "bg-orange-500/20 text-orange-400")}>{exp.expense_type || 'OPEX'}</span>
+                           {exp.description || 'Charge Standard'}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right flex items-center gap-8">
