@@ -41,17 +41,26 @@ export default function LoginPage() {
         
         const user = data?.user
         if (user) {
-          // Update profile with full name if needed, or assume it's handled via metadata if we can find the right way.
-          // For now, let's just proceed with establishment creation.
-          await insforgeService.createEstablishment({
+          // Proceed with establishment creation.
+          const estData = await insforgeService.createEstablishment({
             name: barName,
+            location: 'À configurer',
+            type: 'Bar VIP', // Assuming 'Bar VIP' as barType is not defined
+            user_id: user.id,
             owner: fullName,
             phone: phone || 'Non précisé',
             whatsapp: phone,
-            location: 'À préciser',
-            type: 'Bar VIP',
-            user_id: user.id
           })
+
+          // Create the admin profile using the secure RPC
+          const { error: rpcError } = await insforge.database.rpc('register_partner_profile', {
+            p_full_name: fullName,
+            p_establishment_id: estData.id
+          })
+          
+          if (rpcError) {
+             console.error("Erreur création profil partenaire:", rpcError)
+          }
         }
         
         toast.success('Inscription réussie ! Validation en cours.')

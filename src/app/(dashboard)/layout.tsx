@@ -38,10 +38,13 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className="flex h-screen bg-background text-foreground relative overflow-hidden selection:bg-primary/20">
+      <div className="absolute pointer-events-none inset-0 flex items-center justify-center opacity-20">
+        <div className="w-[50vw] h-[50vw] bg-primary/10 blur-[150px] rounded-full" />
+      </div>
       <Sidebar />
-      <main className="flex-1 overflow-y-auto lg:pl-64">
-        <div className="p-8 max-w-7xl mx-auto">
+      <main className="flex-1 overflow-y-auto lg:pl-64 relative z-10 scrollbar-hide">
+        <div className="p-6 md:p-10 max-w-7xl mx-auto">
           {children}
         </div>
       </main>

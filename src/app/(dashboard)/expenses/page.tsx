@@ -113,7 +113,7 @@ export default function ExpensesPage() {
               <Plus className="h-5 w-5" /> Nouvelle dépense elite
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-card/90 border-white/10 rounded-[2.5rem] p-6 md:p-10 max-w-md max-h-[85vh] overflow-y-auto scrollbar-hide shadow-2xl backdrop-blur-2xl">
+          <DialogContent className="bg-card/40 backdrop-blur-2xl border-white/10 rounded-[2.5rem] p-6 md:p-10 max-w-md max-h-[85vh] overflow-y-auto scrollbar-hide shadow-2xl">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">Nouvelle Sortie</DialogTitle>
               <CardDescription className="text-xs font-medium text-muted-foreground mt-1">Enregistrez une charge stratégique dans le système.</CardDescription>
@@ -125,7 +125,7 @@ export default function ExpensesPage() {
                   <SelectTrigger className="bg-white/5 border-white/5 h-14 rounded-xl px-4 focus:ring-primary/20 transition-all font-black text-white uppercase tracking-tight">
                     <SelectValue placeholder="Choisir une catégorie" />
                   </SelectTrigger>
-                  <SelectContent className="bg-card border border-white/10 rounded-2xl shadow-2xl">
+                  <SelectContent className="premium-card bg-card/40 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-primary/20 transition-all duration-500 shadow-2xl">
                     <SelectItem value="Loyer" className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">Loyer & Charges</SelectItem>
                     <SelectItem value="Electricité" className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">Électricité / Eau</SelectItem>
                     <SelectItem value="Stock" className="font-black text-[10px] uppercase tracking-widest py-3 focus:bg-primary/20">Achat de Stock</SelectItem>

@@ -59,7 +59,8 @@ export const insforgeService = {
         user_id: est.user_id,
         status: 'Pending',
         plan: est.plan || 'Trial',
-        whatsapp: est.whatsapp
+        whatsapp: est.whatsapp,
+        owner: est.owner
       }])
       .select()
       .single()

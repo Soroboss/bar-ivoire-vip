@@ -44,7 +44,7 @@ export function Sidebar() {
   const router = useRouter()
   
   const displayName = userFullName || establishment?.owner || user?.email?.split('@')[0] || 'Partenaire'
-  const displayRole = userRole === 'Admin' ? 'Administrateur' : 'Gérant'
+  const displayRole = userRole === 'Admin' ? 'Administrateur' : (user?.id === establishment?.userId ? 'PROPRIÉTAIRE' : 'GÉRANT')
 
   const handleLogout = async () => {
     try {

@@ -123,6 +123,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         insforge.database.from('profiles').select('role, full_name').eq('id', userId).maybeSingle(),
         insforgeService.getEstablishments().catch(err => {
           console.error('[AppContext] Establishments fetch error:', err)
+          toast.error(`Erreur serveur (Est): ${err.message || err.toString()}`)
           return [] as Establishment[]
         }),
         insforgeService.getSaaSTransactions().catch(() => [])
@@ -198,8 +199,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       // 3. Load Additional Admin Data if needed
       if (currentRole === 'Admin') {
-        insforgeService.getTeamMembers().catch(err => {
-          console.error('[AppContext] Team fetch error:', err)
+        insforgeService.getTeamMembers().catch(error => {
+          console.error('[AppContext] Error fetching user data:', error)
+          toast.error(`Erreur (Profile): ${error.message || error.toString()}`)
+          setAllEstablishments([])
+          setEstablishment(null)
           return []
         })
       }
