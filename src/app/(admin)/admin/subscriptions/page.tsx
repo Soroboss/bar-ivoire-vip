@@ -17,12 +17,14 @@ import {
   ChevronRight,
   RefreshCw,
   ExternalLink,
-  Zap
+  Zap,
+  ArrowLeft
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { useRouter } from 'next/navigation'
 import { saasService } from '@/services/saasService'
 import { UserSubscription, Plan } from '@/types'
 import { toast } from 'sonner'
@@ -30,6 +32,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 export default function AdminSubscriptionsPage() {
+  const router = useRouter()
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([])
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
@@ -93,9 +96,18 @@ export default function AdminSubscriptionsPage() {
             <CreditCard className="h-3 w-3 text-primary" />
             <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Flux Financiers</span>
           </div>
-          <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">
-            Abonnements <span className="gold-gradient-text">Partenaires</span>
-          </h1>
+          <div className="flex items-center gap-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => router.push('/admin/dashboard')}
+              className="h-14 w-14 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all flex-shrink-0"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+            <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">
+              Abonnements <span className="gold-gradient-text">Partenaires</span>
+            </h1>
+          </div>
           <p className="text-muted-foreground/60 text-sm max-w-xl font-medium leading-relaxed">
             Gérez les accès, validez les forfaits, appliquez des remises et suivez l'état des abonnements de vos établissements partenaires.
           </p>

@@ -15,8 +15,11 @@ import {
   CheckCircle2,
   Globe,
   Lock,
-  ArrowUpRight
+  ArrowUpRight,
+  CreditCard,
+  ArrowLeft
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useAppContext } from "@/context/AppContext"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { 
@@ -34,6 +37,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 export default function AdminDashboardContent() {
   const context = useAppContext()
+  const router = useRouter()
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -145,6 +149,59 @@ export default function AdminDashboardContent() {
             </Card>
           </motion.div>
         ))}
+      </div>
+
+      {/* SaaS Quick Management */}
+      <div className="grid gap-8 md:grid-cols-2">
+         <motion.div
+           initial={{ opacity: 0, scale: 0.95 }}
+           animate={{ opacity: 1, scale: 1 }}
+           transition={{ delay: 0.4 }}
+         >
+           <Card 
+             onClick={() => router.push('/admin/plans')}
+             className="premium-card bg-primary/5 backdrop-blur-3xl border border-primary/20 rounded-[2.5rem] p-10 cursor-pointer group hover:bg-primary/10 transition-all duration-500 overflow-hidden relative"
+           >
+             <div className="absolute -top-10 -right-10 h-40 w-40 bg-primary/10 blur-[80px] group-hover:bg-primary/20 transition-all" />
+             <div className="flex items-center gap-8 relative z-10">
+               <div className="h-20 w-20 rounded-2xl bg-primary/20 flex items-center justify-center text-primary border border-primary/30 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shadow-[0_0_30px_rgba(212,175,55,0.2)]">
+                  <Zap className="h-10 w-10" />
+               </div>
+               <div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Gestion des <span className="gold-gradient-text">Forfaits</span></h3>
+                  <p className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest leading-relaxed max-w-[200px]">Édition des tarifs, périodes d'essai et caractéristiques du SaaS.</p>
+               </div>
+               <div className="ml-auto opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+                  <ChevronRight className="h-8 w-8 text-primary" />
+               </div>
+             </div>
+           </Card>
+         </motion.div>
+
+         <motion.div
+           initial={{ opacity: 0, scale: 0.95 }}
+           animate={{ opacity: 1, scale: 1 }}
+           transition={{ delay: 0.5 }}
+         >
+           <Card 
+             onClick={() => router.push('/admin/subscriptions')}
+             className="premium-card bg-emerald-500/5 backdrop-blur-3xl border border-emerald-500/20 rounded-[2.5rem] p-10 cursor-pointer group hover:bg-emerald-500/10 transition-all duration-500 overflow-hidden relative"
+           >
+             <div className="absolute -top-10 -right-10 h-40 w-40 bg-emerald-500/10 blur-[80px] group-hover:bg-emerald-500/20 transition-all" />
+             <div className="flex items-center gap-8 relative z-10">
+               <div className="h-20 w-20 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-500 border border-emerald-500/30 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                  <CreditCard className="h-10 w-10" />
+               </div>
+               <div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Abonnements <span className="text-emerald-500">Partenaires</span></h3>
+                  <p className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest leading-relaxed max-w-[200px]">Validation des accès et suivi des renouvellements clients.</p>
+               </div>
+               <div className="ml-auto opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+                  <ChevronRight className="h-8 w-8 text-emerald-500" />
+               </div>
+             </div>
+           </Card>
+         </motion.div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-7">

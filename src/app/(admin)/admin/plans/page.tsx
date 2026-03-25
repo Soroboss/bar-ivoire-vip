@@ -13,18 +13,21 @@ import {
   X,
   Plus,
   RefreshCw,
-  Info
+  Info,
+  ArrowLeft
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { useRouter } from 'next/navigation'
 import { saasService } from '@/services/saasService'
 import { Plan } from '@/types'
 import { toast } from 'sonner'
 
 export default function AdminPlansPage() {
+  const router = useRouter()
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -84,9 +87,18 @@ export default function AdminPlansPage() {
             <Crown className="h-3 w-3 text-primary" />
             <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Offres & Stratégie</span>
           </div>
-          <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">
-            Gestion des <span className="gold-gradient-text">Forfaits</span>
-          </h1>
+          <div className="flex items-center gap-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => router.push('/admin/dashboard')}
+              className="h-14 w-14 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all flex-shrink-0"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+            <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">
+              Gestion des <span className="gold-gradient-text">Forfaits</span>
+            </h1>
+          </div>
           <p className="text-muted-foreground/60 text-sm max-w-xl font-medium leading-relaxed">
             Configurez les prix, descriptions et avantages. Les modifications sont appliquées instantanément sur la Landing Page publique.
           </p>
