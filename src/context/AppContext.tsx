@@ -104,31 +104,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loading])
 
-  async function loadUserData(user: any) {
+  async function loadUserData(user: any, retryCount = 0) {
     const userId = user.id
-    console.log('[AppContext] Starting data load for user:', userId)
+    console.log(`[AppContext] Starting data load (Attempt ${retryCount + 1}) for user:`, userId)
     
     try {
       setLoading(true)
       
+      // Delay to allow SDK to sync token
+      if (retryCount === 0) {
+        await new Promise(resolve => setTimeout(resolve, 800))
+      }
+
       // 1. Parallelize initial profile and establishments fetch
-      const [profileRes, estsRes] = await Promise.all([
+      const [profileRes, estsRes, transactionsRes] = await Promise.all([
         insforge.database.from('profiles').select('role').eq('id', userId).maybeSingle(),
         insforgeService.getEstablishments().catch(err => {
           console.error('[AppContext] Establishments fetch error:', err)
           return [] as Establishment[]
-        })
+        }),
+        insforgeService.getSaaSTransactions().catch(() => [])
       ])
       
       // Map legacy SUPER_ADMIN to Admin for backwards compatibility
       let currentRole = profileRes.data?.role ? profileRes.data.role.toString() : null
-      if (currentRole === 'SUPER_ADMIN' || currentRole === 'ADMIN') currentRole = 'Admin'
+      
+      // Retry if profile/role is missing on first attempts (transient 403/sync issue)
+      if (!currentRole && retryCount < 2) {
+        console.warn('[AppContext] Empty profile/role detected, retrying...')
+        setTimeout(() => loadUserData(user, retryCount + 1), 1000)
+        return
+      }
 
+      if (currentRole === 'SUPER_ADMIN' || currentRole === 'ADMIN') currentRole = 'Admin'
       setUserRole(currentRole)
       
-      console.log('[AppContext] Role detected and normalized:', currentRole)
-      
-      // Fetch permissions if they exist
+      // Fetch permissions
       if (profileRes.data) {
         const { data: profileData } = await insforge.database
           .from('profiles')
@@ -139,8 +150,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       
       const ests = Array.isArray(estsRes) ? estsRes : []
+      
+      // Retry if Admin but 0 establishments found (RLS transient failure)
+      if (currentRole === 'Admin' && ests.length === 0 && retryCount < 2) {
+        console.warn('[AppContext] Admin detected but 0 establishments, retrying...')
+        setTimeout(() => loadUserData(user, retryCount + 1), 1500)
+        return
+      }
+
       setAllEstablishments(ests)
-      console.log('[AppContext] Establishments loaded:', ests.length)
+      setSaaSTransactions(Array.isArray(transactionsRes) ? transactionsRes : [])
 
       // 2. Identify and Load User Establishment Data
       const userEst = ests.find(e => e.userId === userId) || (currentRole === 'Admin' ? ests[0] : null)
@@ -174,7 +193,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setLoading(false)
       }
 
-      // 3. Load SaaS Transactions if Admin
+      // 3. Load Additional Admin Data if needed
       if (currentRole === 'Admin') {
         insforgeService.getTeamMembers().catch(err => {
           console.error('[AppContext] Team fetch error:', err)
@@ -187,9 +206,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toast.error('Erreur lors de la synchronisation des données.')
       setLoading(false)
     } finally {
-      console.log('[AppContext] Data load finished.')
+      console.log('[AppContext] Data load logic finished for attempt:', retryCount + 1)
     }
   }
+
 
   const resetState = () => {
     setProducts([])
