@@ -19,7 +19,7 @@ import {
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+import { cn, getGreeting } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useAppContext } from '@/context/AppContext'
 import { insforge } from '@/lib/insforge'
@@ -40,8 +40,11 @@ const MENU_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
-  const { establishment, userPermissions, userRole } = useAppContext()
+  const { establishment, userPermissions, userRole, userFullName, user } = useAppContext()
   const router = useRouter()
+  
+  const displayName = userFullName || establishment?.owner || user?.email?.split('@')[0] || 'Partenaire'
+  const displayRole = userRole === 'Admin' ? 'Administrateur' : 'Gérant'
 
   const handleLogout = async () => {
     try {
@@ -81,6 +84,19 @@ export function Sidebar() {
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 mt-1">SaaS Opérationnel</p>
             </div>
           </div>
+          
+          <div className="mt-6 flex flex-col gap-1 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+            <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">
+              {getGreeting()},
+            </span>
+            <span className="text-white font-black text-sm truncate">
+              {displayName}
+            </span>
+            <span className="text-primary text-[10px] font-black uppercase tracking-[0.2em] mt-1">
+              {displayRole}
+            </span>
+          </div>
+
           {establishment && (
             <div className="mt-8 flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 backdrop-blur-md shadow-xl group hover:border-primary/20 transition-all duration-500">
               <Badge className="bg-primary text-primary-foreground text-[9px] font-black px-3 py-1 rounded-lg shadow-lg shadow-primary/20 tracking-widest uppercase">

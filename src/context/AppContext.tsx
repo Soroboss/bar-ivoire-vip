@@ -24,6 +24,7 @@ type AppContextType = {
   user: any | null
   isSignedIn: boolean
   userRole: string | null
+  userFullName: string | null
   userPermissions: any | null
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>
@@ -58,6 +59,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [tables, setTables] = useState<Table[]>([])
   const [loading, setLoading] = useState(true)
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [userFullName, setUserFullName] = useState<string | null>(null)
   const [userPermissions, setUserPermissions] = useState<any | null>(null)
   
   const isSignedIn = !!user
@@ -118,7 +120,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       // 1. Parallelize initial profile and establishments fetch
       const [profileRes, estsRes, transactionsRes] = await Promise.all([
-        insforge.database.from('profiles').select('role').eq('id', userId).maybeSingle(),
+        insforge.database.from('profiles').select('role, full_name').eq('id', userId).maybeSingle(),
         insforgeService.getEstablishments().catch(err => {
           console.error('[AppContext] Establishments fetch error:', err)
           return [] as Establishment[]
@@ -138,6 +140,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       if (currentRole === 'SUPER_ADMIN' || currentRole === 'ADMIN') currentRole = 'Admin'
       setUserRole(currentRole)
+      setUserFullName(profileRes.data?.full_name || null)
       
       // Fetch permissions
       if (profileRes.data) {
@@ -222,6 +225,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAllEstablishments([])
     setTables([])
     setUserRole(null)
+    setUserFullName(null)
     setUserPermissions(null)
   }
 
@@ -435,7 +439,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     <AppContext.Provider value={{ 
       products, orders, clients, staff, expenses, saasTransactions, establishment, allEstablishments, tables, loading, user: user, 
       isSignedIn: isSignedIn, 
-      userRole, userPermissions,
+      userRole, userFullName, userPermissions,
       addProduct, updateProduct, deleteProduct, updateStock, createOrder, addExpense, addClient, toggleStaffStatus, updateEstablishment, registerEstablishment, validateEstablishment,
       switchEstablishment, addTable, signOut, login, getAuthToken
     }}>

@@ -16,7 +16,8 @@ import {
   Crown,
   CreditCard
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, getGreeting } from '@/lib/utils'
+import { useAppContext } from '@/context/AppContext'
 import { Button } from '@/components/ui/button'
 import { insforge } from '@/lib/insforge'
 import { useRouter } from 'next/navigation'
@@ -35,8 +36,12 @@ const menuItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const { userFullName, userRole, user } = useAppContext()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
+
+  const displayName = userFullName || user?.email?.split('@')[0] || 'Admin'
+  const displayRole = userRole === 'Admin' ? 'Super Administrateur' : (userRole || 'Admin')
 
   const handleLogout = async () => {
     await insforge.auth.signOut()
@@ -60,6 +65,19 @@ export function AdminSidebar() {
             </h1>
             <p className="text-[10px] text-primary/40 font-black uppercase tracking-[0.4em] mt-1">SaaS Protocol</p>
           </div>
+        </div>
+
+        {/* User Greeting Block */}
+        <div className="mx-6 mt-6 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+          <p className="text-white/40 text-[9px] uppercase tracking-widest font-black mb-1">
+            {getGreeting()},
+          </p>
+          <p className="text-white font-black text-sm truncate">
+            {displayName}
+          </p>
+          <p className="text-primary text-[10px] font-black uppercase tracking-[0.2em] mt-1">
+            {displayRole}
+          </p>
         </div>
       </div>
 
