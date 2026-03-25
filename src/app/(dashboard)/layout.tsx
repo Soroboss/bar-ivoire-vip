@@ -16,16 +16,14 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!loading) {
-      // Les Admin peuvent tout voir sans établissement rattaché
-      if (userRole === 'Admin') return
-
-      if (!establishment) {
-        // Aucun établissement : rediriger vers l'inscription
-        router.push('/onboarding')
-      } else if (establishment.status !== 'Active') {
-        // Bloque Pending ET Suspended → page d'attente
+      // Le système de validation "Pending" est temporairement désactivé
+      // pour permettre aux partenaires d'accéder au dashboard immédiatement.
+      /*
+      if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') return
+      if (!establishment || establishment.status !== 'Active') {
         router.push('/onboarding')
       }
+      */
     }
   }, [loading, establishment, pathname, router, userRole])
 
