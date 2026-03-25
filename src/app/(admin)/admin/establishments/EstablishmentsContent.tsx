@@ -21,6 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAppContext } from "@/context/AppContext"
 import { useState, useEffect } from "react"
 import { insforgeService } from "@/services/insforgeService"
+import { saasService } from "@/services/saasService"
 import { toast } from "sonner"
 import { AdminRenewalModal } from "../../components/AdminRenewalModal"
 import { motion, AnimatePresence, Variants } from "framer-motion"
@@ -80,19 +81,26 @@ export default function EstablishmentsContent() {
   const handleValidateAndNotify = async (est: any) => {
     setValidatingId(est.id)
     try {
-      await validateEstablishment(est.id, 'Active')
+      // Map display plan to slug for activation
+      const planMap: Record<string, string> = {
+        'Trial': 'starter',
+        'Business': 'business',
+        'VIP': 'vip'
+      }
+      const planSlug = planMap[est.plan] || 'starter'
+      
+      await saasService.activateEstablishment(est.id, planSlug)
       
       const profile = await insforgeService.getProfileByUserId(est.user_id)
       
       if (profile?.email) {
-        // InsForge handled password reset / activation differently, 
-        // but for now we just notify success as the user will get an invite or can reset.
-        toast.success(`Activation déployée ! Profil synchronisé pour ${profile.email}`)
+        toast.success(`Activation déployée ! Abonnement et transaction initialisés pour ${profile.email}`)
       } else {
-        toast.success('Validation réussie')
+        toast.success('Validation et abonnement réussis')
       }
     } catch (e) {
-      toast.error('Erreur de protocole validation')
+      console.error('Validation error:', e)
+      toast.error('Erreur lors du déploiement SaaS')
     } finally {
       setValidatingId(null)
     }

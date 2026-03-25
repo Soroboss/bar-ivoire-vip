@@ -73,6 +73,61 @@ export const saasService = {
     return data as UserSubscription
   },
 
+  async activateEstablishment(establishmentId: string, planSlug: string) {
+    // 1. Get plan details
+    const { data: plan, error: planError } = await insforge.database
+      .from('saas_plans')
+      .select('*')
+      .eq('slug', planSlug)
+      .maybeSingle()
+    
+    if (planError || !plan) throw new Error(`Plan ${planSlug} introuvable`)
+
+    const trialEndsAt = new Date()
+    trialEndsAt.setDate(trialEndsAt.getDate() + (plan.trial_days || 7))
+
+    // 2. Create subscription record
+    const { data: sub, error: subError } = await insforge.database
+      .from('subscriptions')
+      .insert([{
+        establishment_id: establishmentId,
+        plan_id: plan.id,
+        plan: plan.name,
+        status: 'trial',
+        active: true,
+        trial_started_at: new Date().toISOString(),
+        expires_at: trialEndsAt.toISOString()
+      }])
+      .select()
+      .single()
+    
+    if (subError) throw subError
+
+    // 3. Update establishment status & plan
+    const { error: estError } = await insforge.database
+      .from('establishments')
+      .update({ 
+        status: 'Active',
+        plan: plan.name,
+        trial_ends_at: trialEndsAt.toISOString()
+      })
+      .eq('id', establishmentId)
+    
+    if (estError) throw estError
+
+    // 4. Log initial SaaS transaction
+    await insforge.database
+      .from('saas_transactions')
+      .insert([{
+        establishment_id: establishmentId,
+        amount: 0,
+        plan: plan.name,
+        status: 'success'
+      }])
+
+    return sub as UserSubscription
+  },
+
   async applyDiscount(subscriptionId: string, discount: { amount?: number, percent?: number, reason: string }) {
     const { data, error } = await insforge.database
       .from('subscriptions')
