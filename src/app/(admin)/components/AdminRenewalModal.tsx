@@ -60,7 +60,7 @@ export function AdminRenewalModal({ establishment, isOpen, onClose, onSuccess }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-card/90 border border-white/10 text-white max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl p-0 gap-0 backdrop-blur-3xl">
+      <DialogContent className="bg-card/90 border-white/10 text-white max-w-lg rounded-[2.5rem] max-h-[85vh] overflow-y-auto scrollbar-hide shadow-2xl p-0 gap-0 backdrop-blur-3xl flex flex-col">
         <div className="p-10 border-b border-white/5 bg-white/[0.02]">
           <DialogHeader>
             <div className="flex items-center gap-4 mb-3">

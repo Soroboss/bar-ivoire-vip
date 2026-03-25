@@ -113,7 +113,7 @@ export default function ExpensesPage() {
               <Plus className="h-5 w-5" /> Nouvelle dépense elite
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-card/90 border border-white/10 rounded-[2.5rem] p-10 max-w-md shadow-2xl backdrop-blur-3xl">
+          <DialogContent className="bg-card/90 border-white/10 rounded-[2.5rem] p-6 md:p-10 max-w-md max-h-[85vh] overflow-y-auto scrollbar-hide shadow-2xl backdrop-blur-2xl">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">Nouvelle Sortie</DialogTitle>
               <CardDescription className="text-xs font-medium text-muted-foreground mt-1">Enregistrez une charge stratégique dans le système.</CardDescription>

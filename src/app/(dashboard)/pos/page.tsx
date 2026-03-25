@@ -309,7 +309,7 @@ export default function POSPage() {
 
       {/* RECEIPT DIALOG - Nightlife adapted */}
       <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
-        <DialogContent className="bg-card border-white/5 text-white max-w-[420px] p-0 rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-3xl lg:selection:bg-primary/20">
+        <DialogContent className="bg-card/95 border-white/10 text-white max-w-[420px] p-0 rounded-[3rem] max-h-[85vh] overflow-y-auto scrollbar-hide shadow-2xl backdrop-blur-3xl lg:selection:bg-primary/20 flex flex-col">
           <div className="p-10 space-y-8 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-blue-600/20 to-transparent pointer-events-none" />
             

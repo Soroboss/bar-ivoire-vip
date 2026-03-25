@@ -118,7 +118,7 @@ export default function InventoryPage() {
                 <Plus className="h-4 w-4" /> Ajouter un produit
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-card border-white/5 rounded-[2rem] p-8 max-w-md shadow-2xl backdrop-blur-3xl overflow-hidden selection:bg-primary/20">
+            <DialogContent className="bg-card/90 border-white/10 rounded-[2rem] p-6 md:p-8 max-w-md max-h-[85vh] overflow-y-auto scrollbar-hide shadow-2xl backdrop-blur-2xl selection:bg-primary/20">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -z-10" />
               <DialogHeader>
                 <DialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">Nouveau Produit</DialogTitle>
@@ -267,7 +267,7 @@ export default function InventoryPage() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="bg-card border-white/5 rounded-[2rem] p-8 max-w-md shadow-2xl backdrop-blur-3xl overflow-hidden selection:bg-primary/20">
+        <DialogContent className="bg-card/90 border-white/10 rounded-[2rem] p-6 md:p-8 max-w-md max-h-[85vh] overflow-y-auto scrollbar-hide shadow-2xl backdrop-blur-2xl selection:bg-primary/20">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -z-10" />
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">Modifier Référence</DialogTitle>

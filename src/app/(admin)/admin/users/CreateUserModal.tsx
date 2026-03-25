@@ -134,8 +134,8 @@ export function CreateUserModal({ onSuccess }: CreateUserModalProps) {
           Ajouter un utilisateur
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-card border-white/10 shadow-2xl rounded-2xl p-0">
-        <DialogHeader className="p-6 border-b border-white/5 sticky top-0 bg-card/80 backdrop-blur-xl z-10">
+      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto bg-card/90 backdrop-blur-3xl border-white/10 shadow-2xl rounded-[2rem] p-0 scrollbar-hide">
+        <DialogHeader className="p-6 md:p-8 border-b border-white/5 sticky top-0 bg-transparent z-10">
           <DialogTitle className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2">
              Créer un compte <Badge variant="outline" className="text-primary border-primary bg-primary/10">SaaS</Badge>
           </DialogTitle>
@@ -144,7 +144,7 @@ export function CreateUserModal({ onSuccess }: CreateUserModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-8">
+        <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
           {/* Informations Générales */}
           <div className="space-y-4">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 border-b border-white/5 pb-2">Informations Générales</h3>
@@ -213,7 +213,7 @@ export function CreateUserModal({ onSuccess }: CreateUserModalProps) {
             </div>
           </div>
 
-          <div className="pt-4 flex gap-3 sticky bottom-0 bg-card/80 backdrop-blur-xl border-t border-white/5 py-4">
+          <div className="pt-4 flex gap-3 sticky bottom-0 bg-transparent border-t border-white/5 py-4">
              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="flex-1 font-bold h-12">Annuler</Button>
              <Button type="submit" disabled={loading} className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest text-xs h-12 shadow-lg shadow-primary/20">
                {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Créer l'utilisateur"}
