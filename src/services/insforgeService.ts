@@ -68,10 +68,12 @@ export const insforgeService = {
   },
 
   async updateEstablishmentStatus(id: string, status: string) {
-    const { error } = await insforge.database
+    const { error, data } = await insforge.database
       .from('establishments')
       .update({ status })
       .eq('id', id)
+      .select()
+      .single()
     if (error) throw error
   },
 
