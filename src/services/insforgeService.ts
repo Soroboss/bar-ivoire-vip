@@ -169,6 +169,18 @@ export const insforgeService = {
     if (error) throw error
   },
 
+  async getStockMovements(establishmentId: string) {
+    const { data, error } = await insforge.database
+      .from('stock_movements')
+      .select('*, products(name)')
+      .eq('establishment_id', establishmentId)
+      .order('created_at', { ascending: false })
+      .limit(100)
+    
+    if (error) throw error
+    return data
+  },
+
   // Orders
   async createOrder(order: any) {
     const { data: orderData, error: orderError } = await insforge.database
@@ -198,6 +210,39 @@ export const insforgeService = {
       .insert(items)
 
     if (itemsError) throw itemsError
+
+    // Deduct stock and record movements
+    for (const item of order.items) {
+      const { data: prod } = await insforge.database
+        .from('products')
+        .select('stock_quantity')
+        .eq('id', item.productId)
+        .single()
+        
+      const prev = prod?.stock_quantity || 0
+      const next = Math.max(0, prev - item.quantity)
+
+      // Update product stock
+      await insforge.database
+        .from('products')
+        .update({ stock_quantity: next })
+        .eq('id', item.productId)
+
+      // Insert stock movement
+      await insforge.database
+        .from('stock_movements')
+        .insert([{
+          establishment_id: order.establishment_id,
+          product_id: item.productId,
+          user_id: order.staffId || null,
+          type: 'OUT',
+          quantity: -item.quantity,
+          previous_stock: prev,
+          new_stock: next,
+          reason: `Vente POS`
+        }])
+    }
+
     return orderData
   },
 

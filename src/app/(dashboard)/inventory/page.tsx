@@ -38,12 +38,33 @@ import { Label } from '@/components/ui/label'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function InventoryPage() {
-  const { products, addProduct, updateProduct, deleteProduct, loading } = useAppContext()
+  const { establishment, products, addProduct, updateProduct, deleteProduct, loading } = useAppContext()
   const [search, setSearch] = useState('')
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const [movements, setMovements] = useState<any[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [newProduct, setNewProduct] = useState({ name: '', category: 'Bières', price: '', stock: '' })
+
+  const loadHistory = async () => {
+    if (!establishment) return
+    setShowHistory(true)
+    setLoadingHistory(true)
+    try {
+      const { insforgeService } = await import('@/services/insforgeService')
+      const data = await insforgeService.getStockMovements(establishment.id)
+      setMovements(data)
+    } catch(e) {}
+    setLoadingHistory(false)
+  }
+
+  const handleRestock = (product: any) => {
+    const message = encodeURIComponent(`Bonjour, je souhaite passer une commande urgente pour mon établissement "${establishment?.name}".\n\nProduit : ${product.name}\nQuantité souhaitée : `)
+    // In MVP, we just open WhatsApp directly, user picks the contact
+    window.open(`https://wa.me/?text=${message}`, '_blank')
+  }
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
@@ -109,7 +130,11 @@ export default function InventoryPage() {
         </div>
         
         <div className="flex gap-4">
-          <Button variant="outline" className="h-12 border-white/10 text-muted-foreground hover:bg-white/5 font-bold px-6 rounded-xl transition-all">
+          <Button 
+            onClick={loadHistory}
+            variant="outline" 
+            className="h-12 border-white/10 text-muted-foreground hover:bg-white/5 font-bold px-6 rounded-xl transition-all"
+          >
             <History className="mr-2 h-4 w-4" /> Historique
           </Button>
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
@@ -236,6 +261,16 @@ export default function InventoryPage() {
                     </TableCell>
                     <TableCell className="text-right pr-8 py-5">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                        {product.stock <= 5 && (
+                          <Button 
+                            variant="default" 
+                            size="sm" 
+                            className="h-10 px-4 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-all font-black text-[10px] uppercase tracking-widest shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                            onClick={() => handleRestock(product)}
+                          >
+                            Réappro WhatsApp
+                          </Button>
+                        )}
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -311,6 +346,41 @@ export default function InventoryPage() {
               </DialogFooter>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showHistory} onOpenChange={setShowHistory}>
+        <DialogContent className="bg-card/95 border-white/10 text-white max-w-2xl p-0 rounded-[2rem] max-h-[85vh] flex flex-col shadow-2xl backdrop-blur-3xl overflow-hidden">
+          <div className="p-8 border-b border-white/5 shrink-0">
+             <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Historique des Mouvements</DialogTitle>
+             <CardDescription className="text-muted-foreground font-medium mt-1">Traçabilité complète des entrées/sorties en base de données.</CardDescription>
+          </div>
+          <div className="p-6 overflow-y-auto scrollbar-hide flex-1 space-y-4">
+             {loadingHistory ? (
+               <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+             ) : movements.length === 0 ? (
+               <p className="text-center font-bold text-sm text-slate-500 uppercase py-10 tracking-widest">Aucun mouvement récent</p>
+             ) : (
+               movements.map(m => (
+                 <div key={m.id} className="flex justify-between items-center p-4 bg-white/5 border border-white/5 rounded-xl">
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <Badge className={cn("text-[9px] font-black uppercase tracking-widest", m.type === 'IN' ? 'bg-green-500' : 'bg-red-500')}>{m.type}</Badge>
+                        <p className="font-bold text-sm text-white">{m.products?.name || 'Produit inconnu'}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2 font-medium">{m.reason || "Ajustement manuel"}</p>
+                    </div>
+                    <div className="text-right">
+                       <p className={cn("text-xl font-black tracking-tighter", m.type === 'IN' ? 'text-green-500' : 'text-red-500')}>
+                         {m.quantity > 0 ? '+' : ''}{m.quantity}
+                       </p>
+                       <p className="text-[10px] text-muted-foreground/60 uppercase font-bold tracking-widest mt-1">
+                         Stock: {m.previous_stock} → <span className="text-white">{m.new_stock}</span>
+                       </p>
+                    </div>
+                 </div>
+               ))
+             )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
