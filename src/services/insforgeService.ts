@@ -176,6 +176,7 @@ export const insforgeService = {
       .insert([{
         establishment_id: order.establishment_id,
         table_id: order.tableId,
+        staff_id: order.staffId,
         total_amount: order.total,
         status: order.status
       }])

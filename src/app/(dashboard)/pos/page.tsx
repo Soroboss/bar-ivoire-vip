@@ -35,12 +35,24 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function POSPage() {
-  const { products, createOrder, establishment, loading, tables } = useAppContext()
+  const { products, createOrder, establishment, loading, tables, staff } = useAppContext()
   const [selectedTable, setSelectedTable] = useState<string | null>(null)
+  const [selectedStaff, setSelectedStaff] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string>('Toutes')
   const [cart, setCart] = useState<{ productId: string, name: string, quantity: number, price: number }[]>([])
   const [search, setSearch] = useState('')
   const [showReceipt, setShowReceipt] = useState(false)
+  const [showPaymentModal, setShowPaymentDialog] = useState(false)
   const [lastOrder, setLastOrder] = useState<any>(null)
+
+  const categories = ['Toutes', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))]
+
+  // Automatic Staff Selection if only one exists or user is logged in
+  useState(() => {
+    if (staff && staff.length === 1 && !selectedStaff) {
+       setSelectedStaff(staff[0].id)
+    }
+  })
 
   if (loading || !establishment) {
     return (
@@ -55,10 +67,12 @@ export default function POSPage() {
     )
   }
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) || 
-    (p.category && p.category.toLowerCase().includes(search.toLowerCase()))
-  )
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
+                          (p.category && p.category.toLowerCase().includes(search.toLowerCase()))
+    const matchesCategory = selectedCategory === 'Toutes' || p.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
 
   const addToCart = (product: any) => {
     if (product.stock <= 0) {
@@ -91,18 +105,26 @@ export default function POSPage() {
   const tax = subtotal * (establishment.taxRate / 100)
   const total = subtotal + tax
 
-  const handleValidate = async () => {
+  const triggerPayment = () => {
     if (!selectedTable) {
       toast.error('Veuillez sélectionner une table')
       return
     }
+    if (!selectedStaff) {
+      toast.error('Veuillez sélectionner un serveur')
+      return
+    }
     if (cart.length === 0) return
+    setShowPaymentDialog(true)
+  }
 
+  const handleValidate = async (paymentMode: 'cash' | 'table') => {
     const orderData = {
-      tableId: selectedTable,
+      tableId: selectedTable!,
+      staffId: selectedStaff || undefined,
       items: cart,
       total,
-      status: 'completed' as const
+      status: paymentMode === 'cash' ? ('completed' as const) : ('pending' as const)
     }
     
     try {
@@ -110,8 +132,11 @@ export default function POSPage() {
       setLastOrder({ ...orderData, id: `ORD-${Math.random().toString(36).substr(2, 5).toUpperCase()}`, createdAt: new Date().toISOString() })
       setCart([])
       setSelectedTable(null)
+      setShowPaymentDialog(false)
       setShowReceipt(true)
-    } catch (e) {}
+    } catch (e) {
+      toast.error('Erreur lors de la validation')
+    }
   }
 
   return (
@@ -129,52 +154,102 @@ export default function POSPage() {
            <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-white uppercase">Interface de <span className="text-primary">Service</span></h1>
         </div>
 
-        {/* Table Selection */}
-        <section className="space-y-5">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 backdrop-blur-md">
-               <TableIcon className="h-5 w-5 text-primary" />
+        {/* Table & Server Selection */}
+        <section className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 backdrop-blur-md">
+                 <TableIcon className="h-5 w-5 text-primary" />
+              </div>
+              <h2 className="text-xl font-black text-white tracking-widest uppercase">Sélection Table</h2>
             </div>
-            <h2 className="text-xl font-black text-white tracking-widest uppercase">Sélection Zone</h2>
+            <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide">
+              {tables.length === 0 ? (
+                <p className="text-xs font-bold uppercase text-slate-500 tracking-widest">Aucune table configurée</p>
+              ) : (
+                tables.map(table => (
+                  <button
+                    key={table.id}
+                    onClick={() => setSelectedTable(table.id)}
+                    className={cn(
+                      "flex-none px-6 py-4 rounded-xl border transition-all duration-300 text-xs font-black uppercase tracking-[0.2em] relative overflow-hidden group",
+                      selectedTable === table.id 
+                        ? 'bg-primary/20 border-primary text-primary shadow-[0_0_20px_rgba(212,175,55,0.2)]' 
+                        : table.status === 'Occupée'
+                          ? 'bg-white/5 border-destructive/20 text-muted-foreground/30 cursor-not-allowed'
+                          : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20 hover:bg-white/10'
+                    )}
+                    disabled={table.status === 'Occupée'}
+                  >
+                    <span className="relative z-10">{table.name}</span>
+                    {selectedTable === table.id && (
+                      <div className="absolute inset-0 bg-primary/5 backdrop-blur-sm z-0" />
+                    )}
+                  </button>
+                ))
+              )}
+            </div>
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-8 gap-4">
-            {tables.length === 0 ? (
-              <p className="col-span-full text-xs font-bold uppercase text-slate-500 tracking-widest">Aucun secteur configuré</p>
-            ) : (
-              tables.map(table => (
-                <button
-                  key={table.id}
-                  onClick={() => setSelectedTable(table.id)}
-                  className={cn(
-                    "p-4 rounded-xl border transition-all duration-300 text-xs font-black uppercase tracking-[0.2em] relative overflow-hidden group",
-                    selectedTable === table.id 
-                      ? 'bg-primary/20 border-primary text-primary shadow-[0_0_20px_rgba(212,175,55,0.2)]' 
-                      : table.status === 'Occupée'
-                        ? 'bg-white/5 border-destructive/20 text-muted-foreground/30 cursor-not-allowed'
+
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 backdrop-blur-md">
+                 <Users className="h-5 w-5 text-blue-400" />
+              </div>
+              <h2 className="text-xl font-black text-white tracking-widest uppercase">Serveur Assigné</h2>
+            </div>
+            <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide">
+              {staff && staff.length === 0 ? (
+                <p className="text-xs font-bold uppercase text-slate-500 tracking-widest">Aucun personnel enregistré</p>
+              ) : (
+                staff?.map(person => (
+                  <button
+                    key={person.id}
+                    onClick={() => setSelectedStaff(person.id)}
+                    className={cn(
+                      "flex-none px-6 py-4 rounded-xl border transition-all duration-300 text-xs font-black uppercase tracking-[0.2em]",
+                      selectedStaff === person.id 
+                        ? 'bg-blue-500/20 border-blue-500 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.2)]' 
                         : 'bg-white/5 border-white/5 text-muted-foreground hover:border-white/20 hover:bg-white/10'
-                  )}
-                  disabled={table.status === 'Occupée'}
-                >
-                  <span className="relative z-10">{table.name}</span>
-                  {selectedTable === table.id && (
-                    <div className="absolute inset-0 bg-primary/5 backdrop-blur-sm z-0" />
-                  )}
-                </button>
-              ))
-            )}
+                    )}
+                  >
+                    {person.name}
+                  </button>
+                ))
+              )}
+            </div>
           </div>
         </section>
 
-        {/* Product Grid */}
+        {/* Product Grid & Categories */}
         <section className="space-y-6">
-          <div className="relative max-w-xl group">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input 
-              placeholder="Rechercher une référence..."
-              className="pl-14 bg-white/5 border-white/10 h-14 rounded-2xl text-base font-bold text-white placeholder:text-muted-foreground/30 focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all backdrop-blur-xl"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+            <div className="flex overflow-x-auto gap-2 pb-2 w-full sm:w-auto scrollbar-hide">
+              {categories.map(cat => (
+                 <button
+                   key={cat}
+                   onClick={() => setSelectedCategory(cat)}
+                   className={cn(
+                     "flex-none px-5 py-2.5 rounded-full border text-[10px] font-black uppercase tracking-widest transition-all",
+                     selectedCategory === cat
+                       ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                       : "bg-white/5 text-muted-foreground border-white/5 hover:bg-white/10 hover:text-white"
+                   )}
+                 >
+                   {cat}
+                 </button>
+              ))}
+            </div>
+
+            <div className="relative w-full sm:w-72 shrink-0 group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input 
+                placeholder="Rechercher une référence..."
+                className="pl-14 bg-white/5 border-white/10 h-14 rounded-2xl text-base font-bold text-white placeholder:text-muted-foreground/30 focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all backdrop-blur-xl"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pb-10">
@@ -292,13 +367,13 @@ export default function POSPage() {
           </div>
           
           <Button 
+            onClick={triggerPayment}
             className={cn(
               "w-full font-black h-16 rounded-2xl transition-all duration-500 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-[10px]",
               cart.length > 0 
                 ? "bg-primary text-primary-foreground shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(212,175,55,0.5)]" 
                 : "bg-white/5 text-muted-foreground/20 cursor-not-allowed border border-white/5"
             )}
-            onClick={handleValidate}
             disabled={cart.length === 0}
           >
             <Zap className="h-4 w-4" />
@@ -306,6 +381,34 @@ export default function POSPage() {
           </Button>
         </div>
       </div>
+
+      {/* PAYMENT SELECTION DIALOG */}
+      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="bg-card/95 border-white/10 text-white max-w-[400px] p-8 rounded-[3rem] shadow-2xl backdrop-blur-3xl lg:selection:bg-primary/20">
+          <DialogHeader className="text-center space-y-4 mb-8">
+            <div className="mx-auto h-16 w-16 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/20 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+               <CreditCard className="h-8 w-8 text-primary drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
+            </div>
+            <DialogTitle className="text-2xl font-black uppercase tracking-widest text-white">Mode de Paiement</DialogTitle>
+            <p className="text-xs uppercase font-bold text-muted-foreground/60 tracking-[0.2em]">Ticket: {total.toLocaleString()} F</p>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-4">
+            <Button 
+              onClick={() => handleValidate('cash')}
+              className="h-16 w-full rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-xs hover:bg-primary/90 shadow-[0_0_30px_rgba(212,175,55,0.2)]"
+            >
+              Payer Immédiatement (CASH)
+            </Button>
+            <Button 
+              onClick={() => handleValidate('table')}
+              variant="outline"
+              className="h-16 w-full rounded-2xl bg-white/5 border-white/10 text-white font-black uppercase tracking-widest text-xs hover:bg-white/10"
+            >
+              Mettre sur la Table (Différé)
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* RECEIPT DIALOG - Nightlife adapted */}
       <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
