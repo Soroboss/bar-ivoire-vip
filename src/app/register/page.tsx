@@ -99,28 +99,39 @@ function RegisterForm() {
         otp: otp
       })
 
-      if (error) throw error
+      if (error) {
+        if (error.message?.includes('expired') || error.message?.includes('invalid') || error.message?.includes('Token')) {
+          throw new Error("OTP_INVALID")
+        }
+        throw error
+      }
       
       // La vérification a réussi, l'utilisateur a maintenant une session active
       // On peut maintenant créer son établissement "Pending"
       const user = data?.user
       if (user) {
-        await insforgeService.createEstablishment({
-          name: formData.barName,
-          owner: formData.fullName,
-          phone: formData.phone,
-          whatsapp: formData.phone,
-          location: formData.location || 'À préciser',
-          type: 'Bar VIP',
-          user_id: user.id,
-          plan: (planToDb[selectedPlan] || 'Trial') as Establishment['plan'],
-        })
+        try {
+          await insforgeService.createEstablishment({
+            name: formData.barName,
+            owner: formData.fullName,
+            phone: formData.phone,
+            whatsapp: formData.phone,
+            location: formData.location || 'À préciser',
+            type: 'bar', // Fixed enum value from 'Bar VIP' to 'bar'
+            user_id: user.id,
+            plan: (planToDb[selectedPlan] || 'Trial') as Establishment['plan'],
+          })
+        } catch (dbError: any) {
+          console.error("Establishment creation error:", dbError)
+          toast.error("Le compte est vérifié, mais la création de l'établissement a échoué: " + (dbError.message || "Erreur interne"))
+        }
       }
 
       setStep('success')
       toast.success('Email vérifié avec succès !')
     } catch (error: any) {
-      if (error.message?.includes('expired') || error.message?.includes('invalid')) {
+      if (error.message === "OTP_INVALID") {
+        // True OTP Error
         toast.error("Le code est invalide ou a expiré.")
       } else {
         toast.error(error.message || "Erreur lors de la vérification")
