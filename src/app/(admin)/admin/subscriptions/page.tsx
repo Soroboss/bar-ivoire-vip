@@ -16,7 +16,8 @@ import {
   Calendar,
   ChevronRight,
   RefreshCw,
-  ExternalLink
+  ExternalLink,
+  Zap
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -155,8 +156,8 @@ export default function AdminSubscriptionsPage() {
                   {/* Establishment Info */}
                   <div className="flex items-center gap-5 min-w-[300px]">
                     <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                      {sub.establishments?.logo_url ? (
-                        <img src={sub.establishments.logo_url} className="h-full w-full object-cover rounded-2xl" />
+                      {sub.establishments?.logo ? (
+                        <img src={sub.establishments.logo} className="h-full w-full object-cover rounded-2xl" />
                       ) : (
                         <Building2 className="h-8 w-8 text-muted-foreground/40" />
                       )}
@@ -197,7 +198,7 @@ export default function AdminSubscriptionsPage() {
                        {sub.discount_amount > 0 || sub.discount_percent > 0 ? (
                          <div className="flex items-center gap-2 text-emerald-500">
                            <Percent className="h-3 w-3" />
-                           <span className="text-[10px] font-black">-{sub.discount_percent}% / -{sub.discount_amount.toLocaleString()} FCFA</span>
+                           <span className="text-[10px] font-black">-{sub.discount_percent || 0}% / -{(sub.discount_amount || 0).toLocaleString()} FCFA</span>
                          </div>
                        ) : (
                          <span className="text-[10px] text-muted-foreground/20 font-bold uppercase italic">Aucune remise</span>
@@ -228,7 +229,7 @@ function StatMini({ label, value, color }: { label: string, value: number, color
   return (
     <div className="px-4 py-1 text-center border-r border-white/5 last:border-0">
       <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest mb-1">{label}</p>
-      <p className={cn("text-xl font-black leading-none", color)}>{value}</p>
+      <p className={cn("text-xl font-black leading-none", color)}>{value || 0}</p>
     </div>
   )
 }

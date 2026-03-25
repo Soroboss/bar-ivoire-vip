@@ -170,7 +170,7 @@ export default function AdminPlansPage() {
                     <div>
                       <h3 className="text-2xl font-black text-white uppercase tracking-tighter">{plan.name}</h3>
                       <div className="flex items-baseline mt-2 gap-2">
-                        <span className="text-3xl font-black text-white">{plan.price.toLocaleString()}</span>
+                        <span className="text-3xl font-black text-white">{(plan.price || 0).toLocaleString()}</span>
                         <span className="text-muted-foreground/40 text-xs font-bold uppercase tracking-widest">FCFA / mois</span>
                       </div>
                       <p className="text-sm text-muted-foreground/60 mt-4 leading-relaxed font-medium">
