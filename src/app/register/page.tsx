@@ -13,6 +13,12 @@ import { insforge } from '@/lib/insforge'
 import { insforgeService } from '@/services/insforgeService'
 import { Establishment } from '@/types'
 import { toast } from 'sonner'
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp"
+
 
 const planLabels: Record<string, { name: string; color: string }> = {
   starter: { name: 'Starter — 15 000 FCFA/mois', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
@@ -38,31 +44,65 @@ function RegisterForm() {
     phone: '',
     barName: '',
     location: '',
+    password: '',
   })
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [step, setStep] = useState<'form' | 'verification' | 'success'>('form')
+  const [otp, setOtp] = useState('')
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData(prev => ({ ...prev, [field]: e.target.value }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.fullName || !formData.email || !formData.barName || !formData.phone) {
+    if (!formData.fullName || !formData.email || !formData.barName || !formData.phone || !formData.password) {
       toast.error('Veuillez remplir tous les champs obligatoires')
+      return
+    }
+
+    if (formData.password.length < 6) {
+      toast.error('Le mot de passe doit contenir au moins 6 caractères')
       return
     }
 
     setLoading(true)
     try {
-      // Créer le compte avec un mot de passe temporaire (le partenaire le créera après validation)
-      const tempPassword = `TMP_${crypto.randomUUID()}_${Date.now()}`
+      // Créer le compte avec le mot de passe défini par l'utilisateur
       const { data, error } = await insforge.auth.signUp({
         email: formData.email,
-        password: tempPassword
+        password: formData.password,
+        name: formData.fullName,
       })
       if (error) throw error
 
-      // Créer l'établissement en Pending
+      toast.success('Compte créé ! Veuillez vérifier votre email.')
+      setStep('verification') // Passer à l'étape de vérification OTP
+    } catch (error: any) {
+      toast.error(error.message || "Erreur lors de l'inscription")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (otp.length !== 6) {
+      toast.error('Veuillez entrer le code à 6 chiffres complet')
+      return
+    }
+
+    setLoading(true)
+    try {
+      // Vérifier l'email avec le code transmis
+      const { data, error } = await insforge.auth.verifyEmail({
+        email: formData.email,
+        otp: otp
+      })
+
+      if (error) throw error
+      
+      // La vérification a réussi, l'utilisateur a maintenant une session active
+      // On peut maintenant créer son établissement "Pending"
       const user = data?.user
       if (user) {
         await insforgeService.createEstablishment({
@@ -77,17 +117,33 @@ function RegisterForm() {
         })
       }
 
-      setSuccess(true)
-      toast.success('Inscription envoyée avec succès !')
+      setStep('success')
+      toast.success('Email vérifié avec succès !')
     } catch (error: any) {
-      toast.error(error.message || "Erreur lors de l'inscription")
+      if (error.message?.includes('expired') || error.message?.includes('invalid')) {
+        toast.error("Le code est invalide ou a expiré.")
+      } else {
+        toast.error(error.message || "Erreur lors de la vérification")
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  // Écran de succès
-  if (success) {
+  const handleResendOTP = async () => {
+    try {
+      const { error } = await insforge.auth.resendVerificationEmail({
+        email: formData.email
+      })
+      if (error) throw error
+      toast.success('Un nouveau code a été envoyé à votre adresse email')
+    } catch (error: any) {
+      toast.error("Impossible de renvoyer l'email. Veuillez patienter.")
+    }
+  }
+
+  // Écran de succès complet
+  if (step === 'success') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6 selection:bg-primary/20">
         <div className="max-w-md w-full text-center space-y-8 animate-in fade-in zoom-in duration-500">
@@ -101,7 +157,8 @@ function RegisterForm() {
               Nos administrateurs valideront votre compte sous <span className="text-white font-bold">2 heures maximum</span>.
             </p>
             <p className="text-muted-foreground text-sm">
-              Vous recevrez un email à <span className="text-white font-bold">{formData.email}</span> avec un lien pour créer votre mot de passe et accéder à votre espace.
+              Votre Email <strong>{formData.email}</strong> a été validé. 
+              Vous pourrez vous connecter avec votre mot de passe dès que l'administrateur aura activé votre unité.
             </p>
           </div>
           <div className="pt-4 space-y-3">
@@ -121,6 +178,72 @@ function RegisterForm() {
     )
   }
 
+  // Écran de vérification OTP
+  if (step === 'verification') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 selection:bg-primary/20">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
+        </div>
+
+        <div className="w-full max-w-lg space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500">
+          <div className="text-center space-y-3">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/20 text-primary shadow-xl shadow-primary/10">
+              <Mail className="h-8 w-8" />
+            </div>
+            <h1 className="text-3xl font-black tracking-tighter text-white uppercase">
+              Vérifiez <span className="text-primary">VOTRE EMAIL</span>
+            </h1>
+            <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+              Nous avons envoyé un code de vérification à 6 chiffres à <span className="text-white font-bold">{formData.email}</span>.
+            </p>
+          </div>
+
+          <Card className="bg-card/50 border-primary/20 backdrop-blur-3xl shadow-2xl rounded-[2rem] overflow-hidden">
+            <CardContent className="pt-10 pb-10 px-8 text-center space-y-8">
+              <form onSubmit={handleVerifyOTP} className="space-y-8 flex flex-col items-center">
+                <InputOTP
+                  maxLength={6}
+                  value={otp}
+                  onChange={setOtp}
+                  render={({ slots }: any) => (
+                    <InputOTPGroup className="gap-2">
+                      {slots.map((slot: any, index: any) => (
+                        <InputOTPSlot key={index} {...slot} className="w-12 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl" />
+                      ))}
+                    </InputOTPGroup>
+                  )}
+                />
+
+                <Button type="submit" disabled={loading || otp.length !== 6}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black py-7 rounded-xl shadow-lg shadow-primary/10 text-base uppercase tracking-tighter">
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Vérifier et Finaliser"}
+                </Button>
+              </form>
+
+              <div className="space-y-4 pt-4 border-t border-white/5">
+                <p className="text-xs text-muted-foreground">
+                  Vous n'avez pas reçu l'email ou il est dans vos spams ?
+                </p>
+                <Button variant="outline" size="sm" onClick={handleResendOTP} disabled={loading}
+                  className="bg-transparent border-white/10 text-white hover:bg-white/5">
+                  Renvoyer le code
+                </Button>
+                <div>
+                  <Button variant="link" size="sm" onClick={() => setStep('form')}
+                    className="text-muted-foreground hover:text-primary text-xs">
+                    Modifier l'adresse email
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // Écran Formulaire Initial
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6 selection:bg-primary/20">
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
