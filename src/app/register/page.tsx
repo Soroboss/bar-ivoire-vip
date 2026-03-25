@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { useState, Suspense } from 'react'
-import { Loader2, Wine, Building2, User, Phone, Mail, MapPin, ArrowLeft, Check } from 'lucide-react'
+import { Loader2, Wine, Building2, User, Phone, Mail, MapPin, ArrowLeft, Check, Lock } from 'lucide-react'
 import { insforge } from '@/lib/insforge'
 import { insforgeService } from '@/services/insforgeService'
 import { Establishment } from '@/types'
@@ -202,18 +202,16 @@ function RegisterForm() {
           <Card className="bg-card/50 border-primary/20 backdrop-blur-3xl shadow-2xl rounded-[2rem] overflow-hidden">
             <CardContent className="pt-10 pb-10 px-8 text-center space-y-8">
               <form onSubmit={handleVerifyOTP} className="space-y-8 flex flex-col items-center">
-                <InputOTP
-                  maxLength={6}
-                  value={otp}
-                  onChange={setOtp}
-                  render={({ slots }: any) => (
-                    <InputOTPGroup className="gap-2">
-                      {slots.map((slot: any, index: any) => (
-                        <InputOTPSlot key={index} {...slot} className="w-12 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl" />
-                      ))}
-                    </InputOTPGroup>
-                  )}
-                />
+                <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                  <InputOTPGroup className="gap-2">
+                    <InputOTPSlot index={0} className="w-12 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl" />
+                    <InputOTPSlot index={1} className="w-12 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl" />
+                    <InputOTPSlot index={2} className="w-12 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl" />
+                    <InputOTPSlot index={3} className="w-12 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl" />
+                    <InputOTPSlot index={4} className="w-12 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl" />
+                    <InputOTPSlot index={5} className="w-12 h-14 text-xl font-bold bg-white/5 border-white/10 rounded-xl" />
+                  </InputOTPGroup>
+                </InputOTP>
 
                 <Button type="submit" disabled={loading || otp.length !== 6}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black py-7 rounded-xl shadow-lg shadow-primary/10 text-base uppercase tracking-tighter">
@@ -317,6 +315,16 @@ function RegisterForm() {
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                   <Input id="location" placeholder="Cocody, Abidjan"
                     value={formData.location} onChange={update('location')}
+                    className="bg-white/5 border-white/5 h-12 pl-12 rounded-xl text-white focus:ring-primary/20 transition-all font-bold" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-muted-foreground font-bold text-[10px] uppercase ml-1 tracking-widest">Mot de passe *</Label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                  <Input id="password" type="password" placeholder="••••••••" required minLength={6}
+                    value={formData.password} onChange={update('password')}
                     className="bg-white/5 border-white/5 h-12 pl-12 rounded-xl text-white focus:ring-primary/20 transition-all font-bold" />
                 </div>
               </div>
