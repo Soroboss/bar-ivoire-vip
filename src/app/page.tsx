@@ -1,11 +1,14 @@
 'use client'
 
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { 
   ArrowRight, Star, Shield, Smartphone, BarChart3, MessageCircle, 
   Package, Check, Wine, Zap, Crown, Building2, ChevronRight
 } from 'lucide-react'
+import { saasService } from '@/services/saasService'
+import { Plan } from '@/types'
 
 const features = [
   { icon: Smartphone, title: 'Caisse Tactile', desc: 'Prenez des commandes sur tablette ou téléphone. Paiement Mobile Money et espèces.' },
@@ -16,11 +19,10 @@ const features = [
   { icon: Shield, title: 'Sécurité Totale', desc: 'Données chiffrées, accès par rôle (Gérant, Caissier, Serveur). Audit complet.' },
 ]
 
-const plans = [
+const fallbackPlans = [
   {
     name: 'Starter',
-    price: '15 000',
-    period: '/mois',
+    price: 15000,
     desc: 'Idéal pour démarrer votre digitalisation',
     color: 'from-blue-500 to-blue-600',
     badge: '',
@@ -32,13 +34,12 @@ const plans = [
       'Rapports mensuels',
       'Support par email',
     ],
-    cta: 'Commencer',
     slug: 'starter',
+    trial_days: 7
   },
   {
     name: 'Business',
-    price: '35 000',
-    period: '/mois',
+    price: 35000,
     desc: 'Pour les bars et maquis en croissance',
     color: 'from-[#D4AF37] to-[#A68226]',
     badge: 'POPULAIRE',
@@ -51,13 +52,12 @@ const plans = [
       'Rapports en temps réel',
       'Support prioritaire',
     ],
-    cta: 'Choisir Business',
     slug: 'business',
+    trial_days: 7
   },
   {
     name: 'VIP Premium',
-    price: '75 000',
-    period: '/mois',
+    price: 75000,
     desc: 'L\'excellence pour les lounges haut de gamme',
     color: 'from-purple-500 to-purple-700',
     badge: 'EXCLUSIF',
@@ -71,12 +71,39 @@ const plans = [
       'Account Manager dédié',
       'API & intégrations',
     ],
-    cta: 'Devenir VIP',
     slug: 'vip',
+    trial_days: 7
   },
 ]
 
 export default function LandingPage() {
+  const [plans, setPlans] = useState<any[]>(fallbackPlans)
+
+  useEffect(() => {
+    loadPlans()
+  }, [])
+
+  const loadPlans = async () => {
+    try {
+      const dbPlans = await saasService.getPlans()
+      if (dbPlans && dbPlans.length > 0) {
+        const merged = dbPlans.map((p: Plan, i: number) => {
+          const fallback = fallbackPlans.find(f => f.slug === p.slug) || fallbackPlans[i] || fallbackPlans[0]
+          return {
+            ...p,
+            color: fallback.color,
+            badge: p.color_badge || fallback.badge,
+            desc: p.description || fallback.desc,
+            features: Array.isArray(p.features) ? p.features : fallback.features,
+            cta: i === 0 ? 'Commencer' : i === 1 ? 'Choisir Business' : 'Devenir VIP'
+          }
+        })
+        setPlans(merged)
+      }
+    } catch (error) {
+      console.error('Error loading plans:', error)
+    }
+  }
   return (
     <div className="min-h-screen bg-[#0F0F1A] text-white">
       {/* Ambient Light */}
@@ -194,22 +221,22 @@ export default function LandingPage() {
                 className={`relative rounded-2xl border ${i === 1 ? 'border-[#D4AF37]/50 bg-[#1A1A2E] shadow-2xl shadow-[#D4AF37]/10 scale-[1.02]' : 'border-[#3A3A5A]/50 bg-[#1A1A2E]/50'} p-8 flex flex-col transition-all hover:border-[#D4AF37]/30`}
               >
                 {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
                     <span className={`bg-gradient-to-r ${plan.color} text-white text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-lg`}>
                       {plan.badge}
                     </span>
                   </div>
                 )}
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                  <p className="text-[#A0A0B8] text-sm mt-1">{plan.desc}</p>
+                  <h3 className="text-xl font-bold text-white uppercase tracking-tight">{plan.name}</h3>
+                  <p className="text-[#A0A0B8] text-sm mt-1 leading-tight">{plan.desc}</p>
                 </div>
                 <div className="mb-6">
-                  <span className="text-4xl font-black text-white">{plan.price}</span>
-                  <span className="text-[#A0A0B8] text-sm ml-1">FCFA{plan.period}</span>
+                  <span className="text-4xl font-black text-white">{plan.price?.toLocaleString()}</span>
+                  <span className="text-[#A0A0B8] text-sm ml-1">FCFA/mois</span>
                 </div>
                 <ul className="space-y-3 mb-8 flex-1">
-                  {plan.features.map((feat, j) => (
+                  {plan.features.map((feat: string, j: number) => (
                     <li key={j} className="flex items-start gap-2 text-sm">
                       <Check className="h-4 w-4 text-[#D4AF37] mt-0.5 flex-shrink-0" />
                       <span className="text-[#A0A0B8]">{feat}</span>
@@ -218,9 +245,12 @@ export default function LandingPage() {
                 </ul>
                 <Link href={`/register?plan=${plan.slug}`} className="w-full">
                   <Button className={`w-full py-6 rounded-xl font-bold text-base ${i === 1 ? 'bg-[#D4AF37] hover:bg-[#A68226] text-[#1A1A2E] shadow-lg shadow-[#D4AF37]/20' : 'bg-white/5 hover:bg-white/10 border border-[#3A3A5A] text-white'}`}>
-                    {plan.cta} <ChevronRight className="ml-2 h-4 w-4" />
+                    {plan.cta || 'Choisir'} <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
+                <div className="mt-4 text-[10px] text-center text-muted-foreground/30 font-bold uppercase tracking-widest">
+                  Essai gratuit de {plan.trial_days} jours
+                </div>
               </div>
             ))}
           </div>

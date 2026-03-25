@@ -448,5 +448,20 @@ export const insforgeService = {
       .update({ permissions })
       .eq('id', userId)
     if (error) throw error
+  },
+
+  async deleteUser(userId: string) {
+    const { error } = await insforge.database.rpc('admin_delete_user', { p_user_id: userId })
+    if (error) throw error
+    return true
+  },
+
+  async updateUser(userId: string, updates: any) {
+    const { error } = await insforge.database
+      .from('profiles')
+      .update(updates)
+      .eq('id', userId)
+    if (error) throw error
+    return true
   }
 }

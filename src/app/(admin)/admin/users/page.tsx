@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Users, Search, ShieldCheck, UserPlus, Loader2, Star, ShieldAlert } from "lucide-react"
+import { Users, Search, ShieldCheck, UserPlus, Loader2, Star, ShieldAlert, Pencil, Trash2 } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 
@@ -12,6 +12,7 @@ import { insforgeService } from "@/services/insforgeService"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 import { CreateUserModal } from "./CreateUserModal"
+import { EditUserModal } from "./EditUserModal"
 
 export default function SaaSUsersPage() {
   const [admins, setAdmins] = useState<any[]>([])
@@ -21,6 +22,8 @@ export default function SaaSUsersPage() {
   const [isPromoting, setIsPromoting] = useState(false)
   const [search, setSearch] = useState('')
   const [isMounted, setIsMounted] = useState(false)
+  const [editingUser, setEditingUser] = useState<any>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
@@ -69,6 +72,20 @@ export default function SaaSUsersPage() {
       fetchAdmins()
     } catch (e) {
       toast.error("Erreur lors de la révocation")
+    }
+  }
+
+  const handleDelete = async (userId: string) => {
+    if (!window.confirm("ÊTES-VOUS SÛR ? Cette action supprimera définitivement le compte utilisateur et son profil. Cette action est irréversible.")) return
+    try {
+      setLoading(true)
+      await insforgeService.deleteUser(userId)
+      toast.success("Utilisateur supprimé définitivement")
+      fetchAdmins()
+    } catch (e: any) {
+      toast.error(e.message || "Erreur lors de la suppression")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -280,15 +297,40 @@ export default function SaaSUsersPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right pr-8">
-                         <Button 
-                           variant="ghost" 
-                           size="icon" 
-                           onClick={() => handleRevoke(admin.id)}
-                           title="Révoquer l'accès"
-                           className="h-12 w-12 text-muted-foreground/10 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all shadow-2xl"
-                         >
-                           <ShieldAlert className="h-5 w-5" />
-                         </Button>
+                        <div className="flex items-center justify-end gap-2">
+                           <Button 
+                             variant="ghost" 
+                             size="icon" 
+                             onClick={() => {
+                               setEditingUser(admin)
+                               setIsEditModalOpen(true)
+                             }}
+                             title="Modifier le profil"
+                             className="h-10 w-10 text-muted-foreground/10 hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
+                           >
+                             <Pencil className="h-4 w-4" />
+                           </Button>
+
+                           <Button 
+                             variant="ghost" 
+                             size="icon" 
+                             onClick={() => handleRevoke(admin.id)}
+                             title="Révoquer l'accès"
+                             className="h-10 w-10 text-muted-foreground/10 hover:text-amber-500 hover:bg-amber-500/10 rounded-xl transition-all"
+                           >
+                             <ShieldAlert className="h-4 w-4" />
+                           </Button>
+
+                           <Button 
+                             variant="ghost" 
+                             size="icon" 
+                             onClick={() => handleDelete(admin.id)}
+                             title="Supprimer définitivement"
+                             className="h-10 w-10 text-muted-foreground/10 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                           >
+                             <Trash2 className="h-4 w-4" />
+                           </Button>
+                        </div>
                       </TableCell>
                     </motion.tr>
                   ))}
@@ -298,6 +340,13 @@ export default function SaaSUsersPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <EditUserModal 
+        user={editingUser} 
+        open={isEditModalOpen} 
+        onOpenChange={setIsEditModalOpen} 
+        onSuccess={fetchAdmins} 
+      />
     </div>
   )
 }

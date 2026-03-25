@@ -86,9 +86,42 @@ export type Profile = {
   id: string
   email: string
   full_name: string
-  role: 'Admin' | 'Gérant' | 'Gestionnaire' | 'Analyste' | 'Financier' | "Agent d'encaissement"
+  role: 'ADMIN' | 'CASHIER' | 'WAITER' | 'BARMAN' | 'SUPER_ADMIN'
   role_id?: string
   permissions?: Record<string, boolean>
   avatar_url?: string
+  phone?: string
+  establishment_id?: string
   created_at: string
+}
+
+export type Plan = {
+  id: string
+  name: string
+  slug: string
+  description: string
+  price: number
+  billing_period: string
+  trial_days: number
+  features: string[]
+  is_active: boolean
+  display_order: number
+  color_badge: string
+}
+
+export type UserSubscription = {
+  id: string
+  establishment_id: string
+  plan_id: string
+  plan: string // Keep for legacy
+  active: boolean
+  expires_at: string
+  status: 'trial' | 'active' | 'expired' | 'suspended' | 'pending'
+  discount_amount: number
+  discount_percent: number
+  discount_reason?: string
+  trial_started_at: string
+  created_at: string
+  saas_plans?: Plan
+  establishments?: Establishment
 }
