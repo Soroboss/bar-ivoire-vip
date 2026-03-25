@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -26,13 +26,17 @@ export default function OnboardingPage() {
   const userEmail = user?.email?.toLowerCase() || ''
   const isKnownAdmin = adminEmails.some(email => email.toLowerCase() === userEmail)
 
-  if (!loading && (userRole === 'SUPER_ADMIN' || isKnownAdmin)) {
-    router.push('/admin/dashboard')
-    return null
-  }
+  useEffect(() => {
+    if (!loading) {
+      if (userRole === 'SUPER_ADMIN' || isKnownAdmin) {
+        router.push('/admin/dashboard')
+      } else if (establishment?.status === 'Active') {
+        router.push('/dashboard')
+      }
+    }
+  }, [loading, userRole, isKnownAdmin, establishment?.status, router])
 
-  if (!loading && establishment?.status === 'Active') {
-    router.push('/dashboard')
+  if (!loading && (userRole === 'SUPER_ADMIN' || isKnownAdmin || establishment?.status === 'Active')) {
     return null
   }
 
