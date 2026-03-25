@@ -357,6 +357,8 @@ export const insforgeService = {
       .from('profiles')
       .update({ role: role })
       .eq('id', profile.id)
+      .select()
+      .single()
     
     if (updateError) throw updateError
     return true
@@ -369,6 +371,8 @@ export const insforgeService = {
         role: role
       })
       .eq('id', id)
+      .select()
+      .single()
     
     if (updateError) throw updateError
     return true
@@ -381,6 +385,8 @@ export const insforgeService = {
         role: null,
       })
       .eq('id', userId)
+      .select()
+      .single()
     
     if (error) throw error
     return true
@@ -449,6 +455,8 @@ export const insforgeService = {
       .from('profiles')
       .update({ permissions })
       .eq('id', userId)
+      .select()
+      .single()
     if (error) throw error
   },
 
@@ -463,6 +471,8 @@ export const insforgeService = {
       .from('profiles')
       .update(updates)
       .eq('id', userId)
+      .select()
+      .single()
     if (error) throw error
     return true
   },
